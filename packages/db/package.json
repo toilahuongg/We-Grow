@@ -1,0 +1,23 @@
+{
+  "name": "@we-grow/db",
+  "type": "module",
+  "exports": {
+    ".": {
+      "default": "./src/index.ts"
+    },
+    "./*": {
+      "default": "./src/*.ts"
+    }
+  },
+  "scripts": {},
+  "dependencies": {
+    "@we-grow/env": "workspace:*",
+    "dotenv": "catalog:",
+    "mongoose": "^8.14.0",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@we-grow/config": "workspace:*",
+    "typescript": "catalog:"
+  }
+}

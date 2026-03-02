@@ -1,0 +1,24 @@
+{
+  "name": "@we-grow/auth",
+  "type": "module",
+  "exports": {
+    ".": {
+      "default": "./src/index.ts"
+    },
+    "./*": {
+      "default": "./src/*.ts"
+    }
+  },
+  "scripts": {},
+  "dependencies": {
+    "@we-grow/db": "workspace:*",
+    "@we-grow/env": "workspace:*",
+    "better-auth": "catalog:",
+    "dotenv": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@we-grow/config": "workspace:*",
+    "typescript": "catalog:"
+  }
+}
