@@ -8,12 +8,8 @@ import {
 } from "@we-grow/db/models/index";
 import { generateId } from "@we-grow/db/utils/id";
 
-import {
-  protectedProcedure,
-  groupMemberProcedure,
-  groupModeratorProcedure,
-  groupOwnerProcedure,
-} from "../index";
+import { protectedProcedure } from "../index";
+import { requireGroupRole } from "../middlewares/group-auth";
 import { generateInviteCode } from "../lib/invite-code";
 
 function getDateStr(date: Date): string {
@@ -28,9 +24,11 @@ export const groupsRouter = {
     return Group.find({ _id: { $in: groupIds } });
   }),
 
-  getById: groupMemberProcedure
+  getById: protectedProcedure
     .input(z.object({ groupId: z.string() }))
-    .handler(async ({ input }) => {
+    .handler(async ({ context, input }) => {
+      await requireGroupRole(context.session.user.id, input.groupId, ["owner", "moderator", "member"]);
+
       const group = await Group.findById(input.groupId);
       if (!group) return null;
 
@@ -83,7 +81,7 @@ export const groupsRouter = {
       return group;
     }),
 
-  update: groupOwnerProcedure
+  update: protectedProcedure
     .input(
       z.object({
         groupId: z.string(),
@@ -91,7 +89,8 @@ export const groupsRouter = {
         description: z.string().optional(),
       }),
     )
-    .handler(async ({ input }) => {
+    .handler(async ({ context, input }) => {
+      await requireGroupRole(context.session.user.id, input.groupId, ["owner"]);
       const { groupId, ...updates } = input;
       return Group.findByIdAndUpdate(
         groupId,
@@ -100,18 +99,20 @@ export const groupsRouter = {
       );
     }),
 
-  delete: groupOwnerProcedure
+  delete: protectedProcedure
     .input(z.object({ groupId: z.string() }))
-    .handler(async ({ input }) => {
+    .handler(async ({ context, input }) => {
+      await requireGroupRole(context.session.user.id, input.groupId, ["owner"]);
       await GroupMember.deleteMany({ groupId: input.groupId });
       await GroupHabit.deleteMany({ groupId: input.groupId });
       await Group.deleteOne({ _id: input.groupId });
       return { success: true };
     }),
 
-  regenerateInviteCode: groupOwnerProcedure
+  regenerateInviteCode: protectedProcedure
     .input(z.object({ groupId: z.string() }))
-    .handler(async ({ input }) => {
+    .handler(async ({ context, input }) => {
+      await requireGroupRole(context.session.user.id, input.groupId, ["owner"]);
       let inviteCode = generateInviteCode();
       while (await Group.findOne({ inviteCode })) {
         inviteCode = generateInviteCode();
@@ -200,9 +201,10 @@ export const groupsRouter = {
       return { success: true };
     }),
 
-  approveMember: groupModeratorProcedure
+  approveMember: protectedProcedure
     .input(z.object({ groupId: z.string(), userId: z.string() }))
-    .handler(async ({ input }) => {
+    .handler(async ({ context, input }) => {
+      await requireGroupRole(context.session.user.id, input.groupId, ["owner", "moderator"]);
       const member = await GroupMember.findOneAndUpdate(
         { groupId: input.groupId, userId: input.userId, status: "pending" },
         { status: "active", updatedAt: new Date() },
@@ -211,9 +213,10 @@ export const groupsRouter = {
       return { success: !!member };
     }),
 
-  removeMember: groupModeratorProcedure
+  removeMember: protectedProcedure
     .input(z.object({ groupId: z.string(), userId: z.string() }))
-    .handler(async ({ input, context }) => {
+    .handler(async ({ context, input }) => {
+      await requireGroupRole(context.session.user.id, input.groupId, ["owner", "moderator"]);
       if (input.userId === context.session.user.id) {
         throw new Error("Cannot remove yourself");
       }
@@ -225,7 +228,7 @@ export const groupsRouter = {
       return { success: !!member };
     }),
 
-  changeMemberRole: groupOwnerProcedure
+  changeMemberRole: protectedProcedure
     .input(
       z.object({
         groupId: z.string(),
@@ -233,7 +236,8 @@ export const groupsRouter = {
         role: z.enum(["moderator", "member"]),
       }),
     )
-    .handler(async ({ input }) => {
+    .handler(async ({ context, input }) => {
+      await requireGroupRole(context.session.user.id, input.groupId, ["owner"]);
       const member = await GroupMember.findOneAndUpdate(
         { groupId: input.groupId, userId: input.userId, status: "active" },
         { role: input.role, updatedAt: new Date() },
@@ -242,7 +246,7 @@ export const groupsRouter = {
       return { success: !!member };
     }),
 
-  createGroupHabit: groupModeratorProcedure
+  createGroupHabit: protectedProcedure
     .input(
       z.object({
         groupId: z.string(),
@@ -254,6 +258,8 @@ export const groupsRouter = {
       }),
     )
     .handler(async ({ context, input }) => {
+      await requireGroupRole(context.session.user.id, input.groupId, ["owner", "moderator"]);
+
       const group = await Group.findById(input.groupId);
       if (group?.mode !== "together") {
         throw new Error("Group habits can only be created in 'together' mode groups");
@@ -295,9 +301,10 @@ export const groupsRouter = {
       return groupHabit;
     }),
 
-  getMemberProgress: groupMemberProcedure
+  getMemberProgress: protectedProcedure
     .input(z.object({ groupId: z.string(), date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional() }))
-    .handler(async ({ input }) => {
+    .handler(async ({ context, input }) => {
+      await requireGroupRole(context.session.user.id, input.groupId, ["owner", "moderator", "member"]);
       const date = input.date ?? getDateStr(new Date());
 
       const members = await GroupMember.find({

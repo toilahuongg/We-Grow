@@ -1,7 +1,8 @@
 import { z } from "zod";
 import { UserProfile, XpTransaction, GroupMember, Habit } from "@we-grow/db/models/index";
 
-import { protectedProcedure, groupMemberProcedure } from "../index";
+import { protectedProcedure } from "../index";
+import { requireGroupRole } from "../middlewares/group-auth";
 import { getProgressToNextLevel } from "../lib/xp";
 
 export const gamificationRouter = {
@@ -66,9 +67,10 @@ export const gamificationRouter = {
         .select("userId totalXp level");
     }),
 
-  getGroupLeaderboard: groupMemberProcedure
+  getGroupLeaderboard: protectedProcedure
     .input(z.object({ groupId: z.string() }))
-    .handler(async ({ input }) => {
+    .handler(async ({ context, input }) => {
+      await requireGroupRole(context.session.user.id, input.groupId, ["owner", "moderator", "member"]);
       const members = await GroupMember.find({
         groupId: input.groupId,
         status: "active",

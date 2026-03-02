@@ -305,8 +305,9 @@ export const habitsRouter = {
       habit.updatedAt = now;
       await habit.save();
 
-      await awardXp(userId, XP_REWARDS.HABIT_COMPLETION, "habit_completion", habit._id, `Completed habit: ${habit.title}`);
-      await checkStreakBonuses(userId, habit._id, newStreak);
+      const habitId = habit._id as string;
+      await awardXp(userId, XP_REWARDS.HABIT_COMPLETION, "habit_completion", habitId, `Completed habit: ${habit.title}`);
+      await checkStreakBonuses(userId, habitId, newStreak);
       await checkAllHabitsBonus(userId, date);
 
       return {
@@ -396,7 +397,7 @@ export const habitsRouter = {
       return {
         ...habit.toObject(),
         isDue,
-        completedToday: completedIds.has(habit._id),
+        completedToday: completedIds.has(habit._id as string),
       };
     });
   }),

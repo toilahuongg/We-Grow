@@ -1,7 +1,6 @@
 import { ORPCError, os } from "@orpc/server";
 
 import type { Context } from "./context";
-import { requireGroupRole } from "./middlewares/group-auth";
 
 export const o = os.$context<Context>();
 
@@ -19,7 +18,3 @@ const requireAuth = o.middleware(async ({ context, next }) => {
 });
 
 export const protectedProcedure = publicProcedure.use(requireAuth);
-
-export const groupMemberProcedure = requireGroupRole(["owner", "moderator", "member"]);
-export const groupModeratorProcedure = requireGroupRole(["owner", "moderator"]);
-export const groupOwnerProcedure = requireGroupRole(["owner"]);
