@@ -16,10 +16,8 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div>
-      <h1>Dashboard</h1>
-      <p>Welcome {session.user.name}</p>
+    <main className="min-h-screen bg-gradient-mesh bg-grid-pattern">
       <Dashboard session={session} />
-    </div>
+    </main>
   );
 }

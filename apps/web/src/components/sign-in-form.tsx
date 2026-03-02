@@ -1,4 +1,5 @@
 import { useForm } from "@tanstack/react-form";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import z from "zod";
@@ -28,7 +29,7 @@ export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () 
         {
           onSuccess: () => {
             router.push("/dashboard");
-            toast.success("Sign in successful");
+            toast.success("Welcome back! 🎉");
           },
           onError: (error) => {
             toast.error(error.error.message || error.error.statusText);
@@ -49,8 +50,14 @@ export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () 
   }
 
   return (
-    <div className="mx-auto w-full mt-10 max-w-md p-6">
-      <h1 className="mb-6 text-center text-3xl font-bold">Welcome Back</h1>
+    <div className="w-full max-w-md animate-scale-in">
+      {/* Header */}
+      <div className="mb-8 text-center">
+        <h1 className="mb-2 font-display text-3xl font-bold">
+          Welcome <span className="gradient-text">Back</span>
+        </h1>
+        <p className="text-muted-foreground">Continue your growth journey</p>
+      </div>
 
       {/* Google Sign In Button */}
       <button
@@ -61,7 +68,7 @@ export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () 
             {
               onSuccess: () => {
                 router.push("/dashboard");
-                toast.success("Sign in with Google successful");
+                toast.success("Welcome back! 🎉");
               },
               onError: (error) => {
                 toast.error(error.error.message || "Failed to sign in with Google");
@@ -69,9 +76,9 @@ export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () 
             }
           );
         }}
-        className="w-full mb-4 flex items-center justify-center gap-3 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium py-3 px-4 rounded-md transition-colors"
+        className="group relative mb-6 flex w-full items-center justify-center gap-3 overflow-hidden rounded-2xl bg-white/5 border border-white/10 py-3.5 font-medium text-white transition-all hover:bg-white/10 hover:scale-[1.02] hover:border-white/20"
       >
-        <svg className="w-5 h-5" viewBox="0 0 24 24">
+        <svg className="h-5 w-5" viewBox="0 0 24 24">
           <path
             fill="#4285F4"
             d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -92,38 +99,42 @@ export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () 
         Continue with Google
       </button>
 
-      <div className="relative mb-4">
+      {/* Divider */}
+      <div className="relative mb-6">
         <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t border-gray-300" />
+          <span className="w-full border-t border-white/10" />
         </div>
         <div className="relative flex justify-center text-sm">
-          <span className="px-2 bg-white text-gray-500">Or continue with email</span>
+          <span className="bg-background px-3 text-muted-foreground">or continue with email</span>
         </div>
       </div>
 
+      {/* Form */}
       <form
         onSubmit={(e) => {
           e.preventDefault();
           e.stopPropagation();
           form.handleSubmit();
         }}
-        className="space-y-4"
+        className="space-y-5"
       >
         <div>
           <form.Field name="email">
             {(field) => (
               <div className="space-y-2">
-                <Label htmlFor={field.name}>Email</Label>
+                <Label htmlFor={field.name} className="text-sm font-medium">Email</Label>
                 <Input
                   id={field.name}
                   name={field.name}
                   type="email"
+                  placeholder="you@example.com"
+                  className="h-12 rounded-xl border-white/10 bg-white/5 focus:border-[#ff6b6b] focus:ring-[#ff6b6b]/20"
                   value={field.state.value}
                   onBlur={field.handleBlur}
                   onChange={(e) => field.handleChange(e.target.value)}
                 />
                 {field.state.meta.errors.map((error) => (
-                  <p key={error?.message} className="text-red-500">
+                  <p key={error?.message} className="text-sm text-red-400">
                     {error?.message}
                   </p>
                 ))}
@@ -136,17 +147,24 @@ export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () 
           <form.Field name="password">
             {(field) => (
               <div className="space-y-2">
-                <Label htmlFor={field.name}>Password</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor={field.name} className="text-sm font-medium">Password</Label>
+                  <Link href="/forgot-password" className="text-sm text-[#ff6b6b] hover:text-[#ffa06b]">
+                    Forgot password?
+                  </Link>
+                </div>
                 <Input
                   id={field.name}
                   name={field.name}
                   type="password"
+                  placeholder="••••••••"
+                  className="h-12 rounded-xl border-white/10 bg-white/5 focus:border-[#ff6b6b] focus:ring-[#ff6b6b]/20"
                   value={field.state.value}
                   onBlur={field.handleBlur}
                   onChange={(e) => field.handleChange(e.target.value)}
                 />
                 {field.state.meta.errors.map((error) => (
-                  <p key={error?.message} className="text-red-500">
+                  <p key={error?.message} className="text-sm text-red-400">
                     {error?.message}
                   </p>
                 ))}
@@ -159,23 +177,36 @@ export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () 
           {(state) => (
             <Button
               type="submit"
-              className="w-full"
+              className="h-12 w-full rounded-full bg-gradient-to-r from-[#ff6b6b] via-[#ffa06b] to-[#4ecdc4] text-base font-semibold text-white shadow-lg shadow-[#ff6b6b]/25 transition-all hover:scale-[1.02] hover:shadow-xl hover:shadow-[#ff6b6b]/40 disabled:opacity-50"
               disabled={!state.canSubmit || state.isSubmitting}
             >
-              {state.isSubmitting ? "Submitting..." : "Sign In"}
+              {state.isSubmitting ? (
+                <span className="flex items-center gap-2">
+                  <svg className="h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  Signing in...
+                </span>
+              ) : (
+                "Sign In"
+              )}
             </Button>
           )}
         </form.Subscribe>
       </form>
 
-      <div className="mt-4 text-center">
-        <Button
-          variant="link"
-          onClick={onSwitchToSignUp}
-          className="text-indigo-600 hover:text-indigo-800"
-        >
-          Need an account? Sign Up
-        </Button>
+      {/* Switch to Sign Up */}
+      <div className="mt-6 text-center">
+        <p className="text-sm text-muted-foreground">
+          Don't have an account?{" "}
+          <button
+            onClick={onSwitchToSignUp}
+            className="font-semibold text-[#4ecdc4] transition-colors hover:text-[#a78bfa]"
+          >
+            Sign Up
+          </button>
+        </p>
       </div>
     </div>
   );
