@@ -39,7 +39,6 @@ export function ActivityFeed({ groupId }: ActivityFeedProps) {
     refetchInterval: 30000,
   });
 
-  // Sync initial data
   useEffect(() => {
     if (data) {
       setAllActivities(data.activities);
@@ -69,15 +68,14 @@ export function ActivityFeed({ groupId }: ActivityFeedProps) {
     }
   };
 
-  // Group activities by day
   const grouped = useMemo(() => {
-    const groups: { key: string; label: string; items: { activity: any; globalIndex: number }[] }[] = [];
-    const map = new Map<string, { activity: any; globalIndex: number }[]>();
+    const groups: { key: string; label: string; items: any[] }[] = [];
+    const map = new Map<string, any[]>();
 
-    allActivities.forEach((activity, i) => {
+    allActivities.forEach((activity) => {
       const group = getDateGroup(activity.createdAt);
       if (!map.has(group)) map.set(group, []);
-      map.get(group)!.push({ activity, globalIndex: i });
+      map.get(group)!.push(activity);
     });
 
     const labels: Record<string, string> = {
@@ -98,9 +96,15 @@ export function ActivityFeed({ groupId }: ActivityFeedProps) {
 
   if (isLoading) {
     return (
-      <div className="space-y-3">
+      <div className="space-y-4 pl-5">
         {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="h-24 animate-pulse rounded-2xl bg-white/5" style={{ animationDelay: `${i * 150}ms` }} />
+          <div key={i} className="flex gap-3">
+            <div className="h-10 w-10 shrink-0 animate-pulse rounded-full bg-white/5" />
+            <div className="flex-1 space-y-2">
+              <div className="h-14 animate-pulse rounded-2xl bg-white/5" />
+              <div className="h-4 w-24 animate-pulse rounded bg-white/5" />
+            </div>
+          </div>
         ))}
       </div>
     );
@@ -119,22 +123,21 @@ export function ActivityFeed({ groupId }: ActivityFeedProps) {
     <div className="space-y-6">
       {grouped.map((group) => (
         <div key={group.key}>
-          {/* Section header */}
-          <div className="flex items-center gap-3 mb-3">
-            <span className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+          {/* Day label */}
+          <div className="flex items-center gap-3 mb-1 pl-[52px]">
+            <span className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/50">
               {group.label}
             </span>
-            <div className="h-px flex-1 bg-white/[0.06]" />
+            <div className="h-px flex-1 bg-white/[0.04]" />
           </div>
 
-          {/* Activities */}
-          <div className="space-y-2.5">
-            {group.items.map(({ activity, globalIndex }) => (
+          {/* Timeline items */}
+          <div className="divide-y divide-white/[0.04]">
+            {group.items.map((activity) => (
               <ActivityItem
                 key={activity._id}
                 activity={activity}
                 groupId={groupId}
-                index={globalIndex}
               />
             ))}
           </div>
@@ -142,13 +145,13 @@ export function ActivityFeed({ groupId }: ActivityFeedProps) {
       ))}
 
       {hasMore && (
-        <div className="text-center pt-2">
+        <div className="text-center pt-2 pl-[52px]">
           <Button
-            variant="outline"
+            variant="ghost"
             size="sm"
             onClick={loadMore}
             disabled={loadingMore}
-            className="rounded-full px-6"
+            className="text-xs text-muted-foreground hover:text-foreground"
           >
             {loadingMore ? "..." : t("loadMore")}
           </Button>

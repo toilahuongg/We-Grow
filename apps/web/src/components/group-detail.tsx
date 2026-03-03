@@ -31,6 +31,8 @@ import { NoteDialog } from "@/components/note-dialog";
 import { Label } from "@/components/ui/label";
 import { EmptyState } from "@/components/empty-state";
 import { ActivityFeed } from "@/components/activity-feed";
+import { TelegramSettings } from "@/components/telegram-settings";
+import { ZaloSettings } from "@/components/zalo-settings";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
 
@@ -440,13 +442,7 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
 
       {/* Tab: Feed */}
       {activeTab === "feed" && (
-        <div className="glass-strong rounded-2xl p-6">
-          <div className="flex items-center gap-3 mb-5">
-            <h3 className="font-display text-lg font-bold">{t("tabFeed")}</h3>
-            <div className="h-px flex-1 bg-white/[0.06]" />
-          </div>
-          <ActivityFeed groupId={groupId} />
-        </div>
+        <ActivityFeed groupId={groupId} />
       )}
 
       {/* Tab: Leaderboard */}
@@ -814,6 +810,26 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
               </div>
             </div>
           </div>
+
+          {/* Bot Integrations */}
+          {canManage && (
+            <div className="glass-strong rounded-2xl p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#0088cc]/20 to-[#0068ff]/20">
+                  <span className="text-lg">🤖</span>
+                </div>
+                <div>
+                  <h3 className="font-semibold">{t("botIntegrations")}</h3>
+                  <p className="text-sm text-muted-foreground">{t("botIntegrationsDesc")}</p>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <TelegramSettings groupId={group._id as string} t={(key) => t(`telegram_${key}`)} />
+                <ZaloSettings groupId={group._id as string} t={(key) => t(`zalo_${key}`)} />
+              </div>
+            </div>
+          )}
 
           {/* Danger Zone */}
           <div className="glass-strong rounded-2xl p-6 border border-red-500/10">

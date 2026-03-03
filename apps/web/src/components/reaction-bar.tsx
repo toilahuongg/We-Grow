@@ -59,30 +59,37 @@ export function ReactionBar({ activityId, groupId, reactionCounts, myReactions }
   });
 
   return (
-    <div className="flex flex-wrap gap-1.5">
+    <div className="flex flex-wrap gap-1">
       {EMOJIS.map(({ key, display }) => {
         const count = reactionCounts[key] ?? 0;
         const isActive = myReactions.includes(key);
+
+        if (count === 0 && !isActive) {
+          return (
+            <button
+              key={key}
+              onClick={() => toggleMutation.mutate(key)}
+              disabled={toggleMutation.isPending}
+              className="flex h-6 w-6 items-center justify-center rounded-full text-xs opacity-0 group-hover:opacity-40 hover:!opacity-100 transition-opacity duration-200"
+            >
+              {display}
+            </button>
+          );
+        }
 
         return (
           <button
             key={key}
             onClick={() => toggleMutation.mutate(key)}
             disabled={toggleMutation.isPending}
-            className={`group/reaction flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-sm transition-all duration-200 ${
+            className={`flex items-center gap-1 rounded-full px-1.5 py-0.5 text-xs transition-all duration-150 active:scale-90 ${
               isActive
-                ? "bg-[#4ecdc4]/20 border border-[#4ecdc4]/40 shadow-[0_0_8px_rgba(78,205,196,0.15)]"
-                : "bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.08] hover:border-white/15"
-            } active:scale-90 hover:scale-105`}
+                ? "bg-[#4ecdc4]/15 text-[#4ecdc4]"
+                : "bg-white/[0.04] text-muted-foreground hover:bg-white/[0.08]"
+            }`}
           >
-            <span className="transition-transform duration-200 group-hover/reaction:scale-110">
-              {display}
-            </span>
-            {count > 0 && (
-              <span className={`font-medium text-xs tabular-nums ${isActive ? "text-[#4ecdc4]" : "text-muted-foreground"}`}>
-                {count}
-              </span>
-            )}
+            <span className="text-[11px]">{display}</span>
+            <span className="text-[10px] font-medium tabular-nums">{count}</span>
           </button>
         );
       })}
