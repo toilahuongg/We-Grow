@@ -84,6 +84,9 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
   const [leaveDialog, setLeaveDialog] = useState(false);
   const [deleteDialog, setDeleteDialog] = useState(false);
   const [removeMemberTarget, setRemoveMemberTarget] = useState<{ userId: string; userName: string } | null>(null);
+  const [editingGroup, setEditingGroup] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editDescription, setEditDescription] = useState("");
 
   useState(() => {
     authClient.getSession().then(setSession);
@@ -192,6 +195,19 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
     },
     onError: () => {
       toast.error(t("failedRegenerate"));
+    },
+  });
+
+  const updateGroupMutation = useMutation({
+    mutationFn: (data: { name: string; description?: string }) =>
+      client.groups.update({ groupId, ...data }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: orpc.groups.getById.queryKey({ input: { groupId } }) });
+      toast.success(t("groupUpdated"));
+      setEditingGroup(false);
+    },
+    onError: (error: any) => {
+      toast.error(error.message || t("failedUpdateGroup"));
     },
   });
 
@@ -655,22 +671,79 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
         <div className="space-y-6">
           {/* Group Info */}
           <div className="glass-strong rounded-2xl p-6">
-            <h3 className="font-semibold mb-4">{t("groupInfo")}</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              {group.description || t("noDescriptionProvided")}
-            </p>
-            <div className="flex items-center gap-2 mb-4">
-              <span className="rounded-full bg-white/10 px-3 py-1.5 text-sm">
-                {t("membersTitle", { count: activeMembers.length })}
-              </span>
-              <span className={`rounded-full border px-2.5 py-1 text-xs font-medium ${
-                group.mode === "together"
-                  ? "bg-[#ff6b6b]/20 text-[#ff6b6b] border-[#ff6b6b]/30"
-                  : "bg-[#4ecdc4]/20 text-[#4ecdc4] border-[#4ecdc4]/30"
-              }`}>
-                {group.mode === "together" ? t("togetherMode") : t("shareMode")}
-              </span>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold">{t("groupInfo")}</h3>
+              {canManage && !editingGroup && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setEditName(group.name);
+                    setEditDescription(group.description ?? "");
+                    setEditingGroup(true);
+                  }}
+                >
+                  <Edit2 className="mr-2 h-4 w-4" />
+                  {tc("edit")}
+                </Button>
+              )}
             </div>
+
+            {editingGroup ? (
+              <div className="space-y-3 mb-4">
+                <div>
+                  <Label className="text-xs text-muted-foreground mb-1">{t("groupName")}</Label>
+                  <input
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm"
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground mb-1">{t("groupDescription")}</Label>
+                  <textarea
+                    value={editDescription}
+                    onChange={(e) => setEditDescription(e.target.value)}
+                    rows={3}
+                    className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm resize-none"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    onClick={() => updateGroupMutation.mutate({ name: editName, description: editDescription })}
+                    disabled={!editName.trim() || updateGroupMutation.isPending}
+                  >
+                    {updateGroupMutation.isPending ? tc("saving") : tc("save")}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setEditingGroup(false)}
+                  >
+                    {tc("cancel")}
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <p className="text-sm text-muted-foreground mb-4">
+                  {group.description || t("noDescriptionProvided")}
+                </p>
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="rounded-full bg-white/10 px-3 py-1.5 text-sm">
+                    {t("membersTitle", { count: activeMembers.length })}
+                  </span>
+                  <span className={`rounded-full border px-2.5 py-1 text-xs font-medium ${
+                    group.mode === "together"
+                      ? "bg-[#ff6b6b]/20 text-[#ff6b6b] border-[#ff6b6b]/30"
+                      : "bg-[#4ecdc4]/20 text-[#4ecdc4] border-[#4ecdc4]/30"
+                  }`}>
+                    {group.mode === "together" ? t("togetherMode") : t("shareMode")}
+                  </span>
+                </div>
+              </>
+            )}
 
             {/* Invite Code */}
             <div className="rounded-xl border border-white/10 bg-white/5 p-4">
@@ -697,7 +770,7 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                   >
                     <Copy className="h-4 w-4" />
                   </Button>
-                  {isOwner && (
+                  {canManage && (
                     <Button
                       variant="outline"
                       size="sm"

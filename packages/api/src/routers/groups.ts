@@ -103,7 +103,7 @@ export const groupsRouter = {
       }),
     )
     .handler(async ({ context, input }) => {
-      await requireGroupRole(context.session.user.id, input.groupId, ["owner"]);
+      await requireGroupRole(context.session.user.id, input.groupId, ["owner", "moderator"]);
       const { groupId, ...updates } = input;
       return Group.findByIdAndUpdate(
         groupId,
@@ -129,7 +129,7 @@ export const groupsRouter = {
   regenerateInviteCode: protectedProcedure
     .input(z.object({ groupId: z.string() }))
     .handler(async ({ context, input }) => {
-      await requireGroupRole(context.session.user.id, input.groupId, ["owner"]);
+      await requireGroupRole(context.session.user.id, input.groupId, ["owner", "moderator"]);
       let inviteCode = generateInviteCode();
       while (await Group.findOne({ inviteCode })) {
         inviteCode = generateInviteCode();
