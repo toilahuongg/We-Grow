@@ -8,6 +8,7 @@ import {
 import { generateId } from "@we-grow/db/utils/id";
 
 import { protectedProcedure } from "../index";
+import { requireGroupRole } from "../middlewares/group-auth";
 import { XP_REWARDS, getLevelFromXp } from "../lib/xp";
 
 function getDateStr(date: Date): string {
@@ -175,9 +176,13 @@ export const habitsRouter = {
         frequency: z.enum(["daily", "weekly", "specific_days"]),
         targetDays: z.array(z.number().min(0).max(6)).optional(),
         weeklyTarget: z.number().min(1).max(7).optional(),
+        groupId: z.string().optional(),
       }),
     )
     .handler(async ({ context, input }) => {
+      if (input.groupId) {
+        await requireGroupRole(context.session.user.id, input.groupId, ["owner", "moderator", "member"]);
+      }
       const now = new Date();
       return Habit.create({
         _id: generateId(),
@@ -187,6 +192,7 @@ export const habitsRouter = {
         frequency: input.frequency,
         targetDays: input.targetDays ?? [],
         weeklyTarget: input.weeklyTarget ?? 1,
+        groupId: input.groupId ?? null,
         createdAt: now,
         updatedAt: now,
       });

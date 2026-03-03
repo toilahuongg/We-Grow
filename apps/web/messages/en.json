@@ -163,6 +163,7 @@
     "noHabitsYet": "No habits yet",
     "createHabitToStart": "Create a habit to get started",
     "waitingForHabits": "Waiting for group habits to be created",
+    "addMyHabit": "Add your own personal habit to this group",
     "createGroupHabit": "Create Group Habit",
     "dayStreak": "{count} day streak",
     "daysPerWeek": "{count} days/week",

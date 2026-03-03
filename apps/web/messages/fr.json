@@ -163,6 +163,7 @@
     "noHabitsYet": "Aucune habitude pour le moment",
     "createHabitToStart": "Créez une habitude pour commencer",
     "waitingForHabits": "En attente de la création des habitudes du groupe",
+    "addMyHabit": "Ajoutez votre propre habitude personnelle à ce groupe",
     "createGroupHabit": "Créer une habitude de groupe",
     "dayStreak": "Série de {count} jours",
     "daysPerWeek": "{count} jours/semaine",

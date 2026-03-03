@@ -28,9 +28,10 @@ interface HabitFormProps {
     weeklyTarget?: number;
   };
   isEditing?: boolean;
+  groupId?: string;
 }
 
-export function HabitForm({ habit, isEditing = false }: HabitFormProps) {
+export function HabitForm({ habit, isEditing = false, groupId }: HabitFormProps) {
   const t = useTranslations("habits");
   const td = useTranslations("days");
   const tc = useTranslations("common");
@@ -72,7 +73,7 @@ export function HabitForm({ habit, isEditing = false }: HabitFormProps) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: orpc.habits.list.queryKey() });
       toast.success(t("habitCreated"));
-      router.push("/habits");
+      router.push(groupId ? `/groups/${groupId}` : "/habits");
     },
     onError: (error: any) => {
       toast.error(error.message || t("failedCreate"));
@@ -122,6 +123,7 @@ export function HabitForm({ habit, isEditing = false }: HabitFormProps) {
           frequency: value.frequency,
           targetDays: value.targetDays,
           weeklyTarget: value.weeklyTarget,
+          ...(groupId ? { groupId } : {}),
         });
       }
     },
@@ -134,7 +136,7 @@ export function HabitForm({ habit, isEditing = false }: HabitFormProps) {
     <div className="container mx-auto max-w-2xl px-4 py-8">
       {/* Header */}
       <div className="mb-8 flex items-center gap-4">
-        <Link href="/habits">
+        <Link href={groupId ? `/groups/${groupId}` : "/habits"}>
           <Button variant="ghost" size="icon">
             <ArrowLeft className="h-4 w-4" />
           </Button>
@@ -308,7 +310,7 @@ export function HabitForm({ habit, isEditing = false }: HabitFormProps) {
 
           {/* Submit Button */}
           <div className="flex justify-end gap-2 pt-4">
-            <Link href="/habits">
+            <Link href={groupId ? `/groups/${groupId}` : "/habits"}>
               <Button type="button" variant="outline">
                 {tc("cancel")}
               </Button>
@@ -323,7 +325,7 @@ export function HabitForm({ habit, isEditing = false }: HabitFormProps) {
                     updates: values,
                   });
                 } else {
-                  createMutation.mutate(values);
+                  createMutation.mutate({ ...values, ...(groupId ? { groupId } : {}) });
                 }
               }}
               className="bg-gradient-to-r from-[#ff6b6b] via-[#ffa06b] to-[#4ecdc4] text-white"

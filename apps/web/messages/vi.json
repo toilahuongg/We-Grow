@@ -163,6 +163,7 @@
     "noHabitsYet": "Chưa có thói quen nào",
     "createHabitToStart": "Tạo một thói quen để bắt đầu",
     "waitingForHabits": "Đang chờ thói quen nhóm được tạo",
+    "addMyHabit": "Thêm thói quen cá nhân vào nhóm này",
     "createGroupHabit": "Tạo Thói Quen Nhóm",
     "dayStreak": "chuỗi {count} ngày",
     "daysPerWeek": "{count} ngày/tuần",

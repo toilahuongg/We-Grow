@@ -310,24 +310,22 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                     : t("remaining", { count: dueHabits.length - completedCount })}
                 </p>
               </div>
-              {canManage && (
-                <Link href={`/groups/${groupId}/habits/new`}>
-                  <Button size="sm" className="bg-gradient-to-r from-[#ff6b6b] via-[#ffa06b] to-[#4ecdc4] text-white">
-                    {t("newHabit")}
-                  </Button>
-                </Link>
-              )}
+              <Link href={`/groups/${groupId}/habits/new`}>
+                <Button size="sm" className="bg-gradient-to-r from-[#ff6b6b] via-[#ffa06b] to-[#4ecdc4] text-white">
+                  {t("newHabit")}
+                </Button>
+              </Link>
             </div>
 
             <div className="space-y-3">
               {dueHabits.length === 0 ? (
                 <EmptyState
                   title={t("noHabitsYet")}
-                  description={canManage ? t("createHabitToStart") : t("waitingForHabits")}
-                  action={canManage ? {
-                    label: t("createGroupHabit"),
+                  description={canManage ? t("createHabitToStart") : t("addMyHabit")}
+                  action={{
+                    label: canManage ? t("createGroupHabit") : t("newHabit"),
                     onClick: () => router.push(`/groups/${groupId}/habits/new`),
-                  } : undefined}
+                  }}
                 />
               ) : (
                 dueHabits.map((habit: any) => (
