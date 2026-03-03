@@ -5,13 +5,9 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Flame,
   Trophy,
-  Target,
-  TrendingUp,
-  Calendar,
   Plus,
   CheckCircle2,
   Sparkles,
-  Zap,
 } from "lucide-react";
 
 import { authClient } from "@/lib/auth-client";
@@ -258,8 +254,9 @@ export default function Dashboard({ session }: { session: typeof authClient.$Inf
                 </p>
               </div>
               <button
-                onClick={() => router.push("/habits/new")}
+                onClick={() => router.push("/groups")}
                 className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-[#ff6b6b] to-[#4ecdc4] text-white shadow-lg shadow-[#ff6b6b]/25 transition-all hover:scale-110 hover:shadow-xl"
+                title="Manage group habits"
               >
                 <Plus className="h-5 w-5" />
               </button>

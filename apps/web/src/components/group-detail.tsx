@@ -148,7 +148,7 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
           </div>
         </div>
         <div className="flex gap-2">
-          {group.mode === "together" && canManage && (
+          {canManage && (
             <Link href={`/groups/${groupId}/habits/new`}>
               <Button variant="outline">
                 <Trophy className="mr-2 h-4 w-4" />

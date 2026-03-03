@@ -36,15 +36,6 @@ export function createMockApiClient(
       complete: vi.fn().mockResolvedValue({ xpEarned: 10 }),
       uncomplete: vi.fn().mockResolvedValue({ success: true }),
     },
-    // Todos
-    todos: {
-      list: vi.fn().mockResolvedValue([]),
-      get: vi.fn().mockResolvedValue(null),
-      create: vi.fn().mockResolvedValue({ id: '1', title: 'Test Todo' }),
-      update: vi.fn().mockResolvedValue({ id: '1', title: 'Updated Todo' }),
-      delete: vi.fn().mockResolvedValue({ success: true }),
-      toggleComplete: vi.fn().mockResolvedValue({ xpEarned: 10 }),
-    },
     // Groups
     groups: {
       list: vi.fn().mockResolvedValue([]),
@@ -95,14 +86,6 @@ export function createMockApiErrorHandlers() {
       delete: vi.fn().mockRejectedValue(new Error('Failed to delete habit')),
       complete: vi.fn().mockRejectedValue(new Error('Failed to complete habit')),
       uncomplete: vi.fn().mockRejectedValue(new Error('Failed to uncomplete habit')),
-    },
-    todos: {
-      list: vi.fn().mockRejectedValue(new Error('Failed to fetch todos')),
-      get: vi.fn().mockRejectedValue(new Error('Todo not found')),
-      create: vi.fn().mockRejectedValue(new Error('Failed to create todo')),
-      update: vi.fn().mockRejectedValue(new Error('Failed to update todo')),
-      delete: vi.fn().mockRejectedValue(new Error('Failed to delete todo')),
-      toggleComplete: vi.fn().mockRejectedValue(new Error('Failed to toggle todo')),
     },
     groups: {
       list: vi.fn().mockRejectedValue(new Error('Failed to fetch groups')),

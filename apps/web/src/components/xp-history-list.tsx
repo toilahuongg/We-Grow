@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, TrendingUp, Sparkles, Trophy, Flame, Target, Zap } from "lucide-react";
+import { ArrowLeft, TrendingUp, Sparkles, Trophy, Flame, Zap } from "lucide-react";
 import Link from "next/link";
 
 import { orpc } from "@/utils/orpc";
@@ -12,7 +12,6 @@ import { format } from "date-fns";
 
 const SOURCE_ICONS: Record<string, React.ReactNode> = {
   habit_completion: <Flame className="h-4 w-4" />,
-  todo_completion: <Target className="h-4 w-4" />,
   streak_bonus: <Trophy className="h-4 w-4" />,
   all_habits_bonus: <Sparkles className="h-4 w-4" />,
   onboarding: <Zap className="h-4 w-4" />,
@@ -20,7 +19,6 @@ const SOURCE_ICONS: Record<string, React.ReactNode> = {
 
 const SOURCE_COLORS: Record<string, string> = {
   habit_completion: "text-[#ff6b6b]",
-  todo_completion: "text-[#ffa06b]",
   streak_bonus: "text-[#f472b6]",
   all_habits_bonus: "text-[#a78bfa]",
   onboarding: "text-[#4ecdc4]",
@@ -87,7 +85,7 @@ export function XPHistoryList() {
             </div>
             <h3 className="font-semibold mb-2">No XP history yet</h3>
             <p className="text-sm text-muted-foreground">
-              Complete habits and todos to start earning XP!
+              Complete habits to start earning XP!
             </p>
           </div>
         ) : (

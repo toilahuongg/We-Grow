@@ -19,7 +19,6 @@ export default function Header() {
   const authenticatedLinks = [
     { href: "/dashboard", label: "Dashboard" },
     { href: "/habits", label: "Habits" },
-    { href: "/todos", label: "Todos" },
     { href: "/groups", label: "Groups" },
     { href: "/leaderboard", label: "Leaderboard" },
   ] as const;

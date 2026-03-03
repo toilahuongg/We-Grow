@@ -103,6 +103,10 @@ export const groupsRouter = {
     .input(z.object({ groupId: z.string() }))
     .handler(async ({ context, input }) => {
       await requireGroupRole(context.session.user.id, input.groupId, ["owner"]);
+      await Habit.updateMany(
+        { groupId: input.groupId },
+        { archived: true, updatedAt: new Date() },
+      );
       await GroupMember.deleteMany({ groupId: input.groupId });
       await GroupHabit.deleteMany({ groupId: input.groupId });
       await Group.deleteOne({ _id: input.groupId });
@@ -165,6 +169,35 @@ export const groupsRouter = {
           existing.status = "active";
           existing.updatedAt = now;
           await existing.save();
+
+          // Re-create habits for rejoining member
+          const groupHabits = await GroupHabit.find({ groupId: group._id });
+          for (const gh of groupHabits) {
+            const existingHabit = await Habit.findOne({
+              userId,
+              groupHabitId: gh._id as string,
+            });
+            if (!existingHabit) {
+              await Habit.create({
+                _id: generateId(),
+                userId,
+                groupId: group._id as string,
+                groupHabitId: gh._id as string,
+                title: gh.title,
+                description: gh.description,
+                frequency: gh.frequency,
+                targetDays: gh.targetDays,
+                weeklyTarget: gh.weeklyTarget,
+                createdAt: now,
+                updatedAt: now,
+              });
+            } else if (existingHabit.archived) {
+              existingHabit.archived = false;
+              existingHabit.updatedAt = now;
+              await existingHabit.save();
+            }
+          }
+
           return { success: true, status: "active" };
         }
         return { success: true, status: existing.status };
@@ -179,6 +212,24 @@ export const groupsRouter = {
         createdAt: now,
         updatedAt: now,
       });
+
+      // Auto-create habits for new member from existing group habits
+      const groupHabits = await GroupHabit.find({ groupId: group._id });
+      for (const gh of groupHabits) {
+        await Habit.create({
+          _id: generateId(),
+          userId,
+          groupId: group._id as string,
+          groupHabitId: gh._id as string,
+          title: gh.title,
+          description: gh.description,
+          frequency: gh.frequency,
+          targetDays: gh.targetDays,
+          weeklyTarget: gh.weeklyTarget,
+          createdAt: now,
+          updatedAt: now,
+        });
+      }
 
       return { success: true, status: member.status };
     }),
@@ -260,11 +311,6 @@ export const groupsRouter = {
     .handler(async ({ context, input }) => {
       await requireGroupRole(context.session.user.id, input.groupId, ["owner", "moderator"]);
 
-      const group = await Group.findById(input.groupId);
-      if (group?.mode !== "together") {
-        throw new Error("Group habits can only be created in 'together' mode groups");
-      }
-
       const now = new Date();
       const groupHabit = await GroupHabit.create({
         _id: generateId(),
@@ -288,6 +334,8 @@ export const groupsRouter = {
         await Habit.create({
           _id: generateId(),
           userId: member.userId,
+          groupId: input.groupId,
+          groupHabitId: groupHabit._id as string,
           title: input.title,
           description: input.description ?? "",
           frequency: input.frequency,
@@ -299,6 +347,63 @@ export const groupsRouter = {
       }
 
       return groupHabit;
+    }),
+
+  listGroupHabits: protectedProcedure
+    .input(z.object({ groupId: z.string() }))
+    .handler(async ({ context, input }) => {
+      await requireGroupRole(context.session.user.id, input.groupId, ["owner", "moderator", "member"]);
+      return GroupHabit.find({ groupId: input.groupId }).sort({ createdAt: -1 });
+    }),
+
+  updateGroupHabit: protectedProcedure
+    .input(
+      z.object({
+        groupHabitId: z.string(),
+        title: z.string().min(1).optional(),
+        description: z.string().optional(),
+      }),
+    )
+    .handler(async ({ context, input }) => {
+      const groupHabit = await GroupHabit.findById(input.groupHabitId);
+      if (!groupHabit) throw new Error("Group habit not found");
+
+      await requireGroupRole(context.session.user.id, groupHabit.groupId as string, ["owner", "moderator"]);
+
+      const { groupHabitId, ...updates } = input;
+      const now = new Date();
+
+      const updated = await GroupHabit.findByIdAndUpdate(
+        groupHabitId,
+        { ...updates, updatedAt: now },
+        { new: true },
+      );
+
+      // Sync title/description to individual member habits
+      await Habit.updateMany(
+        { groupHabitId },
+        { ...updates, updatedAt: now },
+      );
+
+      return updated;
+    }),
+
+  deleteGroupHabit: protectedProcedure
+    .input(z.object({ groupHabitId: z.string() }))
+    .handler(async ({ context, input }) => {
+      const groupHabit = await GroupHabit.findById(input.groupHabitId);
+      if (!groupHabit) throw new Error("Group habit not found");
+
+      await requireGroupRole(context.session.user.id, groupHabit.groupId as string, ["owner", "moderator"]);
+
+      // Archive individual habits (preserve completion history)
+      await Habit.updateMany(
+        { groupHabitId: input.groupHabitId },
+        { archived: true, updatedAt: new Date() },
+      );
+
+      await GroupHabit.deleteOne({ _id: input.groupHabitId });
+      return { success: true };
     }),
 
   getMemberProgress: protectedProcedure
@@ -314,7 +419,7 @@ export const groupsRouter = {
 
       const progress = await Promise.all(
         members.map(async (member) => {
-          const habits = await Habit.find({ userId: member.userId, archived: false });
+          const habits = await Habit.find({ userId: member.userId, groupId: input.groupId, archived: false });
           const completions = await HabitCompletion.find({
             userId: member.userId,
             date,

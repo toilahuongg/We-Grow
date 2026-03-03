@@ -32,11 +32,6 @@ export function RemindersList() {
     staleTime: 1000 * 60,
   });
 
-  const { data: todos } = useQuery({
-    ...orpc.todos.list.queryOptions(),
-    staleTime: 1000 * 60,
-  });
-
   const deleteMutation = useMutation({
     mutationFn: (reminderId: string) => orpc.notifications.deleteReminder.mutate({ reminderId }),
     onSuccess: () => {
@@ -84,7 +79,7 @@ export function RemindersList() {
           <div>
             <h1 className="font-display text-3xl font-bold">Reminders</h1>
             <p className="text-sm text-muted-foreground">
-              Never miss a habit or todo
+              Never miss a habit
             </p>
           </div>
         </div>
@@ -101,7 +96,7 @@ export function RemindersList() {
       {!reminders || reminders.length === 0 ? (
         <EmptyState
           title="No reminders yet"
-          description="Create reminders to get notified about your habits and todos"
+          description="Create reminders to get notified about your habits"
           action={{
             label: "Create Reminder",
             onClick: () => setCreateDialogOpen(true),
@@ -111,8 +106,7 @@ export function RemindersList() {
         <div className="space-y-3">
           {reminders.map((reminder: any) => {
             const linkedHabit = habits?.find((h: any) => h._id === reminder.habitId);
-            const linkedTodo = todos?.find((t: any) => t._id === reminder.todoId);
-            const linkedItem = linkedHabit || linkedTodo;
+            const linkedItem = linkedHabit;
 
             return (
               <div
@@ -144,11 +138,6 @@ export function RemindersList() {
                       {linkedHabit && (
                         <span className="rounded-full bg-[#ff6b6b]/20 px-2 py-0.5 text-xs font-medium text-[#ff6b6b]">
                           Habit
-                        </span>
-                      )}
-                      {linkedTodo && (
-                        <span className="rounded-full bg-[#ffa06b]/20 px-2 py-0.5 text-xs font-medium text-[#ffa06b]">
-                          Todo
                         </span>
                       )}
                     </div>
@@ -211,7 +200,6 @@ export function RemindersList() {
             <ReminderForm
               reminder={editingReminder}
               habits={habits ?? []}
-              todos={todos ?? []}
               onSuccess={() => {
                 setCreateDialogOpen(false);
                 setEditingReminder(null);
@@ -249,23 +237,21 @@ export function RemindersList() {
 function ReminderForm({
   reminder,
   habits,
-  todos,
   onSuccess,
   onCancel,
 }: {
   reminder?: any;
   habits: any[];
-  todos: any[];
   onSuccess: () => void;
   onCancel: () => void;
 }) {
   const queryClient = useQueryClient();
   const [time, setTime] = useState(reminder?.time ?? "09:00");
-  const [linkedType, setLinkedType] = useState<"habit" | "todo" | "none">(
-    reminder?.habitId ? "habit" : reminder?.todoId ? "todo" : "none"
+  const [linkedType, setLinkedType] = useState<"habit" | "none">(
+    reminder?.habitId ? "habit" : "none"
   );
   const [linkedId, setLinkedId] = useState(
-    reminder?.habitId || reminder?.todoId || ""
+    reminder?.habitId || ""
   );
 
   const createMutation = useMutation({
@@ -295,8 +281,6 @@ function ReminderForm({
 
     if (linkedType === "habit") {
       data.habitId = linkedId;
-    } else if (linkedType === "todo") {
-      data.todoId = linkedId;
     }
 
     if (reminder) {
@@ -320,7 +304,7 @@ function ReminderForm({
 
       <div className="space-y-2">
         <Label>Link to (Optional)</Label>
-        <div className="grid grid-cols-3 gap-2 mb-2">
+        <div className="grid grid-cols-2 gap-2 mb-2">
           <button
             type="button"
             onClick={() => {
@@ -349,20 +333,6 @@ function ReminderForm({
           >
             Habit
           </button>
-          <button
-            type="button"
-            onClick={() => {
-              setLinkedType("todo");
-              setLinkedId("");
-            }}
-            className={`rounded-lg border p-2 text-center text-sm transition-all ${
-              linkedType === "todo"
-                ? "border-[#4ecdc4] bg-[#4ecdc4]/10"
-                : "border-white/10 bg-white/5 hover:border-white/20"
-            }`}
-          >
-            Todo
-          </button>
         </div>
 
         {linkedType === "habit" && (
@@ -380,20 +350,6 @@ function ReminderForm({
           </select>
         )}
 
-        {linkedType === "todo" && (
-          <select
-            value={linkedId}
-            onChange={(e) => setLinkedId(e.target.value)}
-            className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 focus:border-[#4ecdc4] outline-none"
-          >
-            <option value="">Select a todo...</option>
-            {todos.map((todo) => (
-              <option key={todo._id} value={todo._id}>
-                {todo.title}
-              </option>
-            ))}
-          </select>
-        )}
       </div>
 
       <div className="flex justify-end gap-2 pt-2">

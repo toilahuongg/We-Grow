@@ -168,9 +168,15 @@ async function checkAllHabitsBonus(userId: string, date: string) {
 
 export const habitsRouter = {
   list: protectedProcedure
-    .input(z.object({ includeArchived: z.boolean().optional() }).optional())
+    .input(z.object({
+      groupId: z.string().optional(),
+      includeArchived: z.boolean().optional(),
+    }).optional())
     .handler(async ({ context, input }) => {
       const filter: Record<string, unknown> = { userId: context.session.user.id };
+      if (input?.groupId) {
+        filter.groupId = input.groupId;
+      }
       if (!input?.includeArchived) {
         filter.archived = false;
       }
@@ -197,31 +203,6 @@ export const habitsRouter = {
         ...habit.toObject(),
         completedToday: !!completion,
       };
-    }),
-
-  create: protectedProcedure
-    .input(
-      z.object({
-        title: z.string().min(1),
-        description: z.string().optional(),
-        frequency: z.enum(["daily", "weekly", "specific_days"]),
-        targetDays: z.array(z.number().min(0).max(6)).optional(),
-        weeklyTarget: z.number().min(1).max(7).optional(),
-      }),
-    )
-    .handler(async ({ context, input }) => {
-      const now = new Date();
-      return Habit.create({
-        _id: generateId(),
-        userId: context.session.user.id,
-        title: input.title,
-        description: input.description ?? "",
-        frequency: input.frequency,
-        targetDays: input.targetDays ?? [],
-        weeklyTarget: input.weeklyTarget ?? 1,
-        createdAt: now,
-        updatedAt: now,
-      });
     }),
 
   update: protectedProcedure
@@ -375,12 +356,18 @@ export const habitsRouter = {
       }).sort({ date: 1 });
     }),
 
-  todaySummary: protectedProcedure.handler(async ({ context }) => {
+  todaySummary: protectedProcedure
+    .input(z.object({ groupId: z.string().optional() }).optional())
+    .handler(async ({ context, input }) => {
     const userId = context.session.user.id;
     const today = getDateStr(new Date());
     const todayDow = getDayOfWeek(today);
 
-    const habits = await Habit.find({ userId, archived: false });
+    const filter: Record<string, unknown> = { userId, archived: false };
+    if (input?.groupId) {
+      filter.groupId = input.groupId;
+    }
+    const habits = await Habit.find(filter);
     const completions = await HabitCompletion.find({ userId, date: today });
     const completedIds = new Set(completions.map((c) => c.habitId));
 

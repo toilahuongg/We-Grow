@@ -63,7 +63,6 @@ export const notificationsRouter = {
     .input(
       z.object({
         habitId: z.string().optional(),
-        todoId: z.string().optional(),
         time: z.string().regex(/^\d{2}:\d{2}$/),
         enabled: z.boolean().optional(),
       }),
@@ -74,7 +73,6 @@ export const notificationsRouter = {
         _id: generateId(),
         userId: context.session.user.id,
         habitId: input.habitId ?? null,
-        todoId: input.todoId ?? null,
         time: input.time,
         enabled: input.enabled ?? true,
         createdAt: now,

@@ -15,19 +15,6 @@ export interface MockHabit {
   currentStreak?: number
 }
 
-export interface MockTodo {
-  id: string
-  title: string
-  description: string | null
-  priority: 'normal' | 'important' | 'urgent'
-  dueDate: string | null
-  completed: boolean
-  completedAt: string | null
-  xpEarned: number
-  createdAt: string
-  updatedAt: string
-}
-
 export interface MockGroup {
   id: string
   name: string
@@ -86,37 +73,6 @@ export function createMockHabits(count: number): MockHabit[] {
     createMockHabit({
       id: String(i + 1),
       title: `Habit ${i + 1}`,
-    })
-  )
-}
-
-/**
- * Create a mock todo
- */
-export function createMockTodo(overrides: Partial<MockTodo> = {}): MockTodo {
-  return {
-    id: '1',
-    title: 'Buy groceries',
-    description: null,
-    priority: 'normal',
-    dueDate: null,
-    completed: false,
-    completedAt: null,
-    xpEarned: 0,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    ...overrides,
-  }
-}
-
-/**
- * Create mock todos
- */
-export function createMockTodos(count: number): MockTodo[] {
-  return Array.from({ length: count }, (_, i) =>
-    createMockTodo({
-      id: String(i + 1),
-      title: `Todo ${i + 1}`,
     })
   )
 }

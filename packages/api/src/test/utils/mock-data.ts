@@ -33,20 +33,6 @@ export interface MockHabitCompletion {
   updatedAt: Date
 }
 
-export interface MockTodo {
-  _id: string
-  userId: string
-  title: string
-  description?: string | null
-  priority: 'normal' | 'important' | 'urgent'
-  dueDate?: Date | null
-  completed: boolean
-  completedAt?: Date | null
-  xpEarned: number
-  createdAt: Date
-  updatedAt: Date
-}
-
 export interface MockGroup {
   _id: string
   name: string
@@ -182,35 +168,6 @@ export function createMockHabitCompletions(
     date.setDate(date.getDate() - (days - 1 - i))
     return createMockHabitCompletion(habitId, userId, date)
   })
-}
-
-// Todo factories
-export function createMockTodo(
-  userId: string,
-  overrides: Partial<MockTodo> = {}
-): MockTodo {
-  return {
-    _id: generateId(),
-    userId,
-    title: 'Test Todo',
-    description: null,
-    priority: 'normal',
-    dueDate: null,
-    completed: false,
-    completedAt: null,
-    xpEarned: 0,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    ...overrides,
-  }
-}
-
-export function createMockTodos(userId: string, count: number): MockTodo[] {
-  return Array.from({ length: count }, (_, i) =>
-    createMockTodo(userId, {
-      title: `Test Todo ${i + 1}`,
-    })
-  )
 }
 
 // Group factories

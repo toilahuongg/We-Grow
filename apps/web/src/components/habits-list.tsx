@@ -132,10 +132,10 @@ export function HabitsList() {
             </p>
           </div>
         </div>
-        <Link href="/habits/new">
+        <Link href="/groups">
           <Button className="bg-gradient-to-r from-[#ff6b6b] via-[#ffa06b] to-[#4ecdc4] text-white">
             <Plus className="mr-2 h-4 w-4" />
-            New Habit
+            Manage Groups
           </Button>
         </Link>
       </div>
@@ -171,13 +171,13 @@ export function HabitsList() {
           title={filter === "active" ? "No active habits" : filter === "archived" ? "No archived habits" : "No habits yet"}
           description={
             filter === "active"
-              ? "Create your first habit to start building better routines"
+              ? "Join a group and create habits together"
               : "You haven't created any habits yet"
           }
           action={{
-            label: "Create Habit",
+            label: "Go to Groups",
             onClick: () => {
-              window.location.href = "/habits/new";
+              window.location.href = "/groups";
             },
           }}
         />

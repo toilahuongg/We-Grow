@@ -6,6 +6,8 @@ const habitSchema = new Schema(
   {
     _id: { type: String },
     userId: { type: String, ref: "User", required: true },
+    groupId: { type: String, ref: "Group", required: true },
+    groupHabitId: { type: String, ref: "GroupHabit", required: true },
     title: { type: String, required: true },
     description: { type: String, default: "" },
     frequency: {
@@ -25,6 +27,7 @@ const habitSchema = new Schema(
   { collection: "habit" },
 );
 
-habitSchema.index({ userId: 1, archived: 1 });
+habitSchema.index({ userId: 1, groupId: 1, archived: 1 });
+habitSchema.index({ groupHabitId: 1 });
 
 export const Habit = mongoose.models.Habit || model("Habit", habitSchema);

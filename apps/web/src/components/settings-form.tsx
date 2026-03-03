@@ -160,7 +160,7 @@ export function SettingsForm({ session }: { session: any }) {
 
         <div className="text-center py-4">
           <p className="text-sm text-muted-foreground mb-4">
-            Set up reminders for your habits and todos
+            Set up reminders for your habits
           </p>
           <Link href="/reminders">
             <Button variant="outline">Manage Reminders</Button>

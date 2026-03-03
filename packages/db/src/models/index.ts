@@ -2,7 +2,7 @@ export { User, Session, Account, Verification } from "./auth.model";
 export { UserProfile } from "./user-profile.model";
 export { Habit } from "./habit.model";
 export { HabitCompletion } from "./habit-completion.model";
-export { Todo } from "./todo.model";
+
 export { Group } from "./group.model";
 export { GroupMember } from "./group-member.model";
 export { GroupHabit } from "./group-habit.model";
