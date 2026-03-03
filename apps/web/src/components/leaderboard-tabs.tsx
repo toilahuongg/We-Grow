@@ -13,7 +13,7 @@ export function LeaderboardTabs() {
   const [activeTab, setActiveTab] = useState<"global" | "groups">("global");
 
   const { data: globalLeaderboard, isLoading: globalLoading } = useQuery({
-    ...orpc.gamification.getGlobalLeaderboard.queryOptions({ limit: 100 }),
+    ...orpc.gamification.getGlobalLeaderboard.queryOptions({ input: { limit: 100 } }),
     staleTime: 1000 * 60 * 5,
   });
 
@@ -190,7 +190,7 @@ export function LeaderboardTabs() {
               </div>
 
               {/* User's Rank (if not in top 100 or highlighted) */}
-              {userRank >= 0 && userRank < 100 && (
+              {userRank != null && userRank >= 0 && userRank < 100 && (
                 <div className="mt-6 pt-6 border-t border-white/10">
                   <p className="text-sm text-muted-foreground mb-2">Your Ranking</p>
                   <div className="flex items-center gap-4 rounded-xl border border-[#4ecdc4] bg-[#4ecdc4]/10 p-4">

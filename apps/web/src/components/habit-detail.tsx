@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Calendar as CalendarIcon, Flame, TrendingUp, Edit2, Trash2 } from "lucide-react";
 import Link from "next/link";
 
-import { orpc } from "@/utils/orpc";
+import { orpc, client } from "@/utils/orpc";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { StreakBadge } from "@/components/streak-badge";
@@ -50,47 +50,49 @@ export function HabitDetail({ habitId, initialData }: HabitDetailProps) {
   const [deleteDialog, setDeleteDialog] = useState(false);
 
   const { data: habit, isLoading } = useQuery({
-    ...orpc.habits.getById.queryOptions({ habitId }),
+    ...orpc.habits.getById.queryOptions({ input: { habitId } }),
     initialData,
     staleTime: 1000 * 60,
   });
 
   const { data: completions } = useQuery({
     ...orpc.habits.getCompletions.queryOptions({
-      habitId,
-      startDate: format(subMonths(currentMonth, 3), "yyyy-MM-dd"),
-      endDate: format(addMonths(currentMonth, 3), "yyyy-MM-dd"),
+      input: {
+        habitId,
+        startDate: format(subMonths(currentMonth, 3), "yyyy-MM-dd"),
+        endDate: format(addMonths(currentMonth, 3), "yyyy-MM-dd"),
+      },
     }),
     staleTime: 1000 * 60 * 5,
   });
 
   const completeMutation = useMutation({
-    mutationFn: (date: string) => orpc.habits.complete.mutate({ habitId, date }),
+    mutationFn: (date: string) => client.habits.complete({ habitId, date }),
     onSuccess: (result, date) => {
       if (!result.alreadyCompleted) {
         toast.success(`+${result.xpAwarded} XP! ✨`);
       }
-      queryClient.invalidateQueries({ queryKey: orpc.habits.getById.queryKey() });
-      queryClient.invalidateQueries({ queryKey: orpc.habits.getCompletions.queryKey() });
+      queryClient.invalidateQueries({ queryKey: orpc.habits.getById.queryKey({ input: { habitId } }) });
+      queryClient.invalidateQueries({ queryKey: orpc.habits.getCompletions.queryKey({ input: { habitId } } as any) });
       queryClient.invalidateQueries({ queryKey: orpc.gamification.getProfile.queryKey() });
     },
   });
 
   const uncompleteMutation = useMutation({
-    mutationFn: (date: string) => orpc.habits.uncomplete.mutate({ habitId, date }),
+    mutationFn: (date: string) => client.habits.uncomplete({ habitId, date }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: orpc.habits.getById.queryKey() });
-      queryClient.invalidateQueries({ queryKey: orpc.habits.getCompletions.queryKey() });
+      queryClient.invalidateQueries({ queryKey: orpc.habits.getById.queryKey({ input: { habitId } }) });
+      queryClient.invalidateQueries({ queryKey: orpc.habits.getCompletions.queryKey({ input: { habitId } } as any) });
       queryClient.invalidateQueries({ queryKey: orpc.gamification.getProfile.queryKey() });
     },
   });
 
   const deleteMutation = useMutation({
-    mutationFn: () => orpc.habits.delete.mutate({ habitId }),
+    mutationFn: () => client.habits.delete({ habitId }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: orpc.habits.list.queryKey() });
       toast.success("Habit deleted");
-      window.location.href = "/habits";
+      window.location.href = `/groups/${habit?.groupId ?? ""}`;
     },
   });
 
@@ -110,8 +112,8 @@ export function HabitDetail({ habitId, initialData }: HabitDetailProps) {
       <div className="container mx-auto max-w-4xl px-4 py-8">
         <div className="glass-strong rounded-2xl p-12 text-center">
           <h2 className="text-xl font-semibold mb-2">Habit not found</h2>
-          <Link href="/habits">
-            <Button>Back to Habits</Button>
+          <Link href="/groups">
+            <Button>Back to Groups</Button>
           </Link>
         </div>
       </div>
@@ -151,7 +153,7 @@ export function HabitDetail({ habitId, initialData }: HabitDetailProps) {
       {/* Header */}
       <div className="mb-8 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href="/habits">
+          <Link href={habit.groupId ? `/groups/${habit.groupId}` : "/groups"}>
             <Button variant="ghost" size="icon">
               <ArrowLeft className="h-4 w-4" />
             </Button>

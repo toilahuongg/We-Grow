@@ -29,7 +29,7 @@ export function XPHistoryList() {
   const limit = 20;
 
   const { data, isLoading } = useQuery({
-    ...orpc.gamification.getXpHistory.queryOptions({ limit, offset: page * limit }),
+    ...orpc.gamification.getXpHistory.queryOptions({ input: { limit, offset: page * limit } }),
     staleTime: 1000 * 60,
   });
 

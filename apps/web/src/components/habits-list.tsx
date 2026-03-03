@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Plus, Calendar, Archive, Trash2, Edit2 } from "lucide-react";
 import Link from "next/link";
 
-import { orpc } from "@/utils/orpc";
+import { orpc, client } from "@/utils/orpc";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { EmptyState } from "@/components/empty-state";
@@ -54,12 +54,12 @@ export function HabitsList() {
   });
 
   const { data: habits, isLoading } = useQuery({
-    ...orpc.habits.list.queryOptions({ includeArchived: filter !== "active" }),
+    ...orpc.habits.list.queryOptions({ input: { includeArchived: filter !== "active" } }),
     staleTime: 1000 * 60,
   });
 
   const archiveMutation = useMutation({
-    mutationFn: (habitId: string) => orpc.habits.archive.mutate({ habitId }),
+    mutationFn: (habitId: string) => client.habits.archive({ habitId }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: orpc.habits.list.queryKey() });
       toast.success("Habit archived");
@@ -70,7 +70,7 @@ export function HabitsList() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (habitId: string) => orpc.habits.delete.mutate({ habitId }),
+    mutationFn: (habitId: string) => client.habits.delete({ habitId }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: orpc.habits.list.queryKey() });
       toast.success("Habit deleted");
@@ -81,7 +81,7 @@ export function HabitsList() {
   });
 
   const completeMutation = useMutation({
-    mutationFn: (habitId: string) => orpc.habits.complete.mutate({ habitId }),
+    mutationFn: (habitId: string) => client.habits.complete({ habitId }),
     onSuccess: (result) => {
       if (!result.alreadyCompleted) {
         toast.success(`+${result.xpAwarded} XP! ✨`);

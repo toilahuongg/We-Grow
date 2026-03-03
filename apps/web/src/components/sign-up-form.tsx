@@ -47,7 +47,7 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
           },
           {
             onSuccess: () => {
-              router.push("/dashboard");
+              router.push("/groups");
               toast.success("Welcome to We-Grow! 🌱");
             },
             onError: (error) => {
@@ -85,10 +85,10 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
         type="button"
         onClick={() => {
           authClient.signIn.social(
-            { provider: "google", callbackURL: "/dashboard" },
+            { provider: "google", callbackURL: "/groups" },
             {
               onSuccess: () => {
-                router.push("/dashboard");
+                router.push("/groups");
                 toast.success("Welcome to We-Grow! 🌱");
               },
               onError: (error) => {

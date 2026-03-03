@@ -24,7 +24,7 @@ export async function createServerCaller(): Promise<AppRouterClient> {
         ...options,
         credentials: "include",
         headers: {
-          ...options?.headers,
+          ...(options as RequestInit)?.headers,
           // Forward cookies from the server request to maintain session
           cookie: headersList.get("cookie") || "",
         },
@@ -32,5 +32,5 @@ export async function createServerCaller(): Promise<AppRouterClient> {
     },
   });
 
-  return createORPCClient(link);
+  return createORPCClient(link) as unknown as AppRouterClient;
 }

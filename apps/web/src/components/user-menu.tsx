@@ -72,7 +72,7 @@ export default function UserMenu() {
         <DropdownMenuGroup>
           <DropdownMenuItem
             className="gap-3 cursor-pointer rounded-xl transition-colors hover:bg-white/10"
-            onClick={() => router.push("/dashboard")}
+            onClick={() => router.push("/groups")}
           >
             <User className="h-4 w-4 text-[#ff6b6b]" />
             <span>Profile</span>

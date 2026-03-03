@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Plus, Bell, BellOff, Trash2, Edit2, Clock } from "lucide-react";
 import Link from "next/link";
 
-import { orpc } from "@/utils/orpc";
+import { orpc, client } from "@/utils/orpc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,12 +28,12 @@ export function RemindersList() {
   });
 
   const { data: habits } = useQuery({
-    ...orpc.habits.list.queryOptions({ includeArchived: false }),
+    ...orpc.habits.list.queryOptions({ input: { includeArchived: false } }),
     staleTime: 1000 * 60,
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (reminderId: string) => orpc.notifications.deleteReminder.mutate({ reminderId }),
+    mutationFn: (reminderId: string) => client.notifications.deleteReminder({ reminderId }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: orpc.notifications.listReminders.queryKey() });
       toast.success("Reminder deleted");
@@ -43,7 +43,7 @@ export function RemindersList() {
 
   const toggleMutation = useMutation({
     mutationFn: ({ reminderId, enabled }: { reminderId: string; enabled: boolean }) =>
-      orpc.notifications.updateReminder.mutate({ reminderId, enabled }),
+      client.notifications.updateReminder({ reminderId, enabled }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: orpc.notifications.listReminders.queryKey() });
       toast.success("Reminder updated");
@@ -255,7 +255,7 @@ function ReminderForm({
   );
 
   const createMutation = useMutation({
-    mutationFn: orpc.notifications.createReminder.mutate,
+    mutationFn: (input: any) => client.notifications.createReminder(input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: orpc.notifications.listReminders.queryKey() });
       toast.success("Reminder created! 🔔");
@@ -265,7 +265,7 @@ function ReminderForm({
   });
 
   const updateMutation = useMutation({
-    mutationFn: (updates: any) => orpc.notifications.updateReminder.mutate({ reminderId: reminder._id, ...updates }),
+    mutationFn: (updates: any) => client.notifications.updateReminder({ reminderId: reminder._id, ...updates }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: orpc.notifications.listReminders.queryKey() });
       toast.success("Reminder updated! 🔔");

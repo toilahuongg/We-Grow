@@ -22,6 +22,7 @@
     "@radix-ui/react-slot": "^1.2.4",
     "@tanstack/react-form": "^1.28.0",
     "@tanstack/react-query": "^5.90.12",
+    "@tanstack/zod-form-adapter": "^0.42.1",
     "@we-grow/api": "workspace:*",
     "@we-grow/auth": "workspace:*",
     "@we-grow/env": "workspace:*",

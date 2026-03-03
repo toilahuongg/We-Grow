@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { AppRouterClient } from '@we-grow/api/routers/index'
 import { vi } from 'vitest'
 

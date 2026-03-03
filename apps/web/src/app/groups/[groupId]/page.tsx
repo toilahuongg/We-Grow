@@ -1,7 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 
 import { authClient } from "@/lib/auth-client";
-import { orpc, type RouterClient } from "@/utils/orpc";
+import { client } from "@/utils/orpc";
 import { GroupDetail } from "@/components/group-detail";
 
 interface GroupPageProps {
@@ -18,7 +18,7 @@ export default async function GroupPage({ params }: GroupPageProps) {
   const { groupId } = await params;
 
   // Fetch group data server-side
-  const group = await orpc.groups.getById({ groupId });
+  const group = await client.groups.getById({ groupId });
 
   if (!group) {
     notFound();

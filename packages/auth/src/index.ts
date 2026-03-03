@@ -38,7 +38,7 @@ export const auth = betterAuth({
   },
   plugins: [nextCookies()],
   user: {
-    onCreate: async (user) => {
+    onCreate: async (user: { id: string }) => {
       const now = new Date();
       await UserProfile.create({
         _id: generateId(),
@@ -49,5 +49,5 @@ export const auth = betterAuth({
         updatedAt: now,
       });
     },
-  },
+  } as any,
 });

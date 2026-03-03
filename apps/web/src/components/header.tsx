@@ -17,10 +17,7 @@ export default function Header() {
   ] as const;
 
   const authenticatedLinks = [
-    { href: "/dashboard", label: "Dashboard" },
-    { href: "/habits", label: "Habits" },
-    { href: "/groups", label: "Groups" },
-    { href: "/leaderboard", label: "Leaderboard" },
+    { href: "/groups", label: "My Groups" },
   ] as const;
 
   const navLinks = session?.user ? authenticatedLinks : publicLinks;

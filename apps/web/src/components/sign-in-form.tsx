@@ -28,7 +28,7 @@ export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () 
         },
         {
           onSuccess: () => {
-            router.push("/dashboard");
+            router.push("/groups");
             toast.success("Welcome back! 🎉");
           },
           onError: (error) => {
@@ -64,10 +64,10 @@ export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () 
         type="button"
         onClick={() => {
           authClient.signIn.social(
-            { provider: "google", callbackURL: "/dashboard" },
+            { provider: "google", callbackURL: "/groups" },
             {
               onSuccess: () => {
-                router.push("/dashboard");
+                router.push("/groups");
                 toast.success("Welcome back! 🎉");
               },
               onError: (error) => {
