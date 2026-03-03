@@ -3,7 +3,6 @@ import { redirect } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { client } from "@/utils/orpc";
 import { GroupHabitForm } from "@/components/group-habit-form";
-import { HabitForm } from "@/components/habit-form";
 
 interface PageProps {
   params: Promise<{ groupId: string }>;
@@ -29,9 +28,9 @@ export default async function NewGroupHabitPage({ params }: PageProps) {
   );
   const canManage = currentMember?.role === "owner" || currentMember?.role === "moderator";
 
-  if (canManage) {
-    return <GroupHabitForm groupId={groupId} />;
+  if (!canManage) {
+    redirect(`/groups/${groupId}`);
   }
 
-  return <HabitForm groupId={groupId} />;
+  return <GroupHabitForm groupId={groupId} />;
 }

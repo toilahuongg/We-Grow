@@ -181,7 +181,7 @@ export const habitsRouter = {
     )
     .handler(async ({ context, input }) => {
       if (input.groupId) {
-        await requireGroupRole(context.session.user.id, input.groupId, ["owner", "moderator", "member"]);
+        await requireGroupRole(context.session.user.id, input.groupId, ["owner", "moderator"]);
       }
       const now = new Date();
       return Habit.create({
