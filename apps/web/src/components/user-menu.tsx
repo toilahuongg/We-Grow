@@ -72,21 +72,21 @@ export default function UserMenu() {
         <DropdownMenuGroup>
           <DropdownMenuItem
             className="gap-3 cursor-pointer rounded-xl transition-colors hover:bg-white/10"
-            render={<Link href="/dashboard" />}
+            onClick={() => router.push("/dashboard")}
           >
             <User className="h-4 w-4 text-[#ff6b6b]" />
             <span>Profile</span>
           </DropdownMenuItem>
           <DropdownMenuItem
             className="gap-3 cursor-pointer rounded-xl transition-colors hover:bg-white/10"
-            render={<Link href={"/achievements" as any} />}
+            onClick={() => router.push("/achievements" as any)}
           >
             <Trophy className="h-4 w-4 text-[#ffa06b]" />
             <span>Achievements</span>
           </DropdownMenuItem>
           <DropdownMenuItem
             className="gap-3 cursor-pointer rounded-xl transition-colors hover:bg-white/10"
-            render={<Link href={"/settings" as any} />}
+            onClick={() => router.push("/settings" as any)}
           >
             <Settings className="h-4 w-4 text-[#4ecdc4]" />
             <span>Settings</span>

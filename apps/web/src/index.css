@@ -2,9 +2,6 @@
 @import "shadcn/tailwind.css";
 @import "tailwindcss";
 
-
-@custom-variant dark (&:is(.dark *));
-
 /* ===== 2026 ENERGETIC GROWTH THEME ===== */
 
 :root {

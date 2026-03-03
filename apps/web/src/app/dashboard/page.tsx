@@ -2,7 +2,7 @@ import { auth } from "@we-grow/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
-import { authClient } from "@/lib/auth-client";
+import { createServerCaller } from "@/utils/server-rpc";
 
 import Dashboard from "./dashboard";
 
@@ -13,6 +13,18 @@ export default async function DashboardPage() {
 
   if (!session?.user) {
     redirect("/login");
+  }
+
+  // Check if user has completed onboarding
+  try {
+    const rpc = await createServerCaller();
+    const onboardingStatus = await rpc.onboarding.getStatus();
+    if (!onboardingStatus.completed) {
+      redirect("/onboarding");
+    }
+  } catch (error) {
+    // If onboarding check fails, continue to dashboard
+    console.error("Failed to check onboarding status:", error);
   }
 
   return (

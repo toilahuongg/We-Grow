@@ -12,10 +12,19 @@ export default function Header() {
   const pathname = usePathname();
   const { data: session, isPending } = authClient.useSession();
 
-  const navLinks = [
+  const publicLinks = [
     { href: "/", label: "Home" },
-    { href: "/dashboard", label: "Dashboard" },
   ] as const;
+
+  const authenticatedLinks = [
+    { href: "/dashboard", label: "Dashboard" },
+    { href: "/habits", label: "Habits" },
+    { href: "/todos", label: "Todos" },
+    { href: "/groups", label: "Groups" },
+    { href: "/leaderboard", label: "Leaderboard" },
+  ] as const;
+
+  const navLinks = session?.user ? authenticatedLinks : publicLinks;
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/5 bg-background/80 backdrop-blur-xl">
@@ -62,16 +71,19 @@ export default function Header() {
                 <UserMenu />
               ) : (
                 <div className="hidden sm:flex items-center gap-2">
-                  <Button variant="ghost" size="sm" render={<Link href="/login" />}>
-                    Sign In
-                  </Button>
-                  <Button
-                    size="sm"
-                    className="rounded-full bg-gradient-to-r from-[#ff6b6b] via-[#ffa06b] to-[#4ecdc4] text-white shadow-md shadow-[#ff6b6b]/20 hover:shadow-lg hover:shadow-[#ff6b6b]/30"
-                    render={<Link href="/login" />}
-                  >
-                    Get Started
-                  </Button>
+                  <Link href="/login">
+                    <Button variant="ghost" size="sm">
+                      Sign In
+                    </Button>
+                  </Link>
+                  <Link href="/login">
+                    <Button
+                      size="sm"
+                      className="rounded-full bg-gradient-to-r from-[#ff6b6b] via-[#ffa06b] to-[#4ecdc4] text-white shadow-md shadow-[#ff6b6b]/20 hover:shadow-lg hover:shadow-[#ff6b6b]/30"
+                    >
+                      Get Started
+                    </Button>
+                  </Link>
                 </div>
               )}
             </>

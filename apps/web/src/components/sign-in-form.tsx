@@ -149,7 +149,7 @@ export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () 
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label htmlFor={field.name} className="text-sm font-medium">Password</Label>
-                  <Link href="/forgot-password" className="text-sm text-[#ff6b6b] hover:text-[#ffa06b]">
+                  <Link href={"/forgot-password" as any} className="text-sm text-[#ff6b6b] hover:text-[#ffa06b]">
                     Forgot password?
                   </Link>
                 </div>

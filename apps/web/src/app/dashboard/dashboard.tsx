@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Flame,
   Trophy,
@@ -16,34 +16,142 @@ import {
 
 import { authClient } from "@/lib/auth-client";
 import { orpc } from "@/utils/orpc";
+import { DashboardSkeleton } from "@/components/dashboard-skeleton";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
-// Mock data for demonstration
-const mockHabits = [
-  { id: "1", name: "Morning Meditation", streak: 7, completedToday: true, icon: "🧘", category: "wellness" },
-  { id: "2", name: "Exercise 30min", streak: 3, completedToday: false, icon: "💪", category: "fitness" },
-  { id: "3", name: "Read 10 pages", streak: 14, completedToday: true, icon: "📚", category: "learning" },
-  { id: "4", name: "Drink 8 glasses of water", streak: 21, completedToday: false, icon: "💧", category: "health" },
-  { id: "5", name: "No social media before bed", streak: 5, completedToday: false, icon: "📵", category: "wellness" },
-];
-
-const mockXP = {
-  current: 2450,
-  level: 12,
-  nextLevel: 3000,
-  total: 2450,
+const habitIcons: Record<string, string> = {
+  meditation: "🧘",
+  exercise: "💪",
+  reading: "📚",
+  water: "💧",
+  "social-media": "📵",
+  journaling: "✍️",
+  sleep: "😴",
+  learning: "🎓",
+  default: "🌟",
 };
 
-function calculateLevelProgress(current: number, nextLevel: number): number {
-  return ((current % 1000) / 1000) * 100;
+function getHabitIcon(title: string): string {
+  const lowerTitle = title.toLowerCase();
+  if (lowerTitle.includes("meditation") || lowerTitle.includes("mindful")) return habitIcons.meditation;
+  if (lowerTitle.includes("exercise") || lowerTitle.includes("workout")) return habitIcons.exercise;
+  if (lowerTitle.includes("read") || lowerTitle.includes("book")) return habitIcons.reading;
+  if (lowerTitle.includes("water") || lowerTitle.includes("hydrate")) return habitIcons.water;
+  if (lowerTitle.includes("social") || lowerTitle.includes("phone")) return habitIcons["social-media"];
+  if (lowerTitle.includes("journal") || lowerTitle.includes("write")) return habitIcons.journaling;
+  if (lowerTitle.includes("sleep") || lowerTitle.includes("bed")) return habitIcons.sleep;
+  if (lowerTitle.includes("learn") || lowerTitle.includes("study")) return habitIcons.learning;
+  return habitIcons.default;
+}
+
+function getHabitCategory(title: string): string {
+  const lowerTitle = title.toLowerCase();
+  if (lowerTitle.includes("meditation") || lowerTitle.includes("mindful") || lowerTitle.includes("journal")) return "wellness";
+  if (lowerTitle.includes("exercise") || lowerTitle.includes("workout") || lowerTitle.includes("water")) return "fitness";
+  if (lowerTitle.includes("read") || lowerTitle.includes("learn") || lowerTitle.includes("study")) return "learning";
+  if (lowerTitle.includes("sleep")) return "health";
+  return "general";
+}
+
+function calculateLevelProgress(currentXp: number, nextLevelXp: number): number {
+  if (nextLevelXp === 0) return 0;
+  return ((currentXp % 1000) / 1000) * 100;
 }
 
 export default function Dashboard({ session }: { session: typeof authClient.$Infer.Session }) {
+  const router = useRouter();
+  const queryClient = useQueryClient();
   const privateData = useQuery(orpc.privateData.queryOptions());
-  const [selectedTab, setSelectedTab] = useState<"today" | "habits" | "achievements">("today");
 
-  const levelProgress = calculateLevelProgress(mockXP.current, mockXP.nextLevel);
-  const completedToday = mockHabits.filter((h) => h.completedToday).length;
-  const totalHabits = mockHabits.length;
+  // Queries
+  const { data: profile, isLoading: profileLoading, error: profileError } = useQuery({
+    ...orpc.gamification.getProfile.queryOptions(),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+
+  const { data: habits, isLoading: habitsLoading, error: habitsError } = useQuery({
+    ...orpc.habits.todaySummary.queryOptions(),
+    staleTime: 1000 * 60, // 1 minute
+  });
+
+  // Complete habit mutation
+  const completeHabit = useMutation({
+    mutationFn: (habitId: string) => orpc.habits.complete.mutate({ habitId }),
+    onMutate: async (habitId) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: orpc.habits.todaySummary.queryKey() });
+
+      // Snapshot previous value
+      const previousHabits = queryClient.getQueryData(orpc.habits.todaySummary.queryKey());
+
+      // Optimistically update
+      queryClient.setQueryData(
+        orpc.habits.todaySummary.queryKey(),
+        (old: any[]) => old?.map(h => h._id === habitId ? { ...h, completedToday: true } : h)
+      );
+
+      return { previousHabits };
+    },
+    onSuccess: (result) => {
+      if (!result.alreadyCompleted) {
+        toast.success(`+${result.xpAwarded} XP! ✨ Keep it up!`);
+      }
+      // Invalidate related queries
+      queryClient.invalidateQueries({ queryKey: orpc.gamification.getProfile.queryKey() });
+    },
+    onError: (error, variables, context) => {
+      // Rollback
+      queryClient.setQueryData(orpc.habits.todaySummary.queryKey(), context?.previousHabits);
+      toast.error("Failed to complete habit. Please try again.");
+    },
+  });
+
+  // Uncomplete habit mutation
+  const uncompleteHabit = useMutation({
+    mutationFn: (habitId: string) => orpc.habits.uncomplete.mutate({ habitId }),
+    onMutate: async (habitId) => {
+      await queryClient.cancelQueries({ queryKey: orpc.habits.todaySummary.queryKey() });
+      const previousHabits = queryClient.getQueryData(orpc.habits.todaySummary.queryKey());
+
+      queryClient.setQueryData(
+        orpc.habits.todaySummary.queryKey(),
+        (old: any[]) => old?.map(h => h._id === habitId ? { ...h, completedToday: false } : h)
+      );
+
+      return { previousHabits };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: orpc.gamification.getProfile.queryKey() });
+    },
+    onError: (error, variables, context) => {
+      queryClient.setQueryData(orpc.habits.todaySummary.queryKey(), context?.previousHabits);
+      toast.error("Failed to uncomplete habit. Please try again.");
+    },
+  });
+
+  // Handle loading state
+  if (profileLoading || habitsLoading) {
+    return <DashboardSkeleton />;
+  }
+
+  // Handle error state
+  if (profileError || habitsError) {
+    return (
+      <div className="container mx-auto max-w-7xl px-4 py-8">
+        <div className="glass-strong rounded-2xl p-12 text-center">
+          <h2 className="text-xl font-semibold mb-2">Oops! Something went wrong</h2>
+          <p className="text-muted-foreground">Please try refreshing the page</p>
+        </div>
+      </div>
+    );
+  }
+
+  const levelProgress = calculateLevelProgress(profile?.currentLevelXp ?? 0, profile?.nextLevelXp ?? 100);
+  const dueHabits = habits?.filter((h: any) => h.isDue) ?? [];
+  const completedToday = dueHabits.filter((h: any) => h.completedToday).length;
+  const totalHabits = dueHabits.length;
+  const bestStreak = habits?.reduce((max: number, h: any) => Math.max(max, h.longestStreak ?? 0), 0) ?? 0;
 
   return (
     <div className="container mx-auto max-w-7xl px-4 py-8">
@@ -68,11 +176,11 @@ export default function Dashboard({ session }: { session: typeof authClient.$Inf
               </div>
               <span className="text-sm font-medium text-muted-foreground">Level</span>
             </div>
-            <p className="font-display text-3xl font-bold">{mockXP.level}</p>
+            <p className="font-display text-3xl font-bold">{profile?.level ?? 1}</p>
             <div className="mt-2">
               <div className="mb-1 flex items-center justify-between text-xs">
-                <span className="text-muted-foreground">{mockXP.current} XP</span>
-                <span className="text-muted-foreground">{mockXP.nextLevel} XP</span>
+                <span className="text-muted-foreground">{profile?.totalXp ?? 0} XP</span>
+                <span className="text-muted-foreground">{profile?.nextLevelXp ?? 100} XP</span>
               </div>
               <div className="h-2 overflow-hidden rounded-full bg-white/10">
                 <div
@@ -94,7 +202,7 @@ export default function Dashboard({ session }: { session: typeof authClient.$Inf
               </div>
               <span className="text-sm font-medium text-muted-foreground">Best Streak</span>
             </div>
-            <p className="font-display text-3xl font-bold">21</p>
+            <p className="font-display text-3xl font-bold">{bestStreak}</p>
             <p className="mt-1 text-sm text-muted-foreground">days in a row</p>
           </div>
           <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full opacity-20 blur-2xl group-hover:opacity-30 transition-opacity" style={{ background: "#ffa06b" }} />
@@ -126,7 +234,7 @@ export default function Dashboard({ session }: { session: typeof authClient.$Inf
               </div>
               <span className="text-sm font-medium text-muted-foreground">Total XP</span>
             </div>
-            <p className="font-display text-3xl font-bold">{mockXP.total.toLocaleString()}</p>
+            <p className="font-display text-3xl font-bold">{(profile?.totalXp ?? 0).toLocaleString()}</p>
             <p className="mt-1 text-sm text-muted-foreground">lifetime points</p>
           </div>
           <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full opacity-20 blur-2xl group-hover:opacity-30 transition-opacity" style={{ background: "#a78bfa" }} />
@@ -144,63 +252,92 @@ export default function Dashboard({ session }: { session: typeof authClient.$Inf
                 <p className="text-sm text-muted-foreground">
                   {completedToday === totalHabits
                     ? "🎉 All habits completed!"
+                    : totalHabits === 0
+                    ? "No habits scheduled for today"
                     : `${totalHabits - completedToday} remaining`}
                 </p>
               </div>
-              <button className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-[#ff6b6b] to-[#4ecdc4] text-white shadow-lg shadow-[#ff6b6b]/25 transition-all hover:scale-110 hover:shadow-xl">
+              <button
+                onClick={() => router.push("/habits/new")}
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-[#ff6b6b] to-[#4ecdc4] text-white shadow-lg shadow-[#ff6b6b]/25 transition-all hover:scale-110 hover:shadow-xl"
+              >
                 <Plus className="h-5 w-5" />
               </button>
             </div>
 
             <div className="space-y-3">
-              {mockHabits.map((habit, index) => (
-                <div
-                  key={habit.id}
-                  className="group relative flex items-center gap-4 rounded-xl border border-white/5 bg-white/5 p-4 transition-all hover:border-white/10 hover:bg-white/10 animate-slide-up opacity-0"
-                  style={{ animationDelay: `${500 + index * 100}ms`, animationFillMode: "forwards" }}
-                >
-                  {/* Habit Icon */}
-                  <div className={`flex h-12 w-12 items-center justify-center rounded-xl text-2xl ${
-                    habit.completedToday
-                      ? "bg-gradient-to-br from-[#4ecdc4]/20 to-[#a78bfa]/20"
-                      : "bg-white/5"
-                  }`}>
-                    {habit.icon}
-                  </div>
-
-                  {/* Habit Info */}
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <h3 className={`font-semibold ${habit.completedToday ? "text-muted-foreground line-through" : ""}`}>
-                        {habit.name}
-                      </h3>
-                      {habit.streak >= 7 && (
-                        <span className="flex items-center gap-1 rounded-full bg-[#ff6b6b]/20 px-2 py-0.5 text-xs font-medium text-[#ff6b6b]">
-                          <Flame className="h-3 w-3" />
-                          {habit.streak}
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-xs text-muted-foreground capitalize">{habit.category}</p>
-                  </div>
-
-                  {/* Streak */}
-                  <div className="text-right">
-                    <p className="text-sm font-medium">{habit.streak} day streak</p>
-                  </div>
-
-                  {/* Complete Button */}
+              {dueHabits.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <p>No habits scheduled for today</p>
                   <button
-                    className={`flex h-10 w-10 items-center justify-center rounded-full transition-all ${
-                      habit.completedToday
-                        ? "bg-[#4ecdc4] text-white shadow-lg shadow-[#4ecdc4]/30"
-                        : "bg-white/10 text-muted-foreground hover:bg-[#4ecdc4] hover:text-white hover:shadow-lg hover:shadow-[#4ecdc4]/30"
-                    }`}
+                    onClick={() => router.push("/habits")}
+                    className="mt-2 text-sm text-[#4ecdc4] hover:underline"
                   >
-                    <CheckCircle2 className="h-5 w-5" />
+                    View all habits →
                   </button>
                 </div>
-              ))}
+              ) : (
+                dueHabits.map((habit: any, index: number) => (
+                  <div
+                    key={habit._id}
+                    onClick={() => router.push(`/habits/${habit._id}`)}
+                    className="group relative flex items-center gap-4 rounded-xl border border-white/5 bg-white/5 p-4 transition-all hover:border-white/10 hover:bg-white/10 animate-slide-up opacity-0 cursor-pointer"
+                    style={{ animationDelay: `${500 + index * 100}ms`, animationFillMode: "forwards" }}
+                  >
+                    {/* Habit Icon */}
+                    <div className={`flex h-12 w-12 items-center justify-center rounded-xl text-2xl ${
+                      habit.completedToday
+                        ? "bg-gradient-to-br from-[#4ecdc4]/20 to-[#a78bfa]/20"
+                        : "bg-white/5"
+                    }`}>
+                      {getHabitIcon(habit.title)}
+                    </div>
+
+                    {/* Habit Info */}
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <h3 className={`font-semibold ${habit.completedToday ? "text-muted-foreground line-through" : ""}`}>
+                          {habit.title}
+                        </h3>
+                        {(habit.currentStreak ?? 0) >= 7 && (
+                          <span className="flex items-center gap-1 rounded-full bg-[#ff6b6b]/20 px-2 py-0.5 text-xs font-medium text-[#ff6b6b]">
+                            <Flame className="h-3 w-3" />
+                            {habit.currentStreak}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground capitalize">
+                        {habit.frequency} {habit.frequency === "specific_days" ? `· ${habit.targetDays?.length ?? 0} days/week` : ""}
+                      </p>
+                    </div>
+
+                    {/* Streak */}
+                    <div className="text-right">
+                      <p className="text-sm font-medium">{habit.currentStreak ?? 0} day streak</p>
+                    </div>
+
+                    {/* Complete Button */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (habit.completedToday) {
+                          uncompleteHabit.mutate(habit._id);
+                        } else {
+                          completeHabit.mutate(habit._id);
+                        }
+                      }}
+                      disabled={completeHabit.isPending || uncompleteHabit.isPending}
+                      className={`flex h-10 w-10 items-center justify-center rounded-full transition-all ${
+                        habit.completedToday
+                          ? "bg-[#4ecdc4] text-white shadow-lg shadow-[#4ecdc4]/30"
+                          : "bg-white/10 text-muted-foreground hover:bg-[#4ecdc4] hover:text-white hover:shadow-lg hover:shadow-[#4ecdc4]/30"
+                      } ${completeHabit.isPending || uncompleteHabit.isPending ? "opacity-50 cursor-not-allowed" : ""}`}
+                    >
+                      <CheckCircle2 className="h-5 w-5" />
+                    </button>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>
