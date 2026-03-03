@@ -26,12 +26,56 @@ function timeAgo(date: Date, t: (key: string, values?: Record<string, any>) => s
   return t("daysAgo", { count: diffDays });
 }
 
-const typeIcons: Record<string, string> = {
-  habit_completed: "\u2705",
-  streak_milestone: "\uD83D\uDD25",
-  level_up: "\u2B50",
-  all_habits_completed: "\uD83C\uDF89",
-  member_joined: "\uD83D\uDC4B",
+const typeConfig: Record<string, {
+  icon: string;
+  gradient: string;
+  ringColor: string;
+  accentBg: string;
+  accentBorder: string;
+}> = {
+  habit_completed: {
+    icon: "\u2705",
+    gradient: "from-[#4ecdc4] to-[#2ab7ad]",
+    ringColor: "ring-[#4ecdc4]/40",
+    accentBg: "bg-[#4ecdc4]/[0.06]",
+    accentBorder: "border-[#4ecdc4]/10 hover:border-[#4ecdc4]/25",
+  },
+  streak_milestone: {
+    icon: "\uD83D\uDD25",
+    gradient: "from-[#ff6b6b] to-[#ffa06b]",
+    ringColor: "ring-[#ff6b6b]/40",
+    accentBg: "bg-[#ff6b6b]/[0.06]",
+    accentBorder: "border-[#ff6b6b]/10 hover:border-[#ff6b6b]/25",
+  },
+  level_up: {
+    icon: "\u2B50",
+    gradient: "from-[#ffd700] to-[#ffaa00]",
+    ringColor: "ring-[#ffd700]/40",
+    accentBg: "bg-[#ffd700]/[0.06]",
+    accentBorder: "border-[#ffd700]/10 hover:border-[#ffd700]/25",
+  },
+  all_habits_completed: {
+    icon: "\uD83C\uDF89",
+    gradient: "from-[#a78bfa] to-[#f472b6]",
+    ringColor: "ring-[#a78bfa]/40",
+    accentBg: "bg-[#a78bfa]/[0.06]",
+    accentBorder: "border-[#a78bfa]/10 hover:border-[#a78bfa]/25",
+  },
+  member_joined: {
+    icon: "\uD83D\uDC4B",
+    gradient: "from-[#60a5fa] to-[#818cf8]",
+    ringColor: "ring-[#60a5fa]/40",
+    accentBg: "bg-[#60a5fa]/[0.06]",
+    accentBorder: "border-[#60a5fa]/10 hover:border-[#60a5fa]/25",
+  },
+};
+
+const defaultConfig = {
+  icon: "",
+  gradient: "from-[#ffa06b] to-[#f472b6]",
+  ringColor: "ring-white/20",
+  accentBg: "bg-white/[0.03]",
+  accentBorder: "border-white/5 hover:border-white/15",
 };
 
 interface ActivityItemProps {
@@ -46,10 +90,12 @@ interface ActivityItemProps {
     createdAt: string;
   };
   groupId: string;
+  index?: number;
 }
 
-export function ActivityItem({ activity, groupId }: ActivityItemProps) {
+export function ActivityItem({ activity, groupId, index = 0 }: ActivityItemProps) {
   const t = useTranslations("feed");
+  const config = typeConfig[activity.type] ?? defaultConfig;
 
   const getMessage = () => {
     const { type, userName, metadata } = activity;
@@ -70,23 +116,32 @@ export function ActivityItem({ activity, groupId }: ActivityItemProps) {
   };
 
   return (
-    <div className="flex gap-3 rounded-xl border border-white/5 bg-white/5 p-4">
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#ffa06b] to-[#f472b6] text-white text-sm font-semibold">
-        {activity.userImage ? (
-          <img src={activity.userImage} alt="" className="h-10 w-10 rounded-full object-cover" />
-        ) : (
-          getInitials(activity.userName)
-        )}
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-start gap-2">
-          <span className="text-lg">{typeIcons[activity.type] ?? ""}</span>
-          <p className="text-sm">{getMessage()}</p>
+    <div
+      className={`group flex gap-3.5 rounded-2xl border p-4 transition-all duration-300 hover:translate-y-[-1px] hover:shadow-lg hover:shadow-black/10 ${config.accentBg} ${config.accentBorder}`}
+      style={{ animationDelay: `${index * 60}ms` }}
+    >
+      {/* Avatar with type-colored ring */}
+      <div className="relative shrink-0">
+        <div className={`flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br ${config.gradient} text-white text-sm font-semibold ring-2 ${config.ringColor} transition-shadow duration-300 group-hover:ring-4`}>
+          {activity.userImage ? (
+            <img src={activity.userImage} alt="" className="h-11 w-11 rounded-full object-cover" />
+          ) : (
+            getInitials(activity.userName)
+          )}
         </div>
-        <p className="text-xs text-muted-foreground mt-1">
+        {/* Type icon badge */}
+        <div className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-[var(--background)] text-xs shadow-sm">
+          {config.icon}
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 min-w-0">
+        <p className="text-sm leading-relaxed">{getMessage()}</p>
+        <p className="text-[11px] text-muted-foreground mt-1.5 font-medium uppercase tracking-wide">
           {timeAgo(new Date(activity.createdAt), t)}
         </p>
-        <div className="mt-2">
+        <div className="mt-2.5">
           <ReactionBar
             activityId={activity._id}
             groupId={groupId}

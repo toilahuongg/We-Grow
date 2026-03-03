@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 
@@ -11,6 +11,18 @@ import { ActivityItem } from "@/components/activity-item";
 
 interface ActivityFeedProps {
   groupId: string;
+}
+
+function getDateGroup(dateStr: string): "today" | "yesterday" | "earlier" {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  if (date >= today) return "today";
+  if (date >= yesterday) return "yesterday";
+  return "earlier";
 }
 
 export function ActivityFeed({ groupId }: ActivityFeedProps) {
@@ -57,11 +69,38 @@ export function ActivityFeed({ groupId }: ActivityFeedProps) {
     }
   };
 
+  // Group activities by day
+  const grouped = useMemo(() => {
+    const groups: { key: string; label: string; items: { activity: any; globalIndex: number }[] }[] = [];
+    const map = new Map<string, { activity: any; globalIndex: number }[]>();
+
+    allActivities.forEach((activity, i) => {
+      const group = getDateGroup(activity.createdAt);
+      if (!map.has(group)) map.set(group, []);
+      map.get(group)!.push({ activity, globalIndex: i });
+    });
+
+    const labels: Record<string, string> = {
+      today: "Today",
+      yesterday: "Yesterday",
+      earlier: "Earlier",
+    };
+
+    for (const key of ["today", "yesterday", "earlier"] as const) {
+      const items = map.get(key);
+      if (items && items.length > 0) {
+        groups.push({ key, label: labels[key], items });
+      }
+    }
+
+    return groups;
+  }, [allActivities]);
+
   if (isLoading) {
     return (
       <div className="space-y-3">
         {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="h-20 animate-pulse rounded-xl bg-white/5" />
+          <div key={i} className="h-24 animate-pulse rounded-2xl bg-white/5" style={{ animationDelay: `${i * 150}ms` }} />
         ))}
       </div>
     );
@@ -77,9 +116,29 @@ export function ActivityFeed({ groupId }: ActivityFeedProps) {
   }
 
   return (
-    <div className="space-y-3">
-      {allActivities.map((activity: any) => (
-        <ActivityItem key={activity._id} activity={activity} groupId={groupId} />
+    <div className="space-y-6">
+      {grouped.map((group) => (
+        <div key={group.key}>
+          {/* Section header */}
+          <div className="flex items-center gap-3 mb-3">
+            <span className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+              {group.label}
+            </span>
+            <div className="h-px flex-1 bg-white/[0.06]" />
+          </div>
+
+          {/* Activities */}
+          <div className="space-y-2.5">
+            {group.items.map(({ activity, globalIndex }) => (
+              <ActivityItem
+                key={activity._id}
+                activity={activity}
+                groupId={groupId}
+                index={globalIndex}
+              />
+            ))}
+          </div>
+        </div>
       ))}
 
       {hasMore && (
@@ -89,6 +148,7 @@ export function ActivityFeed({ groupId }: ActivityFeedProps) {
             size="sm"
             onClick={loadMore}
             disabled={loadingMore}
+            className="rounded-full px-6"
           >
             {loadingMore ? "..." : t("loadMore")}
           </Button>

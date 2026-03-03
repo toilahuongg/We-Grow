@@ -13,7 +13,6 @@ import {
   Edit2,
   CheckCircle2,
   Flame,
-  Medal,
   Settings,
   Trash2,
   LogOut,
@@ -442,15 +441,17 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
       {/* Tab: Feed */}
       {activeTab === "feed" && (
         <div className="glass-strong rounded-2xl p-6">
-          <h3 className="font-semibold mb-4">{t("tabFeed")}</h3>
+          <div className="flex items-center gap-3 mb-5">
+            <h3 className="font-display text-lg font-bold">{t("tabFeed")}</h3>
+            <div className="h-px flex-1 bg-white/[0.06]" />
+          </div>
           <ActivityFeed groupId={groupId} />
         </div>
       )}
 
       {/* Tab: Leaderboard */}
       {activeTab === "leaderboard" && (
-        <div className="glass-strong rounded-2xl p-6">
-          <h3 className="font-semibold mb-4">{t("leaderboard")}</h3>
+        <div className="space-y-5">
           {!leaderboard || leaderboard.length === 0 ? (
             <EmptyState
               title={t("noDataYet")}
@@ -460,119 +461,122 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
             <>
               {/* Top 3 Podium */}
               {leaderboard.length >= 3 && (
-                <div className="flex items-end justify-center gap-4 mb-8">
-                  {/* 2nd Place */}
-                  <div className="flex flex-col items-center">
-                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-gray-400 to-gray-500 text-white text-xl font-bold mb-2 shadow-lg">
-                      2
-                    </div>
-                    <div className="glass-strong rounded-xl border border-gray-400/30 bg-gray-400/10 p-4 text-center w-32">
-                      <p className="font-medium text-sm truncate">
-                        {leaderboard[1]?.userId === session?.user?.id
-                          ? tc("you")
-                          : leaderboard[1]?.userName}
-                      </p>
-                      <p className="text-lg font-bold">{leaderboard[1]?.totalXp} XP</p>
-                    </div>
+                <div className="glass-strong rounded-2xl p-6 pb-8 overflow-hidden relative">
+                  {/* Decorative gradient mesh */}
+                  <div className="absolute inset-0 opacity-30 pointer-events-none">
+                    <div className="absolute top-0 left-1/4 h-40 w-40 rounded-full bg-[#ffd700]/10 blur-3xl" />
+                    <div className="absolute top-10 right-1/4 h-32 w-32 rounded-full bg-[#4ecdc4]/10 blur-3xl" />
                   </div>
 
-                  {/* 1st Place */}
-                  <div className="flex flex-col items-center">
-                    <Crown className="h-8 w-8 text-yellow-500 mb-2" />
-                    <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 text-white text-2xl font-bold mb-2 shadow-xl">
-                      1
-                    </div>
-                    <div className="glass-strong rounded-xl border border-yellow-500/30 bg-yellow-500/10 p-4 text-center w-36">
-                      <p className="font-semibold truncate">
-                        {leaderboard[0]?.userId === session?.user?.id
-                          ? tc("you")
-                          : leaderboard[0]?.userName}
-                      </p>
-                      <p className="text-xl font-bold gradient-text">{leaderboard[0]?.totalXp} XP</p>
-                      <p className="text-xs text-muted-foreground">
-                        {leaderboard[0]?.levelInfo?.icon} {t("levelLabel", { level: leaderboard[0]?.level })}
-                      </p>
-                    </div>
-                  </div>
+                  <h3 className="font-display text-lg font-bold mb-6 relative z-10">{t("leaderboard")}</h3>
 
-                  {/* 3rd Place */}
-                  <div className="flex flex-col items-center">
-                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-amber-600 to-amber-800 text-white text-xl font-bold mb-2 shadow-lg">
-                      3
+                  <div className="flex items-end justify-center gap-3 sm:gap-6 relative z-10">
+                    {/* 2nd Place */}
+                    <div className="flex flex-col items-center animate-[slide-up_0.5s_ease-out_0.1s_both]">
+                      <span className="text-2xl mb-1">🥈</span>
+                      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-gray-300 to-gray-500 text-white text-base font-bold shadow-lg ring-2 ring-gray-400/30 mb-3">
+                        {getInitials(leaderboard[1]?.userId === session?.user?.id ? tc("you") : (leaderboard[1]?.userName ?? ""))}
+                      </div>
+                      <div className="rounded-2xl border border-gray-400/20 bg-gray-400/[0.06] p-3.5 text-center w-28 sm:w-32">
+                        <p className="font-medium text-sm truncate mb-1">
+                          {leaderboard[1]?.userId === session?.user?.id
+                            ? tc("you")
+                            : leaderboard[1]?.userName}
+                        </p>
+                        <p className="text-lg font-bold tabular-nums">{leaderboard[1]?.totalXp} <span className="text-xs font-medium text-muted-foreground">XP</span></p>
+                        <p className="text-[11px] text-muted-foreground mt-0.5">
+                          {leaderboard[1]?.levelInfo?.icon} {t("levelLabel", { level: leaderboard[1]?.level })}
+                        </p>
+                      </div>
                     </div>
-                    <div className="glass-strong rounded-xl border border-amber-600/30 bg-amber-600/10 p-4 text-center w-32">
-                      <p className="font-medium text-sm truncate">
-                        {leaderboard[2]?.userId === session?.user?.id
-                          ? tc("you")
-                          : leaderboard[2]?.userName}
-                      </p>
-                      <p className="text-lg font-bold">{leaderboard[2]?.totalXp} XP</p>
+
+                    {/* 1st Place */}
+                    <div className="flex flex-col items-center animate-[slide-up_0.5s_ease-out_both] -mt-4">
+                      <Crown className="h-7 w-7 text-yellow-400 mb-1 drop-shadow-[0_0_8px_rgba(255,215,0,0.4)]" />
+                      <span className="text-3xl mb-1">🥇</span>
+                      <div className="flex h-[72px] w-[72px] items-center justify-center rounded-full bg-gradient-to-br from-yellow-300 via-yellow-500 to-amber-600 text-white text-lg font-bold shadow-xl ring-3 ring-yellow-400/40 mb-3 shimmer">
+                        {getInitials(leaderboard[0]?.userId === session?.user?.id ? tc("you") : (leaderboard[0]?.userName ?? ""))}
+                      </div>
+                      <div className="rounded-2xl border border-yellow-500/25 bg-yellow-500/[0.08] p-4 text-center w-32 sm:w-40 shadow-[0_0_30px_rgba(255,215,0,0.06)]">
+                        <p className="font-semibold truncate mb-1">
+                          {leaderboard[0]?.userId === session?.user?.id
+                            ? tc("you")
+                            : leaderboard[0]?.userName}
+                        </p>
+                        <p className="text-xl font-bold gradient-text tabular-nums">{leaderboard[0]?.totalXp} <span className="text-xs font-medium">XP</span></p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {leaderboard[0]?.levelInfo?.icon} {t("levelLabel", { level: leaderboard[0]?.level })}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* 3rd Place */}
+                    <div className="flex flex-col items-center animate-[slide-up_0.5s_ease-out_0.2s_both]">
+                      <span className="text-2xl mb-1">🥉</span>
+                      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-amber-800 text-white text-base font-bold shadow-lg ring-2 ring-amber-600/30 mb-3">
+                        {getInitials(leaderboard[2]?.userId === session?.user?.id ? tc("you") : (leaderboard[2]?.userName ?? ""))}
+                      </div>
+                      <div className="rounded-2xl border border-amber-600/20 bg-amber-600/[0.06] p-3.5 text-center w-28 sm:w-32">
+                        <p className="font-medium text-sm truncate mb-1">
+                          {leaderboard[2]?.userId === session?.user?.id
+                            ? tc("you")
+                            : leaderboard[2]?.userName}
+                        </p>
+                        <p className="text-lg font-bold tabular-nums">{leaderboard[2]?.totalXp} <span className="text-xs font-medium text-muted-foreground">XP</span></p>
+                        <p className="text-[11px] text-muted-foreground mt-0.5">
+                          {leaderboard[2]?.levelInfo?.icon} {t("levelLabel", { level: leaderboard[2]?.level })}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
               )}
 
               {/* Ranked List */}
-              {leaderboard.length < 3 ? (
-                <div className="space-y-2">
-                  {leaderboard.map((entry: any, index: number) => {
-                    const isCurrentUser = entry.userId === session.user?.id;
-                    return (
-                      <div
-                        key={entry.userId}
-                        className={`flex items-center gap-4 rounded-xl border p-3 ${isCurrentUser
-                          ? "border-[#4ecdc4] bg-[#4ecdc4]/10"
-                          : "border-white/10 bg-white/5"
-                          }`}
-                      >
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[#ff6b6b] to-[#ffa06b] text-sm font-bold text-white">
-                          {index + 1}
-                        </div>
-                        <div className="flex-1">
-                          <p className="font-medium">
-                            {isCurrentUser ? tc("you") : entry.userName}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {entry.levelInfo?.icon} {t("levelLabel", { level: entry.level })} · {t("dayStreakLabel", { count: entry.bestStreak })}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-semibold">{entry.totalXp} XP</p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {leaderboard.slice(3).map((entry: any, index: number) => {
-                    const isCurrentUser = entry.userId === session.user?.id;
+              {(leaderboard.length < 3 ? leaderboard : leaderboard.slice(3)).length > 0 && (
+                <div className="glass-strong rounded-2xl p-5">
+                  <div className="space-y-1.5">
+                    {(leaderboard.length < 3 ? leaderboard : leaderboard.slice(3)).map((entry: any, index: number) => {
+                      const actualRank = leaderboard.length < 3 ? index + 1 : index + 4;
+                      const isCurrentUser = entry.userId === session.user?.id;
 
-                    return (
-                      <div
-                        key={entry.userId}
-                        className={`flex items-center gap-4 rounded-xl border p-3 ${isCurrentUser
-                          ? "border-[#4ecdc4] bg-[#4ecdc4]/10"
-                          : "border-white/10 bg-white/5"
+                      return (
+                        <div
+                          key={entry.userId}
+                          className={`group flex items-center gap-4 rounded-xl border p-3.5 transition-all duration-200 hover:translate-y-[-1px] ${
+                            isCurrentUser
+                              ? "border-[#4ecdc4]/30 bg-[#4ecdc4]/[0.08] shadow-[0_0_15px_rgba(78,205,196,0.08)]"
+                              : "border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.05] hover:border-white/10"
                           }`}
-                      >
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[#ff6b6b] to-[#ffa06b] text-sm font-bold text-white">
-                          {index + 4}
+                        >
+                          {actualRank <= 3 ? (
+                            <span className="text-xl w-8 text-center">{actualRank === 1 ? "🥇" : actualRank === 2 ? "🥈" : "🥉"}</span>
+                          ) : (
+                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-sm font-bold tabular-nums">
+                              {actualRank}
+                            </div>
+                          )}
+
+                          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[#ff6b6b]/80 to-[#ffa06b]/80 text-white text-xs font-semibold shrink-0">
+                            {getInitials(isCurrentUser ? tc("you") : (entry.userName ?? ""))}
+                          </div>
+
+                          <div className="flex-1 min-w-0">
+                            <p className={`font-medium text-sm ${isCurrentUser ? "text-[#4ecdc4]" : ""}`}>
+                              {isCurrentUser ? tc("you") : entry.userName}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {entry.levelInfo?.icon} {t("levelLabel", { level: entry.level })} · {t("dayStreakLabel", { count: entry.bestStreak })}
+                            </p>
+                          </div>
+
+                          <div className="text-right shrink-0">
+                            <p className="font-semibold tabular-nums text-sm">{entry.totalXp} <span className="text-xs text-muted-foreground">XP</span></p>
+                          </div>
                         </div>
-                        <div className="flex-1">
-                          <p className="font-medium">
-                            {isCurrentUser ? tc("you") : entry.userName}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {entry.levelInfo?.icon} {t("levelLabel", { level: entry.level })} · {t("dayStreakLabel", { count: entry.bestStreak })}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-semibold">{entry.totalXp} XP</p>
-                        </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
               )}
             </>

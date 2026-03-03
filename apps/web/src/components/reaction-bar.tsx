@@ -59,7 +59,7 @@ export function ReactionBar({ activityId, groupId, reactionCounts, myReactions }
   });
 
   return (
-    <div className="flex gap-1">
+    <div className="flex flex-wrap gap-1.5">
       {EMOJIS.map(({ key, display }) => {
         const count = reactionCounts[key] ?? 0;
         const isActive = myReactions.includes(key);
@@ -69,14 +69,20 @@ export function ReactionBar({ activityId, groupId, reactionCounts, myReactions }
             key={key}
             onClick={() => toggleMutation.mutate(key)}
             disabled={toggleMutation.isPending}
-            className={`flex items-center gap-1 rounded-full px-2 py-1 text-xs transition-all ${
+            className={`group/reaction flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-sm transition-all duration-200 ${
               isActive
-                ? "bg-[#4ecdc4]/20 border border-[#4ecdc4]/30"
-                : "bg-white/5 border border-transparent hover:bg-white/10"
-            }`}
+                ? "bg-[#4ecdc4]/20 border border-[#4ecdc4]/40 shadow-[0_0_8px_rgba(78,205,196,0.15)]"
+                : "bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.08] hover:border-white/15"
+            } active:scale-90 hover:scale-105`}
           >
-            <span>{display}</span>
-            {count > 0 && <span className="font-medium">{count}</span>}
+            <span className="transition-transform duration-200 group-hover/reaction:scale-110">
+              {display}
+            </span>
+            {count > 0 && (
+              <span className={`font-medium text-xs tabular-nums ${isActive ? "text-[#4ecdc4]" : "text-muted-foreground"}`}>
+                {count}
+              </span>
+            )}
           </button>
         );
       })}
