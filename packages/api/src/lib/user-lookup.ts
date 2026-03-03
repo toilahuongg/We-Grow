@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import { client, ObjectId } from "@we-grow/db";
 
 export async function getUserInfoMap(
   userIds: string[],
@@ -6,20 +6,17 @@ export async function getUserInfoMap(
   const uniqueIds = [...new Set(userIds)];
   if (uniqueIds.length === 0) return new Map();
 
-  const db = mongoose.connection.db;
-  if (!db) return new Map();
-
   // Better-Auth's MongoDB adapter stores _id as ObjectId, but
   // GroupMember.userId stores the hex string. Convert to ObjectId for query.
   const objectIds = uniqueIds.map((id) => {
     try {
-      return new mongoose.Types.ObjectId(id);
+      return new ObjectId(id);
     } catch {
       return id;
     }
   });
 
-  const users = await db
+  const users = await client
     .collection("user")
     .find(
       { _id: { $in: objectIds } },

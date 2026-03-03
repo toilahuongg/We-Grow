@@ -12,4 +12,6 @@ const url = new URL(env.DATABASE_URL);
 const dbName = url.pathname.slice(1) || undefined;
 const client = mongoose.connection.getClient().db(dbName);
 
-export { client };
+const ObjectId = mongoose.Types.ObjectId;
+
+export { client, ObjectId };
