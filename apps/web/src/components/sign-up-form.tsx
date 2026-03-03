@@ -21,7 +21,8 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
       name: "",
     },
     onSubmit: async ({ value }) => {
-      await authClient.signUp.email(
+      // First sign up
+      const signUpResult = await authClient.signUp.email(
         {
           email: value.email,
           password: value.password,
@@ -29,14 +30,32 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
         },
         {
           onSuccess: () => {
-            router.push("/onboarding");
-            toast.success("Welcome to We-Grow! 🌱 Let's set up your profile.");
+            toast.success("Account created! Signing you in...");
           },
           onError: (error) => {
             toast.error(error.error.message || error.error.statusText);
           },
         },
       );
+
+      // If sign-up was successful, immediately sign in
+      if (signUpResult.data) {
+        await authClient.signIn.email(
+          {
+            email: value.email,
+            password: value.password,
+          },
+          {
+            onSuccess: () => {
+              router.push("/dashboard");
+              toast.success("Welcome to We-Grow! 🌱");
+            },
+            onError: (error) => {
+              toast.error("Account created but sign-in failed. Please try signing in manually.");
+            },
+          },
+        );
+      }
     },
     validators: {
       onSubmit: z.object({
@@ -66,11 +85,11 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
         type="button"
         onClick={() => {
           authClient.signIn.social(
-            { provider: "google", callbackURL: "/onboarding" },
+            { provider: "google", callbackURL: "/dashboard" },
             {
               onSuccess: () => {
-                router.push("/onboarding");
-                toast.success("Welcome to We-Grow! 🌱 Let's set up your profile.");
+                router.push("/dashboard");
+                toast.success("Welcome to We-Grow! 🌱");
               },
               onError: (error) => {
                 toast.error(error.error.message || "Failed to sign up with Google");

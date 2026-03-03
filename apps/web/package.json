@@ -11,12 +11,15 @@
     "test:coverage": "vitest --coverage"
   },
   "dependencies": {
-    "@base-ui/react": "^1.0.0",
     "@orpc/client": "catalog:",
     "@orpc/openapi": "catalog:",
     "@orpc/server": "catalog:",
     "@orpc/tanstack-query": "^1.12.2",
     "@orpc/zod": "catalog:",
+    "@radix-ui/react-checkbox": "^1.3.3",
+    "@radix-ui/react-dropdown-menu": "^2.1.16",
+    "@radix-ui/react-label": "^2.1.8",
+    "@radix-ui/react-slot": "^1.2.4",
     "@tanstack/react-form": "^1.28.0",
     "@tanstack/react-query": "^5.90.12",
     "@we-grow/api": "workspace:*",

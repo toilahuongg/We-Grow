@@ -8,9 +8,25 @@ import { generateId } from "@we-grow/db/utils/id";
 
 export const auth = betterAuth({
   database: mongodbAdapter(client),
+  baseURL: env.BETTER_AUTH_URL,
   trustedOrigins: [env.CORS_ORIGIN],
   emailAndPassword: {
     enabled: true,
+    requireEmailVerification: false,
+  },
+  session: {
+    expiresIn: 60 * 60 * 24 * 30, // 30 days
+    updateAge: 60 * 60 * 24, // 1 day
+    cookieCache: {
+      enabled: true,
+      maxAge: 5 * 60, // 5 minutes
+    },
+  },
+  advanced: {
+    cookiePrefix: "better-auth",
+    crossSubDomainCookies: {
+      enabled: false,
+    },
   },
   socialProviders: {
     google: {
@@ -27,9 +43,6 @@ export const auth = betterAuth({
       await UserProfile.create({
         _id: generateId(),
         userId: user.id,
-        goals: [],
-        timezone: "UTC",
-        onboardingCompleted: false,
         totalXp: 0,
         level: 1,
         createdAt: now,

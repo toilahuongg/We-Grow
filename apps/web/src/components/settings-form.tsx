@@ -9,7 +9,7 @@ import { orpc } from "@/utils/orpc";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { toast } from "sonner";
-import { signOut } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 
 const COMMON_TIMEZONES = [
@@ -49,7 +49,7 @@ export function SettingsForm({ session }: { session: any }) {
   });
 
   const handleLogout = async () => {
-    await signOut();
+    await authClient.signOut();
     queryClient.clear();
     router.push("/login");
     toast.success("Logged out successfully");

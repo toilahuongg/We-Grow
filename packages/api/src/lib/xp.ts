@@ -7,7 +7,6 @@ export const XP_REWARDS = {
   STREAK_30_DAY: 200,
   STREAK_100_DAY: 500,
   ALL_DAILY_HABITS: 20,
-  ONBOARDING: 10,
 } as const;
 
 export function xpForLevel(level: number): number {

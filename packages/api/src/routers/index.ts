@@ -1,7 +1,6 @@
 import type { RouterClient } from "@orpc/server";
 
 import { publicProcedure, protectedProcedure } from "../index";
-import { onboardingRouter } from "./onboarding";
 import { habitsRouter } from "./habits";
 import { todosRouter } from "./todos";
 import { groupsRouter } from "./groups";
@@ -18,7 +17,6 @@ export const appRouter = {
       user: context.session?.user,
     };
   }),
-  onboarding: onboardingRouter,
   habits: habitsRouter,
   todos: todosRouter,
   groups: groupsRouter,
