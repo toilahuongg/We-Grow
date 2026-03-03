@@ -33,6 +33,7 @@
     "@vitest/ui": "^2.1.8",
     "@we-grow/config": "workspace:*",
     "mongodb-memory-server": "^10.2.0",
+    "mongoose": "^8.23.0",
     "typescript": "catalog:",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^2.1.9"

@@ -26,6 +26,7 @@ const COMMON_TIMEZONES = [
   "Europe/Paris",
   "Europe/Berlin",
   "Asia/Tokyo",
+  "Asia/Ho_Chi_Minh",
   "Asia/Shanghai",
   "Asia/Singapore",
   "Australia/Sydney",

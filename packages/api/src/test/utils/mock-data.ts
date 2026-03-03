@@ -1,4 +1,4 @@
-import { generateId } from '@we-grow/db/utils'
+import { generateId } from '@we-grow/db/utils/id'
 
 export interface MockUser {
   _id: string

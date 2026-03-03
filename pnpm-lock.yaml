@@ -263,6 +263,9 @@ importers:
       mongodb-memory-server:
         specifier: ^10.2.0
         version: 10.4.3
+      mongoose:
+        specifier: ^8.23.0
+        version: 8.23.0
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
@@ -6418,7 +6421,7 @@ snapshots:
       std-env: 3.10.0
       test-exclude: 7.0.2
       tinyrainbow: 1.2.0
-      vitest: 2.1.9(@types/node@20.19.35)(@vitest/ui@2.1.9)(happy-dom@15.11.7)(jsdom@25.0.1)(lightningcss@1.31.1)(msw@2.12.10(@types/node@20.19.35)(typescript@5.9.3))
+      vitest: 2.1.9(@types/node@22.19.13)(@vitest/ui@2.1.9)(happy-dom@15.11.7)(jsdom@25.0.1)(lightningcss@1.31.1)(msw@2.12.10(@types/node@22.19.13)(typescript@5.9.3))
     transitivePeerDependencies:
       - supports-color
 
@@ -6475,7 +6478,7 @@ snapshots:
       sirv: 3.0.2
       tinyglobby: 0.2.15
       tinyrainbow: 1.2.0
-      vitest: 2.1.9(@types/node@20.19.35)(@vitest/ui@2.1.9)(happy-dom@15.11.7)(jsdom@25.0.1)(lightningcss@1.31.1)(msw@2.12.10(@types/node@20.19.35)(typescript@5.9.3))
+      vitest: 2.1.9(@types/node@22.19.13)(@vitest/ui@2.1.9)(happy-dom@15.11.7)(jsdom@25.0.1)(lightningcss@1.31.1)(msw@2.12.10(@types/node@22.19.13)(typescript@5.9.3))
 
   '@vitest/utils@2.1.9':
     dependencies:
