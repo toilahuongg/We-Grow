@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import { ObjectId } from "mongodb";
 
 export async function getUserInfoMap(
   userIds: string[],
@@ -14,7 +13,7 @@ export async function getUserInfoMap(
   // GroupMember.userId stores the hex string. Convert to ObjectId for query.
   const objectIds = uniqueIds.map((id) => {
     try {
-      return new ObjectId(id);
+      return new mongoose.Types.ObjectId(id);
     } catch {
       return id;
     }
