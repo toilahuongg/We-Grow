@@ -124,7 +124,6 @@ export function GroupHabitForm({ groupId }: GroupHabitFormProps) {
       </div>
 
       {/* Form */}
-      <form.Provider>
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -293,7 +292,6 @@ export function GroupHabitForm({ groupId }: GroupHabitFormProps) {
             </Button>
           </div>
         </form>
-      </form.Provider>
     </div>
   );
 }
