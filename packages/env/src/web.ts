@@ -3,7 +3,7 @@ import { z } from "zod";
 
 export const env = createEnv({
   client: {
-    NEXT_PUBLIC_BETTER_AUTH_URL: z.string().url().default("http://localhost:3001"),
+    NEXT_PUBLIC_BETTER_AUTH_URL: z.string().url().default("http://localhost:3000"),
   },
   runtimeEnv: {
     NEXT_PUBLIC_BETTER_AUTH_URL: process.env.NEXT_PUBLIC_BETTER_AUTH_URL,

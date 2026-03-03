@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```bash
 pnpm run dev          # Start all apps in dev mode
-pnpm run dev:web      # Start web app only (port 3001)
+pnpm run dev:web      # Start web app only (port 3000)
 pnpm run build        # Build all packages (pnpm turbo build)
 pnpm run check-types  # TypeScript type checking across all packages
 ```
@@ -58,8 +58,8 @@ Required in `apps/web/.env`:
 ```
 DATABASE_URL=         # MongoDB connection string
 BETTER_AUTH_SECRET=   # 32+ char secret
-BETTER_AUTH_URL=      # e.g. http://localhost:3001
-CORS_ORIGIN=          # e.g. http://localhost:3001
+BETTER_AUTH_URL=      # e.g. http://localhost:3000
+CORS_ORIGIN=          # e.g. http://localhost:3000
 ```
 
 Optional:

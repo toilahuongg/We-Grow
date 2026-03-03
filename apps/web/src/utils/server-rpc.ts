@@ -14,7 +14,7 @@ export async function createServerCaller(): Promise<AppRouterClient> {
 
   // Get the base URL from the request headers
   const protocol = headersList.get("x-forwarded-proto") || "http";
-  const host = headersList.get("host") || "localhost:3001";
+  const host = headersList.get("host") || "localhost:3000";
   const baseUrl = `${protocol}://${host}`;
 
   const link = new RPCLink({

@@ -47,8 +47,8 @@ vi.mock('@we-grow/env/server', () => ({
   env: {
     DATABASE_URL: 'mongodb://localhost:27017/test',
     BETTER_AUTH_SECRET: 'test-secret-key-at-least-32-chars',
-    BETTER_AUTH_URL: 'http://localhost:3001',
-    CORS_ORIGIN: 'http://localhost:3001',
+    BETTER_AUTH_URL: 'http://localhost:3000',
+    CORS_ORIGIN: 'http://localhost:3000',
     VAPID_PUBLIC_KEY: 'test-vapid-public-key',
     VAPID_PRIVATE_KEY: 'test-vapid-private-key',
   },

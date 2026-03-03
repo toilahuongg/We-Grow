@@ -6,7 +6,7 @@ Danh sách các kịch bản test chi tiết để agent-browser thực hiện E
 
 ## Prerequisites
 
-- App đang chạy: `pnpm run dev:web` (port 3001)
+- App đang chạy: `pnpm run dev:web` (port 3000)
 - MongoDB đang chạy
 - Có tài khoản test hoặc flow sign up
 
@@ -17,7 +17,7 @@ Danh sách các kịch bản test chi tiết để agent-browser thực hiện E
 ### Scenario 1.1: Sign Up with Email/Password
 
 **Steps:**
-1. Navigate to `http://localhost:3001`
+1. Navigate to `http://localhost:3000`
 2. Click "Sign Up" button
 3. Fill email: `test@example.com`
 4. Fill password: `Test123456!`
@@ -37,7 +37,7 @@ Danh sách các kịch bản test chi tiết để agent-browser thực hiện E
 ### Scenario 1.2: Complete Onboarding
 
 **Steps:**
-1. Navigate to `http://localhost:3001/onboarding` (hoặc sau sign up)
+1. Navigate to `http://localhost:3000/onboarding` (hoặc sau sign up)
 2. Fill display name: `Test User`
 3. Select avatar (nếu có)
 4. Set primary goal: `Build better habits`
@@ -59,7 +59,7 @@ Danh sách các kịch bản test chi tiết để agent-browser thực hiện E
 ### Scenario 2.1: Create Daily Habit
 
 **Steps:**
-1. Navigate to `http://localhost:3001/habits`
+1. Navigate to `http://localhost:3000/habits`
 2. Click "Create Habit" button (hoặc "+ New Habit")
 3. Fill habit name: `Morning Exercise`
 4. Select frequency: `Daily`
@@ -80,7 +80,7 @@ Danh sách các kịch bản test chi tiết để agent-browser thực hiện E
 ### Scenario 2.2: Create Weekly Habit
 
 **Steps:**
-1. Navigate to `http://localhost:3001/habits`
+1. Navigate to `http://localhost:3000/habits`
 2. Click "Create Habit" button
 3. Fill habit name: `Read Books`
 4. Select frequency: `Weekly`
@@ -100,7 +100,7 @@ Danh sách các kịch bản test chi tiết để agent-browser thực hiện E
 ### Scenario 2.3: Create Specific Days Habit
 
 **Steps:**
-1. Navigate to `http://localhost:3001/habits`
+1. Navigate to `http://localhost:3000/habits`
 2. Click "Create Habit" button
 3. Fill habit name: `Weekend Run`
 4. Select frequency: `Specific Days`
@@ -119,7 +119,7 @@ Danh sách các kịch bản test chi tiết để agent-browser thực hiện E
 ### Scenario 2.4: Complete a Habit
 
 **Steps:**
-1. Navigate to `http://localhost:3001/habits`
+1. Navigate to `http://localhost:3000/habits`
 2. Find habit "Morning Exercise"
 3. Click completion checkbox/button
 4. Wait for API response
@@ -137,7 +137,7 @@ Danh sách các kịch bản test chi tiết để agent-browser thực hiện E
 ### Scenario 2.5: Uncomplete a Habit
 
 **Steps:**
-1. Navigate to `http://localhost:3001/habits`
+1. Navigate to `http://localhost:3000/habits`
 2. Find completed habit
 3. Click checkbox again to uncomplete
 4. Wait for API response
@@ -155,7 +155,7 @@ Danh sách các kịch bản test chi tiết để agent-browser thực hiện E
 ### Scenario 2.6: Edit a Habit
 
 **Steps:**
-1. Navigate to `http://localhost:3001/habits`
+1. Navigate to `http://localhost:3000/habits`
 2. Click on habit "Morning Exercise"
 3. Click "Edit" button
 4. Change name to: `Morning Workout`
@@ -174,7 +174,7 @@ Danh sách các kịch bản test chi tiết để agent-browser thực hiện E
 ### Scenario 2.7: Archive a Habit
 
 **Steps:**
-1. Navigate to `http://localhost:3001/habits`
+1. Navigate to `http://localhost:3000/habits`
 2. Click on habit to edit
 3. Click "Archive" button
 4. Confirm archive action
@@ -191,7 +191,7 @@ Danh sách các kịch bản test chi tiết để agent-browser thực hiện E
 ### Scenario 2.8: Delete a Habit
 
 **Steps:**
-1. Navigate to `http://localhost:3001/habits`
+1. Navigate to `http://localhost:3000/habits`
 2. Go to archived section
 3. Click on archived habit
 4. Click "Delete" button
@@ -211,7 +211,7 @@ Danh sách các kịch bản test chi tiết để agent-browser thực hiện E
 ### Scenario 3.1: View Dashboard Stats
 
 **Steps:**
-1. Navigate to `http://localhost:3001/dashboard`
+1. Navigate to `http://localhost:3000/dashboard`
 2. Observe dashboard components
 
 **Expected Results:**
@@ -229,7 +229,7 @@ Danh sách các kịch bản test chi tiết để agent-browser thực hiện E
 ### Scenario 3.2: XP Progression
 
 **Steps:**
-1. Navigate to `http://localhost:3001/habits`
+1. Navigate to `http://localhost:3000/habits`
 2. Complete 3 different habits
 3. Return to dashboard
 
@@ -246,7 +246,7 @@ Danh sách các kịch bản test chi tiết để agent-browser thực hiện E
 ### Scenario 3.3: View Leaderboard
 
 **Steps:**
-1. Navigate to `http://localhost:3001/dashboard`
+1. Navigate to `http://localhost:3000/dashboard`
 2. Click "Leaderboard" tab
 3. Observe leaderboard rankings
 
@@ -283,7 +283,7 @@ Danh sách các kịch bản test chi tiết để agent-browser thực hiện E
 ### Scenario 4.1: Create Todo
 
 **Steps:**
-1. Navigate to `http://localhost:3001/todos`
+1. Navigate to `http://localhost:3000/todos`
 2. Click "Add Todo" button
 3. Fill title: `Complete project documentation`
 4. Select priority: `Important`
@@ -302,7 +302,7 @@ Danh sách các kịch bản test chi tiết để agent-browser thực hiện E
 ### Scenario 4.2: Complete Todo with XP
 
 **Steps:**
-1. Navigate to `http://localhost:3001/todos`
+1. Navigate to `http://localhost:3000/todos`
 2. Click checkbox on todo
 3. Wait for API response
 
@@ -319,7 +319,7 @@ Danh sách các kịch bản test chi tiết để agent-browser thực hiện E
 ### Scenario 4.3: Filter Todos by Priority
 
 **Steps:**
-1. Navigate to `http://localhost:3001/todos`
+1. Navigate to `http://localhost:3000/todos`
 2. Click filter: "Urgent"
 3. Observe filtered list
 
@@ -337,7 +337,7 @@ Danh sách các kịch bản test chi tiết để agent-browser thực hiện E
 ### Scenario 5.1: Create a Group
 
 **Steps:**
-1. Navigate to `http://localhost:3001/groups`
+1. Navigate to `http://localhost:3000/groups`
 2. Click "Create Group" button
 3. Fill group name: `Fitness Enthusiasts`
 4. Fill description: `A group for fitness lovers`
@@ -410,7 +410,7 @@ Danh sách các kịch bản test chi tiết để agent-browser thực hiện E
 ### Scenario 6.1: Sign In with Email/Password
 
 **Steps:**
-1. Navigate to `http://localhost:3001`
+1. Navigate to `http://localhost:3000`
 2. Click "Sign In" button
 3. Fill email: `test@example.com`
 4. Fill password: `Test123456!`
@@ -431,7 +431,7 @@ Danh sách các kịch bản test chi tiết để agent-browser thực hiện E
 **Prerequisites:** Google OAuth configured
 
 **Steps:**
-1. Navigate to `http://localhost:3001`
+1. Navigate to `http://localhost:3000`
 2. Click "Sign In with Google" button
 3. Complete Google OAuth flow
 4. Grant permissions
@@ -468,7 +468,7 @@ Danh sách các kịch bản test chi tiết để agent-browser thực hiện E
 
 **Steps:**
 1. Sign out (if signed in)
-2. Navigate directly to `http://localhost:3001/dashboard`
+2. Navigate directly to `http://localhost:3000/dashboard`
 
 **Expected Results:**
 - Redirect to login page
@@ -484,7 +484,7 @@ Danh sách các kịch bản test chi tiết để agent-browser thực hiện E
 ### Scenario 7.1: Update Profile
 
 **Steps:**
-1. Navigate to `http://localhost:3001/settings`
+1. Navigate to `http://localhost:3000/settings`
 2. Change display name to: `Updated Name`
 3. Change bio/description
 4. Click "Save" button
@@ -501,7 +501,7 @@ Danh sách các kịch bản test chi tiết để agent-browser thực hiện E
 ### Scenario 7.2: Change Preferences
 
 **Steps:**
-1. Navigate to `http://localhost:3001/settings`
+1. Navigate to `http://localhost:3000/settings`
 2. Toggle dark mode (if available)
 3. Change notification preferences
 4. Click "Save" button
@@ -520,7 +520,7 @@ Danh sách các kịch bản test chi tiết để agent-browser thực hiện E
 ### Scenario 8.1: Duplicate Habit Name
 
 **Steps:**
-1. Navigate to `http://localhost:3001/habits`
+1. Navigate to `http://localhost:3000/habits`
 2. Create habit with name: `Test Habit`
 3. Create another habit with same name: `Test Habit`
 
@@ -536,7 +536,7 @@ Danh sách các kịch bản test chi tiết để agent-browser thực hiện E
 ### Scenario 8.2: Invalid Form Input
 
 **Steps:**
-1. Navigate to `http://localhost:3001/habits`
+1. Navigate to `http://localhost:3000/habits`
 2. Click "Create Habit"
 3. Leave name empty
 4. Click "Save" button
@@ -556,7 +556,7 @@ Danh sách các kịch bản test chi tiết để agent-browser thực hiện E
 
 **Steps:**
 1. Stop API server
-2. Navigate to `http://localhost:3001/habits`
+2. Navigate to `http://localhost:3000/habits`
 3. Try to complete a habit
 
 **Expected Results:**
@@ -593,7 +593,7 @@ Danh sách các kịch bản test chi tiết để agent-browser thực hiện E
 
 **Steps:**
 1. Set viewport to 375x667 (iPhone SE)
-2. Navigate to `http://localhost:3001/dashboard`
+2. Navigate to `http://localhost:3000/dashboard`
 3. Test all interactions
 
 **Expected Results:**
@@ -611,7 +611,7 @@ Danh sách các kịch bản test chi tiết để agent-browser thực hiện E
 
 **Steps:**
 1. Set viewport to 768x1024 (iPad)
-2. Navigate to `http://localhost:3001/habits`
+2. Navigate to `http://localhost:3000/habits`
 3. Test habit creation
 
 **Expected Results:**
@@ -630,7 +630,7 @@ Danh sách các kịch bản test chi tiết để agent-browser thực hiện E
 
 **Steps:**
 1. Open browser DevTools Performance tab
-2. Navigate to `http://localhost:3001`
+2. Navigate to `http://localhost:3000`
 3. Record page load
 
 **Expected Results:**
@@ -649,7 +649,7 @@ Danh sách các kịch bản test chi tiết để agent-browser thực hiện E
 
 **Steps:**
 1. Create 50 habits via API
-2. Navigate to `http://localhost:3001/habits`
+2. Navigate to `http://localhost:3000/habits`
 3. Scroll through list
 4. Test filtering
 

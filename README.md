@@ -86,7 +86,7 @@
 ```
 we-grow/
 ├── apps/
-│   └── web/                  # Next.js fullstack app (port 3001)
+│   └── web/                  # Next.js fullstack app (port 3000)
 │       ├── src/app/          # App Router pages (/login, /dashboard, ...)
 │       ├── src/components/   # UI components (shadcn/ui, forms, header)
 │       ├── src/lib/          # Auth client, utilities
@@ -128,8 +128,8 @@ Tạo file `apps/web/.env` với nội dung:
 ```env
 DATABASE_URL=mongodb://localhost:27017/we-grow
 BETTER_AUTH_SECRET=your-secret-key-at-least-32-characters-long
-BETTER_AUTH_URL=http://localhost:3001
-CORS_ORIGIN=http://localhost:3001
+BETTER_AUTH_URL=http://localhost:3000
+CORS_ORIGIN=http://localhost:3000
 
 # Optional - cho Web Push notifications
 VAPID_PUBLIC_KEY=
@@ -141,7 +141,7 @@ VAPID_PRIVATE_KEY=
 pnpm run dev
 ```
 
-Truy cập [http://localhost:3001](http://localhost:3001)
+Truy cập [http://localhost:3000](http://localhost:3000)
 
 ## Lệnh thường dùng
 
@@ -157,7 +157,7 @@ Truy cập [http://localhost:3001](http://localhost:3001)
 
 Tất cả API endpoints được expose qua oRPC tại `/api/rpc`.
 
-Xem tài liệu API tương tác tại: [http://localhost:3001/api/rpc/api-reference](http://localhost:3001/api/rpc/api-reference)
+Xem tài liệu API tương tác tại: [http://localhost:3000/api/rpc/api-reference](http://localhost:3000/api/rpc/api-reference)
 
 ### Các router
 
