@@ -2,15 +2,19 @@
 
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, User, Clock, Bell } from "lucide-react";
+import { ArrowLeft, User, Clock, Bell, Globe } from "lucide-react";
 import Link from "next/link";
+import { useTranslations, useLocale } from "next-intl";
+import { useRouter } from "next/navigation";
 
 import { orpc } from "@/utils/orpc";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
-import { useRouter } from "next/navigation";
+import { locales, localeNames } from "@/i18n/config";
+import { setLocaleCookie } from "@/i18n/locale-client";
+import type { Locale } from "@/i18n/config";
 
 const COMMON_TIMEZONES = [
   "UTC",
@@ -30,6 +34,9 @@ const COMMON_TIMEZONES = [
 export function SettingsForm({ session }: { session: any }) {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const t = useTranslations("settings");
+  const tc = useTranslations("common");
+  const currentLocale = useLocale();
   const [logoutDialog, setLogoutDialog] = useState(false);
   const [timezone, setTimezone] = useState("UTC");
 
@@ -42,8 +49,7 @@ export function SettingsForm({ session }: { session: any }) {
 
   const updateTimezoneMutation = useMutation({
     mutationFn: async (newTimezone: string) => {
-      // Note: This would need a backend API to update user profile timezone
-      toast.success("Timezone updated!");
+      toast.success(t("timezoneUpdated"));
       setTimezone(newTimezone);
     },
   });
@@ -52,7 +58,12 @@ export function SettingsForm({ session }: { session: any }) {
     await authClient.signOut();
     queryClient.clear();
     router.push("/login");
-    toast.success("Logged out successfully");
+    toast.success(t("loggedOut"));
+  };
+
+  const handleLanguageChange = (locale: Locale) => {
+    setLocaleCookie(locale);
+    router.refresh();
   };
 
   return (
@@ -65,9 +76,9 @@ export function SettingsForm({ session }: { session: any }) {
           </Button>
         </Link>
         <div>
-          <h1 className="font-display text-3xl font-bold">Settings</h1>
+          <h1 className="font-display text-3xl font-bold">{t("title")}</h1>
           <p className="text-sm text-muted-foreground">
-            Manage your account preferences
+            {t("subtitle")}
           </p>
         </div>
       </div>
@@ -79,20 +90,61 @@ export function SettingsForm({ session }: { session: any }) {
             <User className="h-5 w-5 text-[#ff6b6b]" />
           </div>
           <div>
-            <h2 className="font-semibold">Account Information</h2>
-            <p className="text-sm text-muted-foreground">Your account details</p>
+            <h2 className="font-semibold">{t("accountInfo")}</h2>
+            <p className="text-sm text-muted-foreground">{t("accountInfoDesc")}</p>
           </div>
         </div>
 
         <div className="space-y-3">
           <div className="flex justify-between items-center py-2 border-b border-white/5">
-            <span className="text-sm text-muted-foreground">Email</span>
+            <span className="text-sm text-muted-foreground">{t("email")}</span>
             <span className="text-sm font-medium">{session.user?.email}</span>
           </div>
           <div className="flex justify-between items-center py-2 border-b border-white/5">
-            <span className="text-sm text-muted-foreground">Name</span>
-            <span className="text-sm font-medium">{session.user?.name || "Not set"}</span>
+            <span className="text-sm text-muted-foreground">{t("name")}</span>
+            <span className="text-sm font-medium">{session.user?.name || t("notSet")}</span>
           </div>
+        </div>
+      </div>
+
+      {/* Language Settings */}
+      <div className="glass-strong rounded-2xl p-6 mb-6">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#a78bfa]/20 to-[#f472b6]/20">
+            <Globe className="h-5 w-5 text-[#a78bfa]" />
+          </div>
+          <div>
+            <h2 className="font-semibold">{t("language")}</h2>
+            <p className="text-sm text-muted-foreground">{t("languageDesc")}</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2">
+          {locales.map((locale) => {
+            const isSelected = currentLocale === locale;
+            return (
+              <button
+                key={locale}
+                onClick={() => handleLanguageChange(locale)}
+                className={`w-full text-left rounded-xl border p-3 transition-all ${
+                  isSelected
+                    ? "border-[#a78bfa] bg-[#a78bfa]/10"
+                    : "border-white/10 bg-white/5 hover:border-white/20"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="block text-sm font-medium">{localeNames[locale]}</span>
+                  {isSelected && (
+                    <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#a78bfa]">
+                      <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                  )}
+                </div>
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -103,8 +155,8 @@ export function SettingsForm({ session }: { session: any }) {
             <Clock className="h-5 w-5 text-[#ffa06b]" />
           </div>
           <div>
-            <h2 className="font-semibold">Timezone</h2>
-            <p className="text-sm text-muted-foreground">Your local timezone</p>
+            <h2 className="font-semibold">{t("timezone")}</h2>
+            <p className="text-sm text-muted-foreground">{t("timezoneDesc")}</p>
           </div>
         </div>
 
@@ -153,24 +205,24 @@ export function SettingsForm({ session }: { session: any }) {
             <Bell className="h-5 w-5 text-[#4ecdc4]" />
           </div>
           <div>
-            <h2 className="font-semibold">Notifications</h2>
-            <p className="text-sm text-muted-foreground">Manage your reminders</p>
+            <h2 className="font-semibold">{t("notifications")}</h2>
+            <p className="text-sm text-muted-foreground">{t("notificationsDesc")}</p>
           </div>
         </div>
 
         <div className="text-center py-4">
           <p className="text-sm text-muted-foreground mb-4">
-            Set up reminders for your habits
+            {t("setupReminders")}
           </p>
           <Link href="/reminders">
-            <Button variant="outline">Manage Reminders</Button>
+            <Button variant="outline">{t("manageReminders")}</Button>
           </Link>
         </div>
       </div>
 
       {/* Danger Zone */}
       <div className="glass-strong rounded-2xl border border-red-500/20 p-6">
-        <h2 className="font-semibold text-red-500 mb-4">Danger Zone</h2>
+        <h2 className="font-semibold text-red-500 mb-4">{t("dangerZone")}</h2>
 
         <div className="space-y-3">
           <Button
@@ -179,7 +231,7 @@ export function SettingsForm({ session }: { session: any }) {
             className="w-full justify-start"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Log Out
+            {t("logOut")}
           </Button>
         </div>
       </div>
@@ -188,9 +240,9 @@ export function SettingsForm({ session }: { session: any }) {
       <ConfirmDialog
         open={logoutDialog}
         onOpenChange={setLogoutDialog}
-        title="Log Out"
-        description="Are you sure you want to log out? You can always come back!"
-        confirmText="Log Out"
+        title={t("logOutConfirmTitle")}
+        description={t("logOutConfirmDesc")}
+        confirmText={t("logOut")}
         variant="warning"
         onConfirm={handleLogout}
       />

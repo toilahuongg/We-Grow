@@ -3,11 +3,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, Sparkles, TrendingUp, Users, Zap } from "lucide-react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 import { orpc } from "@/utils/orpc";
 
 export default function Home() {
   const healthCheck = useQuery(orpc.healthCheck.queryOptions());
+  const t = useTranslations("landing");
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-mesh bg-grid-pattern">
@@ -33,23 +35,22 @@ export default function Home() {
           {/* Badge */}
           <div className="mb-8 inline-flex animate-scale-in">
             <div className="glass-strong rounded-full px-5 py-2 text-sm">
-              <span className="gradient-text font-semibold">✨ Transform Your Habits</span>
+              <span className="gradient-text font-semibold">✨ {t("badge")}</span>
             </div>
           </div>
 
           {/* Main Heading */}
           <h1 className="mb-6 font-display text-5xl font-bold leading-tight sm:text-6xl md:text-7xl lg:text-8xl animate-slide-up">
-            <span className="gradient-text animate-gradient">Grow</span>
-            <span className="text-foreground"> Together,</span>
+            <span className="gradient-text animate-gradient">{t("heroGrow")}</span>
+            <span className="text-foreground">{t("heroTogether")}</span>
             <br />
-            <span className="text-foreground">Thrive</span>
-            <span className="gradient-text animate-gradient"> Forever</span>
+            <span className="text-foreground">{t("heroThrive")}</span>
+            <span className="gradient-text animate-gradient">{t("heroForever")}</span>
           </h1>
 
           {/* Subheading */}
           <p className="mb-10 max-w-2xl text-lg text-muted-foreground sm:text-xl animate-slide-up" style={{ animationDelay: "150ms" }}>
-            Build lasting habits with the power of community, gamification, and smart tracking.
-            Your journey to personal growth starts here.
+            {t("subheading")}
           </p>
 
           {/* CTA Buttons */}
@@ -62,7 +63,7 @@ export default function Home() {
               onMouseLeave={(e) => e.currentTarget.style.backgroundPosition = "0% 50%"}
             >
               <span className="relative z-10 flex items-center gap-2">
-                Start Your Journey
+                {t("ctaStart")}
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </span>
             </Link>
@@ -71,7 +72,7 @@ export default function Home() {
               href="#learn-more"
               className="glass-strong rounded-full px-8 py-4 font-semibold transition-all hover:bg-white/10 hover:scale-105"
             >
-              Learn More
+              {t("ctaLearnMore")}
             </Link>
           </div>
 
@@ -87,13 +88,13 @@ export default function Home() {
                   } transition-all`}
                 />
                 <div className="text-left">
-                  <p className="text-sm font-semibold">System Status</p>
+                  <p className="text-sm font-semibold">{t("systemStatus")}</p>
                   <p className="text-xs text-muted-foreground">
                     {healthCheck.isLoading
-                      ? "Connecting..."
+                      ? t("connecting")
                       : healthCheck.data
-                        ? "All systems operational"
-                        : "Connection failed"}
+                        ? t("allSystemsOperational")
+                        : t("connectionFailed")}
                   </p>
                 </div>
               </div>
@@ -109,8 +110,8 @@ export default function Home() {
       <div id="learn-more" className="relative z-10 px-4 pb-20">
         <div className="mx-auto max-w-6xl">
           <h2 className="mb-12 text-center font-display text-3xl font-bold sm:text-4xl">
-            Everything You Need to
-            <span className="gradient-text animate-gradient"> Succeed</span>
+            {t("featuresHeading")}
+            <span className="gradient-text animate-gradient">{t("featuresHighlight")}</span>
           </h2>
 
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 stagger-children">
@@ -119,9 +120,9 @@ export default function Home() {
               <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[#ff6b6b] to-[#ffa06b] text-white shadow-lg shadow-[#ff6b6b]/30">
                 <Zap className="h-6 w-6" />
               </div>
-              <h3 className="mb-2 font-display text-xl font-bold">Smart XP System</h3>
+              <h3 className="mb-2 font-display text-xl font-bold">{t("featureXpTitle")}</h3>
               <p className="text-muted-foreground">
-                Earn experience points for every completed habit. Level up and unlock achievements as you grow.
+                {t("featureXpDesc")}
               </p>
             </div>
 
@@ -130,9 +131,9 @@ export default function Home() {
               <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[#4ecdc4] to-[#a78bfa] text-white shadow-lg shadow-[#4ecdc4]/30">
                 <TrendingUp className="h-6 w-6" />
               </div>
-              <h3 className="mb-2 font-display text-xl font-bold">Streak Tracking</h3>
+              <h3 className="mb-2 font-display text-xl font-bold">{t("featureStreakTitle")}</h3>
               <p className="text-muted-foreground">
-                Build momentum with daily, weekly, and custom streaks. Watch your consistency compound over time.
+                {t("featureStreakDesc")}
               </p>
             </div>
 
@@ -141,9 +142,9 @@ export default function Home() {
               <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[#ffa06b] to-[#f472b6] text-white shadow-lg shadow-[#ffa06b]/30">
                 <Users className="h-6 w-6" />
               </div>
-              <h3 className="mb-2 font-display text-xl font-bold">Group Challenges</h3>
+              <h3 className="mb-2 font-display text-xl font-bold">{t("featureGroupTitle")}</h3>
               <p className="text-muted-foreground">
-                Join communities, compete with friends, and achieve goals together. Growth is better together.
+                {t("featureGroupDesc")}
               </p>
             </div>
 
@@ -152,9 +153,9 @@ export default function Home() {
               <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[#a78bfa] to-[#f472b6] text-white shadow-lg shadow-[#a78bfa]/30">
                 <Sparkles className="h-6 w-6" />
               </div>
-              <h3 className="mb-2 font-display text-xl font-bold">Achievements</h3>
+              <h3 className="mb-2 font-display text-xl font-bold">{t("featureAchievementTitle")}</h3>
               <p className="text-muted-foreground">
-                Unlock badges and achievements for milestones. Celebrate your progress with beautifully designed rewards.
+                {t("featureAchievementDesc")}
               </p>
             </div>
 
@@ -165,9 +166,9 @@ export default function Home() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
               </div>
-              <h3 className="mb-2 font-display text-xl font-bold">Analytics Dashboard</h3>
+              <h3 className="mb-2 font-display text-xl font-bold">{t("featureAnalyticsTitle")}</h3>
               <p className="text-muted-foreground">
-                Visualize your progress with detailed charts and insights. Understand your patterns and optimize your growth.
+                {t("featureAnalyticsDesc")}
               </p>
             </div>
 
@@ -175,16 +176,16 @@ export default function Home() {
             <div className="glass-strong group overflow-hidden rounded-3xl p-6 transition-all hover:scale-[1.02] animate-slide-up opacity-0 md:col-span-2 lg:col-span-1" style={{ animationDelay: "1.1s", animationFillMode: "forwards" }}>
               <div className="relative z-10">
                 <h3 className="mb-2 font-display text-2xl font-bold gradient-text">
-                  Ready to Grow?
+                  {t("featureCtaTitle")}
                 </h3>
                 <p className="mb-6 text-muted-foreground">
-                  Join thousands of users building better habits every day.
+                  {t("featureCtaDesc")}
                 </p>
                 <Link
                   href="/login"
                   className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#ff6b6b] to-[#4ecdc4] px-6 py-3 font-semibold text-white transition-all hover:scale-105 hover:shadow-lg hover:shadow-[#ff6b6b]/25"
                 >
-                  Get Started Free
+                  {t("featureCtaButton")}
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>
@@ -201,7 +202,7 @@ export default function Home() {
       <footer className="relative z-10 border-t border-white/5 px-4 py-8">
         <div className="mx-auto max-w-6xl text-center">
           <p className="text-sm text-muted-foreground">
-            © 2026 We-Grow. Built with 💜 for personal growth.
+            {t("footer")}
           </p>
         </div>
       </footer>

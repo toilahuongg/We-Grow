@@ -2,12 +2,14 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 import SignInForm from "@/components/sign-in-form";
 import SignUpForm from "@/components/sign-up-form";
 
 export default function LoginPage() {
   const [showSignIn, setShowSignIn] = useState(false);
+  const t = useTranslations("auth");
 
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-gradient-mesh bg-grid-pattern">
@@ -53,7 +55,7 @@ export default function LoginPage() {
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            Back to Home
+            {t("backToHome")}
           </Link>
         </div>
       </div>

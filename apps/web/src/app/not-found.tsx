@@ -1,8 +1,11 @@
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 
 export default function NotFound() {
+  const t = useTranslations("notFound");
+
   return (
     <div className="flex min-h-[100dvh] flex-col items-center justify-center bg-gradient-mesh bg-grid-pattern px-4">
       <div className="animate-scale-in text-center">
@@ -17,11 +20,10 @@ export default function NotFound() {
 
         {/* Message */}
         <h1 className="mb-4 font-display text-3xl font-bold">
-          Page Not <span className="gradient-text">Found</span>
+          {t("title")} <span className="gradient-text">{t("titleHighlight")}</span>
         </h1>
         <p className="mb-8 max-w-md text-muted-foreground">
-          The page you're looking for doesn't exist or has been moved.
-          Let's get you back on track!
+          {t("description")}
         </p>
 
         {/* Actions */}
@@ -31,7 +33,7 @@ export default function NotFound() {
               size="lg"
               className="rounded-full bg-gradient-to-r from-[#ff6b6b] via-[#ffa06b] to-[#4ecdc4] text-base font-semibold text-white shadow-lg shadow-[#ff6b6b]/25 transition-all hover:scale-[1.02] hover:shadow-xl hover:shadow-[#ff6b6b]/40"
             >
-              Go Home
+              {t("goHome")}
             </Button>
           </Link>
           <Link href="/dashboard">
@@ -40,7 +42,7 @@ export default function NotFound() {
               size="lg"
               className="rounded-full border border-white/10 bg-white/5 text-base font-semibold transition-all hover:bg-white/10 hover:scale-[1.02]"
             >
-              Dashboard
+              {t("dashboard")}
             </Button>
           </Link>
         </div>

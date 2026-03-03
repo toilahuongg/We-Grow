@@ -1,4 +1,7 @@
+"use client";
+
 import { Flame } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { cn } from "@/lib/utils";
 
@@ -10,6 +13,8 @@ interface StreakBadgeProps {
 }
 
 export function StreakBadge({ count, size = "md", showLabel = true, className }: StreakBadgeProps) {
+  const t = useTranslations("habitDetail");
+
   const sizeStyles = {
     sm: {
       container: "px-2 py-0.5 gap-1",
@@ -47,7 +52,7 @@ export function StreakBadge({ count, size = "md", showLabel = true, className }:
     >
       <Flame className={cn(styles.icon, isImpressive ? "text-[#ff6b6b]" : "")} />
       <span className={cn("font-semibold", styles.text)}>{count}</span>
-      {showLabel && <span className={cn("text-xs font-medium", styles.text)}>day streak</span>}
+      {showLabel && <span className={cn("text-xs font-medium", styles.text)}>{t("dayStreak")}</span>}
     </div>
   );
 }

@@ -19,7 +19,7 @@ export async function getUserInfoMap(
   const users = await client
     .collection("user")
     .find(
-      { _id: { $in: objectIds } },
+      { _id: { $in: objectIds } as any },
       { projection: { _id: 1, name: 1, image: 1 } },
     )
     .toArray();

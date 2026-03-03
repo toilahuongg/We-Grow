@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Plus, Bell, BellOff, Trash2, Edit2, Clock } from "lucide-react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 import { orpc, client } from "@/utils/orpc";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,8 @@ import { toast } from "sonner";
 
 export function RemindersList() {
   const queryClient = useQueryClient();
+  const t = useTranslations("reminders");
+  const tc = useTranslations("common");
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editingReminder, setEditingReminder] = useState<any>(null);
   const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; reminderId: string | null }>({
@@ -36,9 +39,9 @@ export function RemindersList() {
     mutationFn: (reminderId: string) => client.notifications.deleteReminder({ reminderId }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: orpc.notifications.listReminders.queryKey() });
-      toast.success("Reminder deleted");
+      toast.success(t("reminderDeleted"));
     },
-    onError: () => toast.error("Failed to delete reminder"),
+    onError: () => toast.error(t("failedDelete")),
   });
 
   const toggleMutation = useMutation({
@@ -46,9 +49,9 @@ export function RemindersList() {
       client.notifications.updateReminder({ reminderId, enabled }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: orpc.notifications.listReminders.queryKey() });
-      toast.success("Reminder updated");
+      toast.success(t("reminderUpdated"));
     },
-    onError: () => toast.error("Failed to update reminder"),
+    onError: () => toast.error(t("failedUpdate")),
   });
 
   if (isLoading) {
@@ -77,9 +80,9 @@ export function RemindersList() {
             </Button>
           </Link>
           <div>
-            <h1 className="font-display text-3xl font-bold">Reminders</h1>
+            <h1 className="font-display text-3xl font-bold">{t("title")}</h1>
             <p className="text-sm text-muted-foreground">
-              Never miss a habit
+              {t("subtitle")}
             </p>
           </div>
         </div>
@@ -88,17 +91,17 @@ export function RemindersList() {
           className="bg-gradient-to-r from-[#ff6b6b] via-[#ffa06b] to-[#4ecdc4] text-white"
         >
           <Plus className="mr-2 h-4 w-4" />
-          New Reminder
+          {t("newReminder")}
         </Button>
       </div>
 
       {/* Reminders List */}
       {!reminders || reminders.length === 0 ? (
         <EmptyState
-          title="No reminders yet"
-          description="Create reminders to get notified about your habits"
+          title={t("noRemindersTitle")}
+          description={t("noRemindersDesc")}
           action={{
-            label: "Create Reminder",
+            label: t("createReminder"),
             onClick: () => setCreateDialogOpen(true),
           }}
         />
@@ -133,18 +136,18 @@ export function RemindersList() {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <h3 className={`font-semibold ${!reminder.enabled ? "text-muted-foreground" : ""}`}>
-                        {linkedItem ? linkedItem.title : "General Reminder"}
+                        {linkedItem ? linkedItem.title : t("generalReminder")}
                       </h3>
                       {linkedHabit && (
                         <span className="rounded-full bg-[#ff6b6b]/20 px-2 py-0.5 text-xs font-medium text-[#ff6b6b]">
-                          Habit
+                          {t("habitLabel")}
                         </span>
                       )}
                     </div>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Clock className="h-3 w-3" />
                       <span>{reminder.time}</span>
-                      {!reminder.enabled && <span>· Disabled</span>}
+                      {!reminder.enabled && <span>· {t("disabled")}</span>}
                     </div>
                   </div>
 
@@ -157,21 +160,21 @@ export function RemindersList() {
                         })
                       }
                       className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 text-muted-foreground transition-all hover:bg-[#4ecdc4]/20 hover:text-[#4ecdc4]"
-                      title={reminder.enabled ? "Disable" : "Enable"}
+                      title={reminder.enabled ? t("disable") : t("enable")}
                     >
                       {reminder.enabled ? <Bell className="h-4 w-4" /> : <BellOff className="h-4 w-4" />}
                     </button>
                     <button
                       onClick={() => setEditingReminder(reminder)}
                       className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 text-muted-foreground transition-all hover:bg-white/20 hover:text-foreground"
-                      title="Edit"
+                      title={tc("edit")}
                     >
                       <Edit2 className="h-4 w-4" />
                     </button>
                     <button
                       onClick={() => setDeleteDialog({ open: true, reminderId: reminder._id })}
                       className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 text-muted-foreground transition-all hover:bg-red-500/20 hover:text-red-500"
-                      title="Delete"
+                      title={tc("delete")}
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -195,7 +198,7 @@ export function RemindersList() {
           />
           <div className="relative z-50 glass-strong rounded-2xl p-6 shadow-xl w-full max-w-md mx-4 animate-in zoom-in-95">
             <h2 className="text-lg font-bold mb-4">
-              {editingReminder ? "Edit Reminder" : "Create Reminder"}
+              {editingReminder ? t("editReminder") : t("createReminder")}
             </h2>
             <ReminderForm
               reminder={editingReminder}
@@ -218,9 +221,9 @@ export function RemindersList() {
       <ConfirmDialog
         open={deleteDialog.open}
         onOpenChange={(open) => setDeleteDialog({ ...deleteDialog, open })}
-        title="Delete Reminder"
-        description="Are you sure you want to delete this reminder?"
-        confirmText="Delete"
+        title={t("deleteReminder")}
+        description={t("deleteConfirmDesc")}
+        confirmText={tc("delete")}
         variant="danger"
         onConfirm={() => {
           if (deleteDialog.reminderId) {
@@ -246,6 +249,8 @@ function ReminderForm({
   onCancel: () => void;
 }) {
   const queryClient = useQueryClient();
+  const t = useTranslations("reminders");
+  const tc = useTranslations("common");
   const [time, setTime] = useState(reminder?.time ?? "09:00");
   const [linkedType, setLinkedType] = useState<"habit" | "none">(
     reminder?.habitId ? "habit" : "none"
@@ -258,20 +263,20 @@ function ReminderForm({
     mutationFn: (input: any) => client.notifications.createReminder(input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: orpc.notifications.listReminders.queryKey() });
-      toast.success("Reminder created! 🔔");
+      toast.success(t("reminderCreated"));
       onSuccess();
     },
-    onError: () => toast.error("Failed to create reminder"),
+    onError: () => toast.error(t("failedCreate")),
   });
 
   const updateMutation = useMutation({
     mutationFn: (updates: any) => client.notifications.updateReminder({ reminderId: reminder._id, ...updates }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: orpc.notifications.listReminders.queryKey() });
-      toast.success("Reminder updated! 🔔");
+      toast.success(t("reminderUpdated"));
       onSuccess();
     },
-    onError: () => toast.error("Failed to update reminder"),
+    onError: () => toast.error(t("failedUpdate")),
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -293,7 +298,7 @@ function ReminderForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
-        <Label>Time *</Label>
+        <Label>{t("time")}</Label>
         <Input
           type="time"
           value={time}
@@ -303,7 +308,7 @@ function ReminderForm({
       </div>
 
       <div className="space-y-2">
-        <Label>Link to (Optional)</Label>
+        <Label>{t("linkTo")}</Label>
         <div className="grid grid-cols-2 gap-2 mb-2">
           <button
             type="button"
@@ -317,7 +322,7 @@ function ReminderForm({
                 : "border-white/10 bg-white/5 hover:border-white/20"
             }`}
           >
-            None
+            {t("none")}
           </button>
           <button
             type="button"
@@ -331,7 +336,7 @@ function ReminderForm({
                 : "border-white/10 bg-white/5 hover:border-white/20"
             }`}
           >
-            Habit
+            {t("habitLabel")}
           </button>
         </div>
 
@@ -341,7 +346,7 @@ function ReminderForm({
             onChange={(e) => setLinkedId(e.target.value)}
             className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 focus:border-[#4ecdc4] outline-none"
           >
-            <option value="">Select a habit...</option>
+            <option value="">{t("selectHabit")}</option>
             {habits.map((habit) => (
               <option key={habit._id} value={habit._id}>
                 {habit.title}
@@ -354,7 +359,7 @@ function ReminderForm({
 
       <div className="flex justify-end gap-2 pt-2">
         <Button type="button" variant="outline" onClick={onCancel}>
-          Cancel
+          {tc("cancel")}
         </Button>
         <Button
           type="submit"
@@ -362,10 +367,10 @@ function ReminderForm({
           disabled={createMutation.isPending || updateMutation.isPending}
         >
           {createMutation.isPending || updateMutation.isPending
-            ? "Saving..."
+            ? tc("saving")
             : reminder
-            ? "Update"
-            : "Create"}
+            ? t("update")
+            : t("create")}
         </Button>
       </div>
     </form>

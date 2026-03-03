@@ -7,6 +7,7 @@ import { z } from "zod";
 import { zodValidator } from "@tanstack/zod-form-adapter";
 import { ArrowLeft, Trophy } from "lucide-react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 import { orpc, client } from "@/utils/orpc";
 import { Button } from "@/components/ui/button";
@@ -14,47 +15,56 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 
-const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
-
-const groupHabitSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  description: z.string().optional(),
-  frequency: z.enum(["daily", "weekly", "specific_days"]),
-  targetDays: z.array(z.number()).optional(),
-  weeklyTarget: z.number().min(1).max(7).optional(),
-}).refine(
-  (data) => {
-    if (data.frequency === "specific_days") {
-      return data.targetDays && data.targetDays.length > 0;
-    }
-    if (data.frequency === "weekly") {
-      return data.weeklyTarget && data.weeklyTarget >= 1;
-    }
-    return true;
-  },
-  {
-    message: "Please fill all required fields",
-    path: ["frequency"],
-  }
-);
-
 interface GroupHabitFormProps {
   groupId: string;
 }
 
 export function GroupHabitForm({ groupId }: GroupHabitFormProps) {
   const queryClient = useQueryClient();
+  const t = useTranslations("habits");
+  const td = useTranslations("days");
+  const tc = useTranslations("common");
+
+  const DAYS = [td("mon"), td("tue"), td("wed"), td("thu"), td("fri"), td("sat"), td("sun")];
+
+  const frequencyLabels: Record<string, string> = {
+    daily: t("daily"),
+    weekly: t("weekly"),
+    specific_days: t("specificDays"),
+  };
+
+  const groupHabitSchema = z.object({
+    title: z.string().min(1, t("titleRequired")),
+    description: z.string().optional(),
+    frequency: z.enum(["daily", "weekly", "specific_days"]),
+    targetDays: z.array(z.number()).optional(),
+    weeklyTarget: z.number().min(1).max(7).optional(),
+  }).refine(
+    (data) => {
+      if (data.frequency === "specific_days") {
+        return data.targetDays && data.targetDays.length > 0;
+      }
+      if (data.frequency === "weekly") {
+        return data.weeklyTarget && data.weeklyTarget >= 1;
+      }
+      return true;
+    },
+    {
+      message: t("fillRequired"),
+      path: ["frequency"],
+    }
+  );
 
   const createMutation = useMutation({
     mutationFn: (input: any) => client.groups.createGroupHabit(input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: orpc.groups.getById.queryKey({ input: { groupId } }) });
       queryClient.invalidateQueries({ queryKey: orpc.habits.list.queryKey() });
-      toast.success("Group habit created! All members can now track this habit. 🎉");
+      toast.success(t("groupHabitCreated"));
       window.location.href = `/groups/${groupId}`;
     },
     onError: (error: any) => {
-      toast.error(error.message || "Failed to create group habit");
+      toast.error(error.message || t("failedCreateGroupHabit"));
     },
   });
 
@@ -91,9 +101,9 @@ export function GroupHabitForm({ groupId }: GroupHabitFormProps) {
           </Button>
         </Link>
         <div>
-          <h1 className="font-display text-3xl font-bold">Create Group Habit</h1>
+          <h1 className="font-display text-3xl font-bold">{t("createGroupHabit")}</h1>
           <p className="text-sm text-muted-foreground">
-            This habit will be added to all group members
+            {t("groupHabitSubtitle")}
           </p>
         </div>
       </div>
@@ -105,10 +115,9 @@ export function GroupHabitForm({ groupId }: GroupHabitFormProps) {
             <Trophy className="h-4 w-4 text-[#ff6b6b]" />
           </div>
           <div>
-            <h3 className="font-semibold text-sm">Together Mode</h3>
+            <h3 className="font-semibold text-sm">{t("togetherModeTitle")}</h3>
             <p className="text-xs text-muted-foreground mt-1">
-              This habit will be created for all group members. Each member will track their own progress,
-              and you'll be able to see how everyone is doing on the leaderboard!
+              {t("togetherModeDesc")}
             </p>
           </div>
         </div>
@@ -127,14 +136,14 @@ export function GroupHabitForm({ groupId }: GroupHabitFormProps) {
           <form.Field name="title">
             {(field) => (
               <div className="space-y-2">
-                <Label htmlFor={field.name}>Title *</Label>
+                <Label htmlFor={field.name}>{t("title")}</Label>
                 <Input
                   id={field.name}
                   name={field.name}
                   value={field.state.value}
                   onBlur={field.handleBlur}
                   onChange={(e) => field.handleChange(e.target.value)}
-                  placeholder="e.g., Morning Meditation"
+                  placeholder={t("titlePlaceholder")}
                 />
                 {field.state.meta.errors.length > 0 && (
                   <p className="text-sm text-red-500">{field.state.meta.errors[0]}</p>
@@ -147,14 +156,14 @@ export function GroupHabitForm({ groupId }: GroupHabitFormProps) {
           <form.Field name="description">
             {(field) => (
               <div className="space-y-2">
-                <Label htmlFor={field.name}>Description</Label>
+                <Label htmlFor={field.name}>{t("descriptionLabel")}</Label>
                 <Input
                   id={field.name}
                   name={field.name}
                   value={field.state.value}
                   onBlur={field.handleBlur}
                   onChange={(e) => field.handleChange(e.target.value)}
-                  placeholder="Optional notes or motivation"
+                  placeholder={t("descriptionPlaceholder")}
                 />
               </div>
             )}
@@ -164,7 +173,7 @@ export function GroupHabitForm({ groupId }: GroupHabitFormProps) {
           <form.Field name="frequency">
             {(field) => (
               <div className="space-y-2">
-                <Label htmlFor={field.name}>Frequency *</Label>
+                <Label htmlFor={field.name}>{t("frequency")}</Label>
                 <div className="grid grid-cols-3 gap-2">
                   {(["daily", "weekly", "specific_days"] as const).map((freq) => (
                     <label
@@ -183,7 +192,7 @@ export function GroupHabitForm({ groupId }: GroupHabitFormProps) {
                         onChange={(e) => field.handleChange(e.target.value as any)}
                         className="sr-only"
                       />
-                      <span className="block text-sm font-medium capitalize">{freq.replace("_", " ")}</span>
+                      <span className="block text-sm font-medium">{frequencyLabels[freq]}</span>
                     </label>
                   ))}
                 </div>
@@ -198,7 +207,7 @@ export function GroupHabitForm({ groupId }: GroupHabitFormProps) {
                 <form.Field name="targetDays">
                   {(targetDaysField) => (
                     <div className="space-y-2">
-                      <Label>Select Days *</Label>
+                      <Label>{t("selectDays")}</Label>
                       <div className="grid grid-cols-7 gap-2">
                         {DAYS.map((day, index) => (
                           <label
@@ -243,7 +252,7 @@ export function GroupHabitForm({ groupId }: GroupHabitFormProps) {
                 <form.Field name="weeklyTarget">
                   {(weeklyTargetField) => (
                     <div className="space-y-2">
-                      <Label htmlFor={weeklyTargetField.name}>Weekly Target *</Label>
+                      <Label htmlFor={weeklyTargetField.name}>{t("weeklyTarget")}</Label>
                       <div className="flex items-center gap-4">
                         <Input
                           id={weeklyTargetField.name}
@@ -256,7 +265,7 @@ export function GroupHabitForm({ groupId }: GroupHabitFormProps) {
                           onChange={(e) => weeklyTargetField.handleChange(Number(e.target.value))}
                           className="w-20"
                         />
-                        <span className="text-sm text-muted-foreground">times per week</span>
+                        <span className="text-sm text-muted-foreground">{t("timesPerWeek")}</span>
                       </div>
                       {weeklyTargetField.state.meta.errors.length > 0 && (
                         <p className="text-sm text-red-500">{weeklyTargetField.state.meta.errors[0]}</p>
@@ -272,7 +281,7 @@ export function GroupHabitForm({ groupId }: GroupHabitFormProps) {
           <div className="flex justify-end gap-2 pt-4">
             <Link href={`/groups/${groupId}`}>
               <Button type="button" variant="outline">
-                Cancel
+                {tc("cancel")}
               </Button>
             </Link>
             <Button
@@ -280,7 +289,7 @@ export function GroupHabitForm({ groupId }: GroupHabitFormProps) {
               className="bg-gradient-to-r from-[#ff6b6b] via-[#ffa06b] to-[#4ecdc4] text-white"
               disabled={createMutation.isPending}
             >
-              {createMutation.isPending ? "Creating..." : "Create Group Habit"}
+              {createMutation.isPending ? tc("saving") : t("createGroupHabitButton")}
             </Button>
           </div>
         </form>

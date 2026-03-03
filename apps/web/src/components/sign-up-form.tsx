@@ -2,6 +2,7 @@ import { useForm } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import z from "zod";
+import { useTranslations } from "next-intl";
 
 import { authClient } from "@/lib/auth-client";
 
@@ -12,6 +13,7 @@ import { Label } from "./ui/label";
 
 export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () => void }) {
   const router = useRouter();
+  const t = useTranslations("auth");
   const { isPending } = authClient.useSession();
 
   const form = useForm({
@@ -21,7 +23,6 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
       name: "",
     },
     onSubmit: async ({ value }) => {
-      // First sign up
       const signUpResult = await authClient.signUp.email(
         {
           email: value.email,
@@ -30,7 +31,7 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
         },
         {
           onSuccess: () => {
-            toast.success("Account created! Signing you in...");
+            toast.success(t("accountCreated"));
           },
           onError: (error) => {
             toast.error(error.error.message || error.error.statusText);
@@ -38,7 +39,6 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
         },
       );
 
-      // If sign-up was successful, immediately sign in
       if (signUpResult.data) {
         await authClient.signIn.email(
           {
@@ -48,10 +48,10 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
           {
             onSuccess: () => {
               router.push("/groups");
-              toast.success("Welcome to We-Grow! 🌱");
+              toast.success(t("welcomeToWeGrow"));
             },
-            onError: (error) => {
-              toast.error("Account created but sign-in failed. Please try signing in manually.");
+            onError: () => {
+              toast.error(t("signInFailed"));
             },
           },
         );
@@ -59,9 +59,9 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
     },
     validators: {
       onSubmit: z.object({
-        name: z.string().min(2, "Name must be at least 2 characters"),
-        email: z.email("Invalid email address"),
-        password: z.string().min(8, "Password must be at least 8 characters"),
+        name: z.string().min(2, t("nameMinLength")),
+        email: z.email(t("invalidEmail")),
+        password: z.string().min(8, t("passwordMinLength")),
       }),
     },
   });
@@ -75,9 +75,9 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
       {/* Header */}
       <div className="mb-8 text-center">
         <h1 className="mb-2 font-display text-3xl font-bold">
-          Start Your <span className="gradient-text">Journey</span>
+          {t("startYour")} <span className="gradient-text">{t("journey")}</span>
         </h1>
-        <p className="text-muted-foreground">Join thousands building better habits</p>
+        <p className="text-muted-foreground">{t("joinThousands")}</p>
       </div>
 
       {/* Google Sign Up Button */}
@@ -89,10 +89,10 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
             {
               onSuccess: () => {
                 router.push("/groups");
-                toast.success("Welcome to We-Grow! 🌱");
+                toast.success(t("welcomeToWeGrow"));
               },
               onError: (error) => {
-                toast.error(error.error.message || "Failed to sign up with Google");
+                toast.error(error.error.message || t("failedGoogleSignUp"));
               },
             }
           );
@@ -117,7 +117,7 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
             d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
           />
         </svg>
-        Continue with Google
+        {t("continueWithGoogle")}
       </button>
 
       {/* Divider */}
@@ -126,7 +126,7 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
           <span className="w-full border-t border-white/10" />
         </div>
         <div className="relative flex justify-center text-sm">
-          <span className="bg-background px-3 text-muted-foreground">or continue with email</span>
+          <span className="bg-background px-3 text-muted-foreground">{t("orContinueWithEmail")}</span>
         </div>
       </div>
 
@@ -143,7 +143,7 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
           <form.Field name="name">
             {(field) => (
               <div className="space-y-2">
-                <Label htmlFor={field.name} className="text-sm font-medium">Name</Label>
+                <Label htmlFor={field.name} className="text-sm font-medium">{t("name")}</Label>
                 <Input
                   id={field.name}
                   name={field.name}
@@ -167,7 +167,7 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
           <form.Field name="email">
             {(field) => (
               <div className="space-y-2">
-                <Label htmlFor={field.name} className="text-sm font-medium">Email</Label>
+                <Label htmlFor={field.name} className="text-sm font-medium">{t("email")}</Label>
                 <Input
                   id={field.name}
                   name={field.name}
@@ -192,7 +192,7 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
           <form.Field name="password">
             {(field) => (
               <div className="space-y-2">
-                <Label htmlFor={field.name} className="text-sm font-medium">Password</Label>
+                <Label htmlFor={field.name} className="text-sm font-medium">{t("password")}</Label>
                 <Input
                   id={field.name}
                   name={field.name}
@@ -226,10 +226,10 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                   </svg>
-                  Creating account...
+                  {t("creatingAccount")}
                 </span>
               ) : (
-                "Create Account"
+                t("createAccount")
               )}
             </Button>
           )}
@@ -239,19 +239,19 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
       {/* Switch to Sign In */}
       <div className="mt-6 text-center">
         <p className="text-sm text-muted-foreground">
-          Already have an account?{" "}
+          {t("alreadyHaveAccount")}{" "}
           <button
             onClick={onSwitchToSignIn}
             className="font-semibold text-[#4ecdc4] transition-colors hover:text-[#a78bfa]"
           >
-            Sign In
+            {t("signIn")}
           </button>
         </p>
       </div>
 
       {/* Terms */}
       <p className="mt-4 text-center text-xs text-muted-foreground">
-        By signing up, you agree to our Terms of Service and Privacy Policy
+        {t("termsNotice")}
       </p>
     </div>
   );

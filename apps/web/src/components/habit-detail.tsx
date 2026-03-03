@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Calendar as CalendarIcon, Flame, TrendingUp, Edit2, Trash2 } from "lucide-react";
 import Link from "next/link";
+import { useTranslations, useLocale } from "next-intl";
 
 import { orpc, client } from "@/utils/orpc";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,8 @@ import { StreakBadge } from "@/components/streak-badge";
 import { toast } from "sonner";
 import { HabitForm } from "./habit-form";
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isToday } from "date-fns";
+import { getDateFnsLocale } from "@/i18n/date-locale";
+import type { Locale } from "@/i18n/config";
 
 const habitIcons: Record<string, string> = {
   meditation: "🧘",
@@ -49,6 +52,12 @@ export function HabitDetail({ habitId, initialData }: HabitDetailProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [deleteDialog, setDeleteDialog] = useState(false);
 
+  const t = useTranslations("habitDetail");
+  const tc = useTranslations("common");
+  const td = useTranslations("calendarDays");
+  const locale = useLocale();
+  const dateLocale = getDateFnsLocale(locale as Locale);
+
   const { data: habit, isLoading } = useQuery({
     ...orpc.habits.getById.queryOptions({ input: { habitId } }),
     initialData,
@@ -70,7 +79,7 @@ export function HabitDetail({ habitId, initialData }: HabitDetailProps) {
     mutationFn: (date: string) => client.habits.complete({ habitId, date }),
     onSuccess: (result, date) => {
       if (!result.alreadyCompleted) {
-        toast.success(`+${result.xpAwarded} XP! ✨`);
+        toast.success(t("xpAwarded", { amount: result.xpAwarded ?? 0 }));
       }
       queryClient.invalidateQueries({ queryKey: orpc.habits.getById.queryKey({ input: { habitId } }) });
       queryClient.invalidateQueries({ queryKey: orpc.habits.getCompletions.queryKey({ input: { habitId } } as any) });
@@ -91,7 +100,7 @@ export function HabitDetail({ habitId, initialData }: HabitDetailProps) {
     mutationFn: () => client.habits.delete({ habitId }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: orpc.habits.list.queryKey() });
-      toast.success("Habit deleted");
+      toast.success(t("habitDeleted"));
       window.location.href = `/groups/${habit?.groupId ?? ""}`;
     },
   });
@@ -111,9 +120,9 @@ export function HabitDetail({ habitId, initialData }: HabitDetailProps) {
     return (
       <div className="container mx-auto max-w-4xl px-4 py-8">
         <div className="glass-strong rounded-2xl p-12 text-center">
-          <h2 className="text-xl font-semibold mb-2">Habit not found</h2>
+          <h2 className="text-xl font-semibold mb-2">{t("habitNotFound")}</h2>
           <Link href="/groups">
-            <Button>Back to Groups</Button>
+            <Button>{t("backToGroups")}</Button>
           </Link>
         </div>
       </div>
@@ -129,7 +138,7 @@ export function HabitDetail({ habitId, initialData }: HabitDetailProps) {
           className="mb-4"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Detail
+          {t("backToDetail")}
         </Button>
         <HabitForm habit={habit} isEditing />
       </div>
@@ -166,7 +175,7 @@ export function HabitDetail({ habitId, initialData }: HabitDetailProps) {
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={() => setIsEditing(true)}>
             <Edit2 className="mr-2 h-4 w-4" />
-            Edit
+            {tc("edit")}
           </Button>
           <Button
             variant="destructive"
@@ -183,27 +192,27 @@ export function HabitDetail({ habitId, initialData }: HabitDetailProps) {
         <div className="lg:col-span-2 space-y-6">
           {/* Quick Stats */}
           <div className="glass-strong rounded-2xl p-6">
-            <h2 className="mb-4 font-display text-lg font-bold">Statistics</h2>
+            <h2 className="mb-4 font-display text-lg font-bold">{t("statistics")}</h2>
             <div className="grid grid-cols-3 gap-4">
               <div className="text-center">
                 <div className="flex items-center justify-center gap-2 mb-1">
                   <Flame className="h-4 w-4 text-[#ff6b6b]" />
                   <span className="font-display text-2xl font-bold">{habit.currentStreak ?? 0}</span>
                 </div>
-                <p className="text-xs text-muted-foreground">Current Streak</p>
+                <p className="text-xs text-muted-foreground">{t("currentStreak")}</p>
               </div>
               <div className="text-center">
                 <div className="flex items-center justify-center gap-2 mb-1">
                   <TrendingUp className="h-4 w-4 text-[#4ecdc4]" />
                   <span className="font-display text-2xl font-bold">{habit.longestStreak ?? 0}</span>
                 </div>
-                <p className="text-xs text-muted-foreground">Best Streak</p>
+                <p className="text-xs text-muted-foreground">{t("bestStreak")}</p>
               </div>
               <div className="text-center">
                 <div className="mb-1">
                   <span className="font-display text-2xl font-bold">{completionRate}%</span>
                 </div>
-                <p className="text-xs text-muted-foreground">Completion Rate</p>
+                <p className="text-xs text-muted-foreground">{t("completionRate")}</p>
               </div>
             </div>
           </div>
@@ -211,7 +220,7 @@ export function HabitDetail({ habitId, initialData }: HabitDetailProps) {
           {/* Calendar View */}
           <div className="glass-strong rounded-2xl p-6">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="font-display text-lg font-bold">Completion History</h2>
+              <h2 className="font-display text-lg font-bold">{t("completionHistory")}</h2>
               <div className="flex items-center gap-2">
                 <Button
                   variant="outline"
@@ -221,7 +230,7 @@ export function HabitDetail({ habitId, initialData }: HabitDetailProps) {
                   ←
                 </Button>
                 <span className="text-sm font-medium min-w-[120px] text-center">
-                  {format(currentMonth, "MMMM yyyy")}
+                  {format(currentMonth, "MMMM yyyy", { locale: dateLocale })}
                 </span>
                 <Button
                   variant="outline"
@@ -234,7 +243,7 @@ export function HabitDetail({ habitId, initialData }: HabitDetailProps) {
             </div>
 
             <div className="grid grid-cols-7 gap-1">
-              {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+              {[td("sun"), td("mon"), td("tue"), td("wed"), td("thu"), td("fri"), td("sat")].map((day) => (
                 <div key={day} className="text-center text-xs text-muted-foreground py-2">
                   {day}
                 </div>
@@ -264,7 +273,7 @@ export function HabitDetail({ habitId, initialData }: HabitDetailProps) {
                       }
                       disabled:opacity-50
                     `}
-                    title={format(day, "MMM d, yyyy")}
+                    title={format(day, "MMM d, yyyy", { locale: dateLocale })}
                   >
                     {format(day, "d")}
                   </button>
@@ -275,15 +284,15 @@ export function HabitDetail({ habitId, initialData }: HabitDetailProps) {
             <div className="mt-4 flex items-center justify-center gap-4 text-xs text-muted-foreground">
               <div className="flex items-center gap-2">
                 <div className="h-3 w-3 rounded bg-gradient-to-br from-[#4ecdc4] to-[#a78bfa]" />
-                <span>Completed</span>
+                <span>{t("completed")}</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="h-3 w-3 rounded bg-white/5" />
-                <span>Not completed</span>
+                <span>{t("notCompleted")}</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="h-3 w-3 rounded ring-2 ring-[#ff6b6b]" />
-                <span>Today</span>
+                <span>{t("todayLabel")}</span>
               </div>
             </div>
           </div>
@@ -301,34 +310,34 @@ export function HabitDetail({ habitId, initialData }: HabitDetailProps) {
 
           {/* Details */}
           <div className="glass-strong rounded-2xl p-6">
-            <h3 className="mb-4 font-semibold">Details</h3>
+            <h3 className="mb-4 font-semibold">{t("details")}</h3>
             <div className="space-y-3 text-sm">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Frequency</span>
+                <span className="text-muted-foreground">{t("frequencyLabel")}</span>
                 <span className="font-medium capitalize">{habit.frequency.replace("_", " ")}</span>
               </div>
               {habit.frequency === "specific_days" && (
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Target Days</span>
-                  <span className="font-medium">{habit.targetDays?.length ?? 0} days/week</span>
+                  <span className="text-muted-foreground">{t("targetDays")}</span>
+                  <span className="font-medium">{t("daysPerWeek", { count: habit.targetDays?.length ?? 0 })}</span>
                 </div>
               )}
               {habit.frequency === "weekly" && (
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Weekly Target</span>
-                  <span className="font-medium">{habit.weeklyTarget ?? 1}x/week</span>
+                  <span className="text-muted-foreground">{t("weeklyTargetLabel")}</span>
+                  <span className="font-medium">{t("timesPerWeek", { count: habit.weeklyTarget ?? 1 })}</span>
                 </div>
               )}
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Created</span>
-                <span className="font-medium">{format(new Date(habit.createdAt), "MMM d, yyyy")}</span>
+                <span className="text-muted-foreground">{t("created")}</span>
+                <span className="font-medium">{format(new Date(habit.createdAt), "MMM d, yyyy", { locale: dateLocale })}</span>
               </div>
             </div>
           </div>
 
           {/* Today's Status */}
           <div className="glass-strong rounded-2xl p-6">
-            <h3 className="mb-4 font-semibold">Today</h3>
+            <h3 className="mb-4 font-semibold">{t("todayStatus")}</h3>
             {habit.completedToday ? (
               <div className="text-center">
                 <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-[#4ecdc4]/20 text-[#4ecdc4] mx-auto">
@@ -336,13 +345,13 @@ export function HabitDetail({ habitId, initialData }: HabitDetailProps) {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
-                <p className="font-semibold text-[#4ecdc4]">Completed!</p>
+                <p className="font-semibold text-[#4ecdc4]">{t("completedStatus")}</p>
                 <button
                   onClick={() => uncompleteMutation.mutate(format(new Date(), "yyyy-MM-dd"))}
                   className="mt-2 text-xs text-muted-foreground hover:text-foreground"
                   disabled={uncompleteMutation.isPending}
                 >
-                  Undo completion
+                  {t("undoCompletion")}
                 </button>
               </div>
             ) : (
@@ -351,7 +360,7 @@ export function HabitDetail({ habitId, initialData }: HabitDetailProps) {
                 className="w-full bg-gradient-to-r from-[#4ecdc4] to-[#a78bfa] text-white"
                 disabled={completeMutation.isPending}
               >
-                Mark Complete
+                {t("markComplete")}
               </Button>
             )}
           </div>
@@ -362,9 +371,9 @@ export function HabitDetail({ habitId, initialData }: HabitDetailProps) {
       <ConfirmDialog
         open={deleteDialog}
         onOpenChange={setDeleteDialog}
-        title="Delete Habit"
-        description={`Are you sure you want to delete "${habit.title}"? This action cannot be undone and all completion history will be lost.`}
-        confirmText="Delete"
+        title={t("deleteHabit")}
+        description={t("deleteConfirmDesc", { title: habit.title })}
+        confirmText={tc("delete")}
         variant="danger"
         onConfirm={() => deleteMutation.mutate()}
         isLoading={deleteMutation.isPending}

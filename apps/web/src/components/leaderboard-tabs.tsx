@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Trophy, Medal, Crown, Users } from "lucide-react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 import { orpc } from "@/utils/orpc";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,8 @@ import { StreakBadge } from "@/components/streak-badge";
 
 export function LeaderboardTabs() {
   const [activeTab, setActiveTab] = useState<"global" | "groups">("global");
+  const t = useTranslations("leaderboard");
+  const tc = useTranslations("common");
 
   const { data: globalLeaderboard, isLoading: globalLoading } = useQuery({
     ...orpc.gamification.getGlobalLeaderboard.queryOptions({ input: { limit: 100 } }),
@@ -30,13 +33,6 @@ export function LeaderboardTabs() {
     ? globalLeaderboard?.findIndex((entry: any) => entry.userId === session.user.id)
     : -1;
 
-  const getRankIcon = (rank: number) => {
-    if (rank === 0) return <Crown className="h-5 w-5 text-yellow-500" />;
-    if (rank === 1) return <Medal className="h-5 w-5 text-gray-400" />;
-    if (rank === 2) return <Medal className="h-5 w-5 text-amber-600" />;
-    return null;
-  };
-
   const getRankColor = (rank: number) => {
     if (rank === 0) return "border-yellow-500/30 bg-yellow-500/10";
     if (rank === 1) return "border-gray-400/30 bg-gray-400/10";
@@ -54,9 +50,9 @@ export function LeaderboardTabs() {
           </Button>
         </Link>
         <div>
-          <h1 className="font-display text-3xl font-bold">Leaderboard</h1>
+          <h1 className="font-display text-3xl font-bold">{t("title")}</h1>
           <p className="text-sm text-muted-foreground">
-            See how you rank among other growers
+            {t("subtitle")}
           </p>
         </div>
       </div>
@@ -69,7 +65,7 @@ export function LeaderboardTabs() {
           size="sm"
         >
           <Trophy className="mr-2 h-4 w-4" />
-          Global
+          {t("global")}
         </Button>
         <Button
           variant={activeTab === "groups" ? "default" : "outline"}
@@ -78,7 +74,7 @@ export function LeaderboardTabs() {
           disabled
         >
           <Users className="mr-2 h-4 w-4" />
-          Groups
+          {t("groupsTab")}
         </Button>
       </div>
 
@@ -96,9 +92,9 @@ export function LeaderboardTabs() {
               <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/5 mx-auto mb-4">
                 <Trophy className="h-8 w-8 text-muted-foreground" />
               </div>
-              <h3 className="font-semibold mb-2">No rankings yet</h3>
+              <h3 className="font-semibold mb-2">{t("noRankingsTitle")}</h3>
               <p className="text-sm text-muted-foreground">
-                Be the first to earn XP and appear on the leaderboard!
+                {t("noRankingsDesc")}
               </p>
             </div>
           ) : (
@@ -114,7 +110,7 @@ export function LeaderboardTabs() {
                     <div className="glass-strong rounded-xl border border-gray-400/30 bg-gray-400/10 p-4 text-center w-32">
                       <p className="font-medium text-sm truncate">
                         {globalLeaderboard[1]?.userId === session?.user?.id
-                          ? "You"
+                          ? tc("you")
                           : `User #${globalLeaderboard[1]?.userId.slice(0, 8)}`}
                       </p>
                       <p className="text-lg font-bold">{globalLeaderboard[1]?.totalXp} XP</p>
@@ -130,7 +126,7 @@ export function LeaderboardTabs() {
                     <div className="glass-strong rounded-xl border border-yellow-500/30 bg-yellow-500/10 p-4 text-center w-36">
                       <p className="font-semibold truncate">
                         {globalLeaderboard[0]?.userId === session?.user?.id
-                          ? "You"
+                          ? tc("you")
                           : `User #${globalLeaderboard[0]?.userId.slice(0, 8)}`}
                       </p>
                       <p className="text-xl font-bold gradient-text">{globalLeaderboard[0]?.totalXp} XP</p>
@@ -146,7 +142,7 @@ export function LeaderboardTabs() {
                     <div className="glass-strong rounded-xl border border-amber-600/30 bg-amber-600/10 p-4 text-center w-32">
                       <p className="font-medium text-sm truncate">
                         {globalLeaderboard[2]?.userId === session?.user?.id
-                          ? "You"
+                          ? tc("you")
                           : `User #${globalLeaderboard[2]?.userId.slice(0, 8)}`}
                       </p>
                       <p className="text-lg font-bold">{globalLeaderboard[2]?.totalXp} XP</p>
@@ -176,7 +172,7 @@ export function LeaderboardTabs() {
                       <div className="flex-1">
                         <p className="font-medium">
                           {entry.userId === session?.user?.id
-                            ? "You"
+                            ? tc("you")
                             : `User #${entry.userId.slice(0, 8)}`}
                         </p>
                         <p className="text-xs text-muted-foreground">Level {entry.level}</p>
@@ -192,13 +188,13 @@ export function LeaderboardTabs() {
               {/* User's Rank (if not in top 100 or highlighted) */}
               {userRank != null && userRank >= 0 && userRank < 100 && (
                 <div className="mt-6 pt-6 border-t border-white/10">
-                  <p className="text-sm text-muted-foreground mb-2">Your Ranking</p>
+                  <p className="text-sm text-muted-foreground mb-2">{t("yourRanking")}</p>
                   <div className="flex items-center gap-4 rounded-xl border border-[#4ecdc4] bg-[#4ecdc4]/10 p-4">
                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#4ecdc4] text-white font-bold">
                       {userRank + 1}
                     </div>
                     <div className="flex-1">
-                      <p className="font-semibold">You</p>
+                      <p className="font-semibold">{tc("you")}</p>
                       <p className="text-xs text-muted-foreground">Level {globalLeaderboard[userRank]?.level}</p>
                     </div>
                     <div className="text-right">
@@ -217,12 +213,12 @@ export function LeaderboardTabs() {
         <div className="glass-strong rounded-2xl p-6">
           <div className="text-center py-12">
             <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="font-semibold mb-2">Group Leaderboards</h3>
+            <h3 className="font-semibold mb-2">{t("groupLeaderboards")}</h3>
             <p className="text-sm text-muted-foreground">
-              Join a group to see group-specific leaderboards!
+              {t("groupLeaderboardsDesc")}
             </p>
             <Link href="/groups">
-              <Button className="mt-4">Browse Groups</Button>
+              <Button className="mt-4">{t("browseGroups")}</Button>
             </Link>
           </div>
         </div>

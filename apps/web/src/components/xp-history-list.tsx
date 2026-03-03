@@ -4,11 +4,14 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, TrendingUp, Sparkles, Trophy, Flame, Zap } from "lucide-react";
 import Link from "next/link";
+import { useTranslations, useLocale } from "next-intl";
 
 import { orpc } from "@/utils/orpc";
 import { Button } from "@/components/ui/button";
 import { XPBadge } from "@/components/xp-badge";
 import { format } from "date-fns";
+import { getDateFnsLocale } from "@/i18n/date-locale";
+import type { Locale } from "@/i18n/config";
 
 const SOURCE_ICONS: Record<string, React.ReactNode> = {
   habit_completion: <Flame className="h-4 w-4" />,
@@ -27,6 +30,9 @@ const SOURCE_COLORS: Record<string, string> = {
 export function XPHistoryList() {
   const [page, setPage] = useState(0);
   const limit = 20;
+  const t = useTranslations("xpHistory");
+  const locale = useLocale();
+  const dateLocale = getDateFnsLocale(locale as Locale);
 
   const { data, isLoading } = useQuery({
     ...orpc.gamification.getXpHistory.queryOptions({ input: { limit, offset: page * limit } }),
@@ -46,9 +52,9 @@ export function XPHistoryList() {
           </Button>
         </Link>
         <div>
-          <h1 className="font-display text-3xl font-bold">XP History</h1>
+          <h1 className="font-display text-3xl font-bold">{t("title")}</h1>
           <p className="text-sm text-muted-foreground">
-            Track your earning history
+            {t("subtitle")}
           </p>
         </div>
       </div>
@@ -58,7 +64,7 @@ export function XPHistoryList() {
         <div className="glass-strong rounded-2xl p-6 mb-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-muted-foreground">Total XP Earned</p>
+              <p className="text-sm text-muted-foreground">{t("totalXpEarned")}</p>
               <p className="font-display text-3xl font-bold gradient-text">
                 {transactions.reduce((sum, t) => sum + t.amount, 0)}
               </p>
@@ -83,9 +89,9 @@ export function XPHistoryList() {
             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/5 mx-auto mb-4">
               <Sparkles className="h-8 w-8 text-muted-foreground" />
             </div>
-            <h3 className="font-semibold mb-2">No XP history yet</h3>
+            <h3 className="font-semibold mb-2">{t("noHistoryTitle")}</h3>
             <p className="text-sm text-muted-foreground">
-              Complete habits to start earning XP!
+              {t("noHistoryDesc")}
             </p>
           </div>
         ) : (
@@ -104,7 +110,7 @@ export function XPHistoryList() {
                 <div className="flex-1 min-w-0">
                   <p className="font-medium">{transaction.description}</p>
                   <p className="text-xs text-muted-foreground">
-                    {format(new Date(transaction.createdAt), "MMM d, yyyy 'at' h:mm a")}
+                    {format(new Date(transaction.createdAt), "MMM d, yyyy 'at' h:mm a", { locale: dateLocale })}
                   </p>
                 </div>
 
@@ -123,10 +129,10 @@ export function XPHistoryList() {
               onClick={() => setPage((p) => Math.max(0, p - 1))}
               disabled={page === 0}
             >
-              Previous
+              {t("previous")}
             </Button>
             <span className="text-sm text-muted-foreground">
-              Page {page + 1} of {totalPages}
+              {t("pageOf", { page: page + 1, total: totalPages })}
             </span>
             <Button
               variant="outline"
@@ -134,7 +140,7 @@ export function XPHistoryList() {
               onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
               disabled={page >= totalPages - 1}
             >
-              Next
+              {t("next")}
             </Button>
           </div>
         )}

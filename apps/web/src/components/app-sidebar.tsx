@@ -4,12 +4,14 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Menu, Settings, LogOut } from "lucide-react";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { cn } from "@/lib/utils";
 import { mainNav } from "@/lib/navigation";
 import { authClient } from "@/lib/auth-client";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { ModeToggle } from "@/components/mode-toggle";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
@@ -29,6 +31,7 @@ function Logo() {
 
 function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
+  const t = useTranslations("nav");
 
   return (
     <nav className="flex flex-col gap-1">
@@ -54,7 +57,7 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
               </>
             )}
             <Icon className={cn("relative h-4 w-4", isActive ? item.color : "")} />
-            <span className="relative">{item.label}</span>
+            <span className="relative">{t(item.labelKey)}</span>
           </Link>
         );
       })}
@@ -64,6 +67,7 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
 
 function UserSection() {
   const router = useRouter();
+  const t = useTranslations("nav");
   const { data: session, isPending } = authClient.useSession();
 
   if (isPending) {
@@ -113,7 +117,7 @@ function UserSection() {
           }}
         >
           <LogOut className="h-4 w-4" />
-          <span className="sr-only">Sign out</span>
+          <span className="sr-only">{t("signOut")}</span>
         </Button>
       </div>
     </div>
@@ -122,6 +126,7 @@ function UserSection() {
 
 function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
+  const t = useTranslations("nav");
   const isSettingsActive = pathname === "/settings";
 
   return (
@@ -156,11 +161,12 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
               </>
             )}
             <Settings className={cn("relative h-4 w-4", isSettingsActive ? "text-[#a78bfa]" : "")} />
-            <span className="relative">Settings</span>
+            <span className="relative">{t("settings")}</span>
           </Link>
           <div className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground">
             <ModeToggle />
-            <span>Theme</span>
+            <LanguageSwitcher />
+            <span>{t("theme")}</span>
           </div>
         </div>
       </div>
@@ -173,6 +179,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 
 export default function AppSidebar({ children }: { children: React.ReactNode }) {
   const isMobile = useIsMobile();
+  const t = useTranslations("nav");
   const [open, setOpen] = useState(false);
 
   return (
@@ -192,7 +199,7 @@ export default function AppSidebar({ children }: { children: React.ReactNode }) 
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-9 w-9">
                   <Menu className="h-5 w-5" />
-                  <span className="sr-only">Open menu</span>
+                  <span className="sr-only">{t("openMenu")}</span>
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="w-[280px] p-0">

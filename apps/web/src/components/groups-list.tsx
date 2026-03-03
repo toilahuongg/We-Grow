@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, Users, Trophy, CheckCircle2, Flame, Sparkles } from "lucide-react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 import { orpc, client } from "@/utils/orpc";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,8 @@ const modeConfig = {
 
 export function GroupsList() {
   const queryClient = useQueryClient();
+  const t = useTranslations("groups");
+  const tc = useTranslations("common");
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [joinDialogOpen, setJoinDialogOpen] = useState(false);
   const [inviteCode, setInviteCode] = useState("");
@@ -52,20 +55,20 @@ export function GroupsList() {
     mutationFn: (input: { inviteCode: string }) => client.groups.join(input),
     onSuccess: (result) => {
       if (result.status === "active") {
-        toast.success("Successfully joined the group!");
+        toast.success(t("joinedSuccess"));
         queryClient.invalidateQueries({ queryKey: orpc.groups.listMy.queryKey() });
         setJoinDialogOpen(false);
         setInviteCode("");
         setLookupResult(null);
       } else if (result.status === "pending") {
-        toast.success("Request sent! Waiting for approval.");
+        toast.success(t("joinRequestSent"));
         setJoinDialogOpen(false);
         setInviteCode("");
         setLookupResult(null);
       }
     },
     onError: (error: any) => {
-      toast.error(error.message || "Failed to join group");
+      toast.error(error.message || t("failedJoin"));
     },
   });
 
@@ -79,7 +82,7 @@ export function GroupsList() {
       const result = await client.groups.lookupByInviteCode({ inviteCode: inviteCode.trim().toUpperCase() });
       setLookupResult(result);
     } catch (error: any) {
-      toast.error(error.message || "Invalid invite code");
+      toast.error(error.message || t("invalidInviteCode"));
       setLookupResult(null);
     } finally {
       setLookingUp(false);
@@ -131,7 +134,7 @@ export function GroupsList() {
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#ff6b6b] to-[#ffa06b]">
                 <Trophy className="h-4 w-4 text-white" />
               </div>
-              <span className="text-sm font-medium text-muted-foreground">Level</span>
+              <span className="text-sm font-medium text-muted-foreground">{t("level")}</span>
             </div>
             <p className="font-display text-3xl font-bold">{profile?.level ?? 1}</p>
             <p className="text-sm text-muted-foreground">{(profile?.totalXp ?? 0).toLocaleString()} XP</p>
@@ -145,10 +148,10 @@ export function GroupsList() {
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#4ecdc4] to-[#a78bfa]">
                 <CheckCircle2 className="h-4 w-4 text-white" />
               </div>
-              <span className="text-sm font-medium text-muted-foreground">Today</span>
+              <span className="text-sm font-medium text-muted-foreground">{t("today")}</span>
             </div>
             <p className="font-display text-3xl font-bold">{completedToday}/{totalHabits}</p>
-            <p className="text-sm text-muted-foreground">habits completed</p>
+            <p className="text-sm text-muted-foreground">{t("habitsCompleted")}</p>
           </div>
           <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full opacity-20 blur-2xl group-hover:opacity-30 transition-opacity" style={{ background: "#4ecdc4" }} />
         </div>
@@ -159,10 +162,10 @@ export function GroupsList() {
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#a78bfa] to-[#f472b6]">
                 <Sparkles className="h-4 w-4 text-white" />
               </div>
-              <span className="text-sm font-medium text-muted-foreground">Groups</span>
+              <span className="text-sm font-medium text-muted-foreground">{t("groupsLabel")}</span>
             </div>
             <p className="font-display text-3xl font-bold">{groups?.length ?? 0}</p>
-            <p className="text-sm text-muted-foreground">active groups</p>
+            <p className="text-sm text-muted-foreground">{t("activeGroups")}</p>
           </div>
           <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full opacity-20 blur-2xl group-hover:opacity-30 transition-opacity" style={{ background: "#a78bfa" }} />
         </div>
@@ -171,9 +174,9 @@ export function GroupsList() {
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="font-display text-3xl font-bold">My Groups</h1>
+          <h1 className="font-display text-3xl font-bold">{t("title")}</h1>
           <p className="text-sm text-muted-foreground">
-            Grow together with friends
+            {t("subtitle")}
           </p>
         </div>
         <div className="flex gap-2">
@@ -181,14 +184,14 @@ export function GroupsList() {
             variant="outline"
             onClick={() => setJoinDialogOpen(true)}
           >
-            Join Group
+            {t("joinGroup")}
           </Button>
           <Button
             onClick={() => setCreateDialogOpen(true)}
             className="bg-gradient-to-r from-[#ff6b6b] via-[#ffa06b] to-[#4ecdc4] text-white"
           >
             <Plus className="mr-2 h-4 w-4" />
-            Create Group
+            {t("createGroup")}
           </Button>
         </div>
       </div>
@@ -196,10 +199,10 @@ export function GroupsList() {
       {/* Groups List */}
       {!groups || groups.length === 0 ? (
         <EmptyState
-          title="No groups yet"
-          description="Create a group or join one with an invite code to grow together"
+          title={t("noGroupsTitle")}
+          description={t("noGroupsDesc")}
           action={{
-            label: "Create Your First Group",
+            label: t("createFirstGroup"),
             onClick: () => setCreateDialogOpen(true),
           }}
         />
@@ -235,20 +238,20 @@ export function GroupsList() {
                           ? "bg-[#ff6b6b]/20 text-[#ff6b6b] border-[#ff6b6b]/30"
                           : "bg-[#4ecdc4]/20 text-[#4ecdc4] border-[#4ecdc4]/30"
                       }`}>
-                        {config.label}
+                        {group.mode === "together" ? t("together") : t("share")}
                       </span>
                     </div>
 
                     <h3 className="mb-1 font-display text-xl font-bold">{group.name}</h3>
                     <p className="mb-4 text-sm text-muted-foreground line-clamp-2">
-                      {group.description || "No description"}
+                      {group.description || tc("noDescription")}
                     </p>
 
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4 text-xs text-muted-foreground">
                         <div className="flex items-center gap-1">
                           <Users className="h-3 w-3" />
-                          <span>Members</span>
+                          <span>{tc("members")}</span>
                         </div>
                       </div>
 
@@ -287,7 +290,7 @@ export function GroupsList() {
             onClick={() => setCreateDialogOpen(false)}
           />
           <div className="relative z-50 glass-strong rounded-2xl p-6 shadow-xl w-full max-w-md mx-4 animate-in zoom-in-95 max-h-[90vh] overflow-y-auto">
-            <h2 className="text-lg font-bold mb-4">Create Group</h2>
+            <h2 className="text-lg font-bold mb-4">{t("createGroup")}</h2>
             <GroupForm
               onSuccess={() => {
                 setCreateDialogOpen(false);
@@ -311,16 +314,16 @@ export function GroupsList() {
             }}
           />
           <div className="relative z-50 glass-strong rounded-2xl p-6 shadow-xl w-full max-w-md mx-4 animate-in zoom-in-95">
-            <h2 className="text-lg font-bold mb-4">Join Group</h2>
+            <h2 className="text-lg font-bold mb-4">{t("joinGroup")}</h2>
 
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-medium mb-2 block">Invite Code</label>
+                <label className="text-sm font-medium mb-2 block">{t("inviteCode")}</label>
                 <input
                   type="text"
                   value={inviteCode}
                   onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
-                  placeholder="Enter 6-character code"
+                  placeholder={t("enterCode")}
                   className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 focus:border-[#4ecdc4] outline-none text-center text-lg font-mono tracking-widest uppercase"
                   maxLength={6}
                 />
@@ -332,25 +335,25 @@ export function GroupsList() {
                 className="w-full"
                 variant="outline"
               >
-                {lookingUp ? "Looking up..." : "Lookup Group"}
+                {lookingUp ? t("lookingUp") : t("lookupGroup")}
               </Button>
 
               {lookupResult && (
                 <div className="rounded-xl border border-white/10 bg-white/5 p-4">
                   <h3 className="font-semibold mb-1">{lookupResult.name}</h3>
                   <p className="text-sm text-muted-foreground mb-2">
-                    {lookupResult.description || "No description"}
+                    {lookupResult.description || tc("noDescription")}
                   </p>
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-muted-foreground">
-                      {lookupResult.memberCount} members
+                      {t("membersCount", { count: lookupResult.memberCount })}
                     </span>
                     <span className={`rounded-full border px-2 py-0.5 ${
                       lookupResult.mode === "together"
                         ? "bg-[#ff6b6b]/20 text-[#ff6b6b] border-[#ff6b6b]/30"
                         : "bg-[#4ecdc4]/20 text-[#4ecdc4] border-[#4ecdc4]/30"
                     }`}>
-                      {modeConfig[lookupResult.mode as keyof typeof modeConfig].label}
+                      {lookupResult.mode === "together" ? t("together") : t("share")}
                     </span>
                   </div>
                   <Button
@@ -358,7 +361,7 @@ export function GroupsList() {
                     disabled={joinMutation.isPending}
                     className="w-full mt-3 bg-gradient-to-r from-[#4ecdc4] to-[#a78bfa] text-white"
                   >
-                    {joinMutation.isPending ? "Joining..." : "Join Group"}
+                    {joinMutation.isPending ? t("joining") : t("joinGroup")}
                   </Button>
                 </div>
               )}
@@ -372,7 +375,7 @@ export function GroupsList() {
                 }}
                 className="w-full"
               >
-                Cancel
+                {tc("cancel")}
               </Button>
             </div>
           </div>
@@ -388,6 +391,8 @@ function GroupForm({ onSuccess, onCancel }: {
   onCancel: () => void;
 }) {
   const queryClient = useQueryClient();
+  const t = useTranslations("groups");
+  const tc = useTranslations("common");
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [mode, setMode] = useState<"together" | "share">("together");
@@ -397,10 +402,10 @@ function GroupForm({ onSuccess, onCancel }: {
       client.groups.create(input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: orpc.groups.listMy.queryKey() });
-      toast.success("Group created!");
+      toast.success(t("groupCreated"));
       onSuccess();
     },
-    onError: (error: any) => toast.error(error.message || "Failed to create group"),
+    onError: (error: any) => toast.error(error.message || t("failedCreate")),
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -412,30 +417,30 @@ function GroupForm({ onSuccess, onCancel }: {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
-        <label className="text-sm font-medium">Group Name *</label>
+        <label className="text-sm font-medium">{t("groupName")}</label>
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="My Growth Group"
+          placeholder={t("groupNamePlaceholder")}
           className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 focus:border-[#4ecdc4] outline-none"
           autoFocus
         />
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-medium">Description</label>
+        <label className="text-sm font-medium">{t("description")}</label>
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          placeholder="What's this group about?"
+          placeholder={t("descriptionPlaceholder")}
           rows={2}
           className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 focus:border-[#4ecdc4] outline-none resize-none"
         />
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-medium">Group Mode *</label>
+        <label className="text-sm font-medium">{t("groupMode")}</label>
         <div className="grid grid-cols-2 gap-2">
           {(["together", "share"] as const).map((m) => {
             const config = modeConfig[m];
@@ -460,8 +465,8 @@ function GroupForm({ onSuccess, onCancel }: {
                 />
                 <div className="flex flex-col items-center text-center gap-1">
                   <Icon className="h-5 w-5" />
-                  <span className="text-sm font-medium">{config.label}</span>
-                  <span className="text-xs text-muted-foreground">{config.description}</span>
+                  <span className="text-sm font-medium">{m === "together" ? t("together") : t("share")}</span>
+                  <span className="text-xs text-muted-foreground">{m === "together" ? t("togetherDesc") : t("shareDesc")}</span>
                 </div>
               </label>
             );
@@ -471,14 +476,14 @@ function GroupForm({ onSuccess, onCancel }: {
 
       <div className="flex justify-end gap-2 pt-2">
         <Button type="button" variant="outline" onClick={onCancel}>
-          Cancel
+          {tc("cancel")}
         </Button>
         <Button
           type="submit"
           className="bg-gradient-to-r from-[#ff6b6b] via-[#ffa06b] to-[#4ecdc4] text-white"
           disabled={createMutation.isPending || !name.trim()}
         >
-          {createMutation.isPending ? "Creating..." : "Create Group"}
+          {createMutation.isPending ? t("creating") : t("createGroup")}
         </Button>
       </div>
     </form>

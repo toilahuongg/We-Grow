@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 import { orpc, client } from "@/utils/orpc";
 import { Button } from "@/components/ui/button";
@@ -30,9 +31,9 @@ import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
 
 const roleConfig = {
-  owner: { label: "Owner", icon: Crown, color: "text-yellow-500" },
-  moderator: { label: "Moderator", icon: Shield, color: "text-blue-500" },
-  member: { label: "Member", icon: Users, color: "text-muted-foreground" },
+  owner: { labelKey: "owner" as const, icon: Crown, color: "text-yellow-500" },
+  moderator: { labelKey: "moderator" as const, icon: Shield, color: "text-blue-500" },
+  member: { labelKey: "member" as const, icon: Users, color: "text-muted-foreground" },
 };
 
 const habitIcons: Record<string, string> = {
@@ -73,6 +74,8 @@ function getHabitIcon(title: string): string {
 export function GroupDetail({ groupId, initialData }: { groupId: string; initialData: any }) {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const t = useTranslations("groupDetail");
+  const tc = useTranslations("common");
   const [session, setSession] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<"today" | "leaderboard" | "members" | "settings">("today");
   const [showInviteCode, setShowInviteCode] = useState(false);
@@ -116,7 +119,7 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
     },
     onSuccess: (result) => {
       if (!result.alreadyCompleted) {
-        toast.success(`+${result.xpAwarded} XP!`);
+        toast.success(t("xpAwarded", { amount: result.xpAwarded ?? 0 }));
       }
       queryClient.invalidateQueries({ queryKey: orpc.gamification.getProfile.queryKey() });
     },
@@ -125,7 +128,7 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
         orpc.habits.todaySummary.queryOptions({ input: { groupId } }).queryKey,
         context?.previousHabits
       );
-      toast.error("Failed to complete habit.");
+      toast.error(t("failedComplete"));
     },
   });
 
@@ -150,7 +153,7 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
         orpc.habits.todaySummary.queryOptions({ input: { groupId } }).queryKey,
         context?.previousHabits
       );
-      toast.error("Failed to uncomplete habit.");
+      toast.error(t("failedUncomplete"));
     },
   });
 
@@ -158,11 +161,11 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
     mutationFn: () => client.groups.leave({ groupId }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: orpc.groups.listMy.queryKey() });
-      toast.success("Left the group");
+      toast.success(t("leftGroup"));
       window.location.href = "/groups";
     },
     onError: (error: any) => {
-      toast.error(error.message || "Failed to leave group");
+      toast.error(error.message || t("failedLeave"));
     },
   });
 
@@ -170,11 +173,11 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
     mutationFn: () => client.groups.delete({ groupId }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: orpc.groups.listMy.queryKey() });
-      toast.success("Group deleted");
+      toast.success(t("groupDeleted"));
       window.location.href = "/groups";
     },
     onError: (error: any) => {
-      toast.error(error.message || "Failed to delete group");
+      toast.error(error.message || t("failedDelete"));
     },
   });
 
@@ -182,10 +185,10 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
     mutationFn: () => client.groups.regenerateInviteCode({ groupId }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: orpc.groups.getById.queryKey({ input: { groupId } }) });
-      toast.success("Invite code regenerated!");
+      toast.success(t("inviteCodeRegenerated"));
     },
     onError: () => {
-      toast.error("Failed to regenerate invite code");
+      toast.error(t("failedRegenerate"));
     },
   });
 
@@ -193,10 +196,10 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
     mutationFn: (userId: string) => client.groups.removeMember({ groupId, userId }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: orpc.groups.getById.queryKey({ input: { groupId } }) });
-      toast.success("Member removed");
+      toast.success(t("memberRemoved"));
     },
     onError: (error: any) => {
-      toast.error(error.message || "Failed to remove member");
+      toast.error(error.message || t("failedRemoveMember"));
     },
   });
 
@@ -205,10 +208,10 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
       client.groups.changeMemberRole({ groupId, userId, role }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: orpc.groups.getById.queryKey({ input: { groupId } }) });
-      toast.success("Role updated");
+      toast.success(t("roleUpdated"));
     },
     onError: (error: any) => {
-      toast.error(error.message || "Failed to update role");
+      toast.error(error.message || t("failedUpdateRole"));
     },
   });
 
@@ -227,10 +230,10 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
     return (
       <div className="container mx-auto max-w-4xl px-4 py-8">
         <EmptyState
-          title="Group not found"
-          description="The group you're looking for doesn't exist"
+          title={t("groupNotFound")}
+          description={t("groupNotFoundDesc")}
           action={{
-            label: "Back to Groups",
+            label: t("backToGroups"),
             onClick: () => {
               window.location.href = "/groups";
             },
@@ -250,17 +253,17 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
 
   const copyInviteCode = () => {
     navigator.clipboard.writeText(group.inviteCode);
-    toast.success("Invite code copied!");
+    toast.success(t("inviteCodeCopied"));
   };
 
   const dueHabits = (todayHabits as any[])?.filter((h: any) => h.isDue) ?? [];
   const completedCount = dueHabits.filter((h: any) => h.completedToday).length;
 
   const tabs = [
-    { key: "today" as const, label: "Today" },
-    { key: "leaderboard" as const, label: "Leaderboard" },
-    { key: "members" as const, label: "Members" },
-    { key: "settings" as const, label: "Settings" },
+    { key: "today" as const, label: t("tabToday") },
+    { key: "leaderboard" as const, label: t("tabLeaderboard") },
+    { key: "members" as const, label: t("tabMembers") },
+    { key: "settings" as const, label: t("tabSettings") },
   ];
 
   return (
@@ -274,7 +277,7 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
         </Link>
         <div>
           <h1 className="font-display text-3xl font-bold">{group.name}</h1>
-          <p className="text-sm text-muted-foreground capitalize">{group.mode} mode</p>
+          <p className="text-sm text-muted-foreground capitalize">{t("mode", { mode: group.mode })}</p>
         </div>
       </div>
 
@@ -298,19 +301,19 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
           <div className="glass-strong rounded-2xl p-6">
             <div className="mb-6 flex items-center justify-between">
               <div>
-                <h2 className="font-display text-xl font-bold">Today's Habits</h2>
+                <h2 className="font-display text-xl font-bold">{t("todaysHabits")}</h2>
                 <p className="text-sm text-muted-foreground">
                   {completedCount === dueHabits.length && dueHabits.length > 0
-                    ? "All habits completed!"
+                    ? t("allCompleted")
                     : dueHabits.length === 0
-                    ? "No habits scheduled for today"
-                    : `${dueHabits.length - completedCount} remaining`}
+                    ? t("noHabitsToday")
+                    : t("remaining", { count: dueHabits.length - completedCount })}
                 </p>
               </div>
               {canManage && (
                 <Link href={`/groups/${groupId}/habits/new`}>
                   <Button size="sm" className="bg-gradient-to-r from-[#ff6b6b] via-[#ffa06b] to-[#4ecdc4] text-white">
-                    + New Habit
+                    {t("newHabit")}
                   </Button>
                 </Link>
               )}
@@ -319,10 +322,10 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
             <div className="space-y-3">
               {dueHabits.length === 0 ? (
                 <EmptyState
-                  title="No habits yet"
-                  description={canManage ? "Create a habit to get started" : "Waiting for group habits to be created"}
+                  title={t("noHabitsYet")}
+                  description={canManage ? t("createHabitToStart") : t("waitingForHabits")}
                   action={canManage ? {
-                    label: "Create Group Habit",
+                    label: t("createGroupHabit"),
                     onClick: () => router.push(`/groups/${groupId}/habits/new`),
                   } : undefined}
                 />
@@ -359,7 +362,7 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                     </div>
 
                     <div className="text-right">
-                      <p className="text-sm font-medium">{habit.currentStreak ?? 0} day streak</p>
+                      <p className="text-sm font-medium">{t("dayStreak", { count: habit.currentStreak ?? 0 })}</p>
                     </div>
 
                     <button
@@ -391,11 +394,11 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
       {/* Tab: Leaderboard */}
       {activeTab === "leaderboard" && (
         <div className="glass-strong rounded-2xl p-6">
-          <h3 className="font-semibold mb-4">Leaderboard</h3>
+          <h3 className="font-semibold mb-4">{t("leaderboard")}</h3>
           {!leaderboard || leaderboard.length === 0 ? (
             <EmptyState
-              title="No data yet"
-              description="Complete some habits to see the leaderboard"
+              title={t("noDataYet")}
+              description={t("completeToSeeLeaderboard")}
             />
           ) : (
             <>
@@ -410,7 +413,7 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                     <div className="glass-strong rounded-xl border border-gray-400/30 bg-gray-400/10 p-4 text-center w-32">
                       <p className="font-medium text-sm truncate">
                         {leaderboard[1]?.userId === session?.user?.id
-                          ? "You"
+                          ? tc("you")
                           : leaderboard[1]?.userName}
                       </p>
                       <p className="text-lg font-bold">{leaderboard[1]?.totalXp} XP</p>
@@ -426,11 +429,11 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                     <div className="glass-strong rounded-xl border border-yellow-500/30 bg-yellow-500/10 p-4 text-center w-36">
                       <p className="font-semibold truncate">
                         {leaderboard[0]?.userId === session?.user?.id
-                          ? "You"
+                          ? tc("you")
                           : leaderboard[0]?.userName}
                       </p>
                       <p className="text-xl font-bold gradient-text">{leaderboard[0]?.totalXp} XP</p>
-                      <p className="text-xs text-muted-foreground">Level {leaderboard[0]?.level}</p>
+                      <p className="text-xs text-muted-foreground">{t("levelLabel", { level: leaderboard[0]?.level })}</p>
                     </div>
                   </div>
 
@@ -442,7 +445,7 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                     <div className="glass-strong rounded-xl border border-amber-600/30 bg-amber-600/10 p-4 text-center w-32">
                       <p className="font-medium text-sm truncate">
                         {leaderboard[2]?.userId === session?.user?.id
-                          ? "You"
+                          ? tc("you")
                           : leaderboard[2]?.userName}
                       </p>
                       <p className="text-lg font-bold">{leaderboard[2]?.totalXp} XP</p>
@@ -470,10 +473,10 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                         </div>
                         <div className="flex-1">
                           <p className="font-medium">
-                            {isCurrentUser ? "You" : entry.userName}
+                            {isCurrentUser ? tc("you") : entry.userName}
                           </p>
                           <p className="text-xs text-muted-foreground">
-                            Level {entry.level} · {entry.bestStreak} day streak
+                            {t("levelLabel", { level: entry.level })} · {t("dayStreakLabel", { count: entry.bestStreak })}
                           </p>
                         </div>
                         <div className="text-right">
@@ -502,10 +505,10 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                         </div>
                         <div className="flex-1">
                           <p className="font-medium">
-                            {isCurrentUser ? "You" : entry.userName}
+                            {isCurrentUser ? tc("you") : entry.userName}
                           </p>
                           <p className="text-xs text-muted-foreground">
-                            Level {entry.level} · {entry.bestStreak} day streak
+                            {t("levelLabel", { level: entry.level })} · {t("dayStreakLabel", { count: entry.bestStreak })}
                           </p>
                         </div>
                         <div className="text-right">
@@ -524,12 +527,12 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
       {/* Tab: Members */}
       {activeTab === "members" && (
         <div className="glass-strong rounded-2xl p-6">
-          <h3 className="font-semibold mb-4">Members ({activeMembers.length})</h3>
+          <h3 className="font-semibold mb-4">{t("membersTitle", { count: activeMembers.length })}</h3>
 
           {activeMembers.length === 0 ? (
             <EmptyState
-              title="No members yet"
-              description="Share the invite code to add members"
+              title={t("noMembersYet")}
+              description={t("shareInviteCode")}
             />
           ) : (
             <div className="space-y-2">
@@ -552,11 +555,11 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                     </div>
                     <div className="flex-1">
                       <p className="font-medium">
-                        {isCurrentUser ? "You" : member.userName}
+                        {isCurrentUser ? tc("you") : member.userName}
                       </p>
                       <div className={`flex items-center gap-1 text-xs ${config.color}`}>
                         <RoleIcon className="h-3 w-3" />
-                        <span>{config.label}</span>
+                        <span>{t(config.labelKey)}</span>
                       </div>
                     </div>
                     {canManage && !isCurrentUser && isOwner && (
@@ -570,13 +573,13 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                           className="bg-white/5 border border-white/10 rounded px-2 py-1 text-xs"
                           disabled={changeRoleMutation.isPending}
                         >
-                          <option value="member">Member</option>
-                          <option value="moderator">Moderator</option>
+                          <option value="member">{t("member")}</option>
+                          <option value="moderator">{t("moderator")}</option>
                         </select>
                         <button
                           onClick={() => removeMemberMutation.mutate(member.userId)}
                           className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 text-muted-foreground transition-all hover:bg-red-500/20 hover:text-red-500"
-                          title="Remove member"
+                          title={t("removeMember")}
                           disabled={removeMemberMutation.isPending}
                         >
                           <UserX className="h-4 w-4" />
@@ -591,7 +594,7 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
 
           {pendingMembers.length > 0 && canManage && (
             <>
-              <h4 className="font-semibold mt-6 mb-3">Pending Members ({pendingMembers.length})</h4>
+              <h4 className="font-semibold mt-6 mb-3">{t("pendingMembers", { count: pendingMembers.length })}</h4>
               <div className="space-y-2">
                 {pendingMembers.map((member: any) => (
                   <div
@@ -603,7 +606,7 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                     </div>
                     <div className="flex-1">
                       <p className="font-medium">{member.userName}</p>
-                      <p className="text-xs text-yellow-500">Waiting for approval</p>
+                      <p className="text-xs text-yellow-500">{t("waitingForApproval")}</p>
                     </div>
                   </div>
                 ))}
@@ -618,20 +621,20 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
         <div className="space-y-6">
           {/* Group Info */}
           <div className="glass-strong rounded-2xl p-6">
-            <h3 className="font-semibold mb-4">Group Information</h3>
+            <h3 className="font-semibold mb-4">{t("groupInfo")}</h3>
             <p className="text-sm text-muted-foreground mb-4">
-              {group.description || "No description provided"}
+              {group.description || t("noDescriptionProvided")}
             </p>
             <div className="flex items-center gap-2 mb-4">
               <span className="rounded-full bg-white/10 px-3 py-1.5 text-sm">
-                {activeMembers.length} members
+                {t("membersTitle", { count: activeMembers.length })}
               </span>
               <span className={`rounded-full border px-2.5 py-1 text-xs font-medium ${
                 group.mode === "together"
                   ? "bg-[#ff6b6b]/20 text-[#ff6b6b] border-[#ff6b6b]/30"
                   : "bg-[#4ecdc4]/20 text-[#4ecdc4] border-[#4ecdc4]/30"
               }`}>
-                {group.mode === "together" ? "Together" : "Share"} mode
+                {group.mode === "together" ? t("togetherMode") : t("shareMode")}
               </span>
             </div>
 
@@ -639,7 +642,7 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
             <div className="rounded-xl border border-white/10 bg-white/5 p-4">
               <div className="flex items-center justify-between">
                 <div className="flex-1">
-                  <Label className="text-xs text-muted-foreground mb-1">Invite Code</Label>
+                  <Label className="text-xs text-muted-foreground mb-1">{t("inviteCode")}</Label>
                   <div className="flex items-center gap-2">
                     <code className="text-lg font-mono tracking-widest">
                       {showInviteCode ? group.inviteCode : "••••••"}
@@ -648,7 +651,7 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                       onClick={() => setShowInviteCode(!showInviteCode)}
                       className="text-muted-foreground hover:text-foreground text-sm"
                     >
-                      {showInviteCode ? "Hide" : "Show"}
+                      {showInviteCode ? t("hide") : t("show")}
                     </button>
                   </div>
                 </div>
@@ -677,12 +680,12 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
 
           {/* Danger Zone */}
           <div className="glass-strong rounded-2xl p-6 border border-red-500/10">
-            <h3 className="font-semibold mb-4 text-red-400">Danger Zone</h3>
+            <h3 className="font-semibold mb-4 text-red-400">{t("dangerZone")}</h3>
             <div className="space-y-3">
               <div className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 p-4">
                 <div>
-                  <p className="font-medium">Leave Group</p>
-                  <p className="text-sm text-muted-foreground">You can rejoin later with the invite code</p>
+                  <p className="font-medium">{t("leaveGroup")}</p>
+                  <p className="text-sm text-muted-foreground">{t("leaveGroupDesc")}</p>
                 </div>
                 <Button
                   variant="outline"
@@ -690,22 +693,22 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                   className="border-red-500/30 text-red-400 hover:bg-red-500/10"
                 >
                   <LogOut className="mr-2 h-4 w-4" />
-                  Leave
+                  {t("leave")}
                 </Button>
               </div>
 
               {isOwner && (
                 <div className="flex items-center justify-between rounded-xl border border-red-500/20 bg-red-500/5 p-4">
                   <div>
-                    <p className="font-medium text-red-400">Delete Group</p>
-                    <p className="text-sm text-muted-foreground">This action cannot be undone</p>
+                    <p className="font-medium text-red-400">{t("deleteGroup")}</p>
+                    <p className="text-sm text-muted-foreground">{t("deleteGroupDesc")}</p>
                   </div>
                   <Button
                     variant="destructive"
                     onClick={() => setDeleteDialog(true)}
                   >
                     <Trash2 className="mr-2 h-4 w-4" />
-                    Delete
+                    {t("deleteGroup")}
                   </Button>
                 </div>
               )}
@@ -718,9 +721,9 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
       <ConfirmDialog
         open={leaveDialog}
         onOpenChange={setLeaveDialog}
-        title="Leave Group"
-        description={`Are you sure you want to leave "${group.name}"? You can join again later with the invite code.`}
-        confirmText="Leave"
+        title={t("leaveConfirmTitle")}
+        description={t("leaveConfirmDesc", { name: group.name })}
+        confirmText={t("leave")}
         variant="warning"
         onConfirm={() => leaveMutation.mutate()}
         isLoading={leaveMutation.isPending}
@@ -730,9 +733,9 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
       <ConfirmDialog
         open={deleteDialog}
         onOpenChange={setDeleteDialog}
-        title="Delete Group"
-        description={`Are you sure you want to delete "${group.name}"? This action cannot be undone and all group data will be lost.`}
-        confirmText="Delete"
+        title={t("deleteConfirmTitle")}
+        description={t("deleteConfirmDesc", { name: group.name })}
+        confirmText={t("deleteGroup")}
         variant="danger"
         onConfirm={() => deleteMutation.mutate()}
         isLoading={deleteMutation.isPending}
