@@ -89,7 +89,7 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
   const [editDescription, setEditDescription] = useState("");
 
   useState(() => {
-    authClient.getSession().then(setSession);
+    authClient.getSession().then((res) => setSession(res.data ? res.data : null));
   });
 
   const { data: group, isLoading } = useQuery({
@@ -273,7 +273,9 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
     );
   }
 
-  const currentUser = group.members?.find((m: any) => m.userId === session.user?.id);
+  const currentUser = group.members?.find((m: any) => {
+    return m.userId === session.user?.id;
+  });
   const isOwner = currentUser?.role === "owner";
   const isModerator = currentUser?.role === "moderator";
   const canManage = isOwner || isModerator;
@@ -336,8 +338,8 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                   {completedCount === dueHabits.length && dueHabits.length > 0
                     ? t("allCompleted")
                     : dueHabits.length === 0
-                    ? t("noHabitsToday")
-                    : t("remaining", { count: dueHabits.length - completedCount })}
+                      ? t("noHabitsToday")
+                      : t("remaining", { count: dueHabits.length - completedCount })}
                 </p>
               </div>
               <Link href={`/groups/${groupId}/habits/new`}>
@@ -364,11 +366,10 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                     onClick={() => router.push(`/habits/${habit._id}`)}
                     className="group relative flex items-center gap-4 rounded-xl border border-white/5 bg-white/5 p-4 transition-all hover:border-white/10 hover:bg-white/10 cursor-pointer"
                   >
-                    <div className={`flex h-12 w-12 items-center justify-center rounded-xl text-2xl ${
-                      habit.completedToday
-                        ? "bg-gradient-to-br from-[#4ecdc4]/20 to-[#a78bfa]/20"
-                        : "bg-white/5"
-                    }`}>
+                    <div className={`flex h-12 w-12 items-center justify-center rounded-xl text-2xl ${habit.completedToday
+                      ? "bg-gradient-to-br from-[#4ecdc4]/20 to-[#a78bfa]/20"
+                      : "bg-white/5"
+                      }`}>
                       {getHabitIcon(habit.title)}
                     </div>
 
@@ -403,11 +404,10 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                         }
                       }}
                       disabled={completeHabit.isPending || uncompleteHabit.isPending}
-                      className={`flex h-10 w-10 items-center justify-center rounded-full transition-all ${
-                        habit.completedToday
-                          ? "bg-[#4ecdc4] text-white shadow-lg shadow-[#4ecdc4]/30"
-                          : "bg-white/10 text-muted-foreground hover:bg-[#4ecdc4] hover:text-white hover:shadow-lg hover:shadow-[#4ecdc4]/30"
-                      } ${completeHabit.isPending || uncompleteHabit.isPending ? "opacity-50 cursor-not-allowed" : ""}`}
+                      className={`flex h-10 w-10 items-center justify-center rounded-full transition-all ${habit.completedToday
+                        ? "bg-[#4ecdc4] text-white shadow-lg shadow-[#4ecdc4]/30"
+                        : "bg-white/10 text-muted-foreground hover:bg-[#4ecdc4] hover:text-white hover:shadow-lg hover:shadow-[#4ecdc4]/30"
+                        } ${completeHabit.isPending || uncompleteHabit.isPending ? "opacity-50 cursor-not-allowed" : ""}`}
                     >
                       <CheckCircle2 className="h-5 w-5" />
                     </button>
@@ -490,11 +490,10 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                     return (
                       <div
                         key={entry.userId}
-                        className={`flex items-center gap-4 rounded-xl border p-3 ${
-                          isCurrentUser
-                            ? "border-[#4ecdc4] bg-[#4ecdc4]/10"
-                            : "border-white/10 bg-white/5"
-                        }`}
+                        className={`flex items-center gap-4 rounded-xl border p-3 ${isCurrentUser
+                          ? "border-[#4ecdc4] bg-[#4ecdc4]/10"
+                          : "border-white/10 bg-white/5"
+                          }`}
                       >
                         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[#ff6b6b] to-[#ffa06b] text-sm font-bold text-white">
                           {index + 1}
@@ -522,11 +521,10 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                     return (
                       <div
                         key={entry.userId}
-                        className={`flex items-center gap-4 rounded-xl border p-3 ${
-                          isCurrentUser
-                            ? "border-[#4ecdc4] bg-[#4ecdc4]/10"
-                            : "border-white/10 bg-white/5"
-                        }`}
+                        className={`flex items-center gap-4 rounded-xl border p-3 ${isCurrentUser
+                          ? "border-[#4ecdc4] bg-[#4ecdc4]/10"
+                          : "border-white/10 bg-white/5"
+                          }`}
                       >
                         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[#ff6b6b] to-[#ffa06b] text-sm font-bold text-white">
                           {index + 4}
@@ -572,11 +570,10 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                 return (
                   <div
                     key={member._id}
-                    className={`flex items-center gap-3 rounded-xl border p-3 ${
-                      isCurrentUser
-                        ? "border-[#4ecdc4] bg-[#4ecdc4]/10"
-                        : "border-white/10 bg-white/5"
-                    }`}
+                    className={`flex items-center gap-3 rounded-xl border p-3 ${isCurrentUser
+                      ? "border-[#4ecdc4] bg-[#4ecdc4]/10"
+                      : "border-white/10 bg-white/5"
+                      }`}
                   >
                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#ffa06b] to-[#f472b6] text-white font-semibold">
                       {isCurrentUser ? "Y" : getInitials(member.userName)}
@@ -734,11 +731,10 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                   <span className="rounded-full bg-white/10 px-3 py-1.5 text-sm">
                     {t("membersTitle", { count: activeMembers.length })}
                   </span>
-                  <span className={`rounded-full border px-2.5 py-1 text-xs font-medium ${
-                    group.mode === "together"
-                      ? "bg-[#ff6b6b]/20 text-[#ff6b6b] border-[#ff6b6b]/30"
-                      : "bg-[#4ecdc4]/20 text-[#4ecdc4] border-[#4ecdc4]/30"
-                  }`}>
+                  <span className={`rounded-full border px-2.5 py-1 text-xs font-medium ${group.mode === "together"
+                    ? "bg-[#ff6b6b]/20 text-[#ff6b6b] border-[#ff6b6b]/30"
+                    : "bg-[#4ecdc4]/20 text-[#4ecdc4] border-[#4ecdc4]/30"
+                    }`}>
                     {group.mode === "together" ? t("togetherMode") : t("shareMode")}
                   </span>
                 </div>

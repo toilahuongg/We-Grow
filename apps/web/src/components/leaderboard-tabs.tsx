@@ -1,14 +1,14 @@
 "use client";
 
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Trophy, Medal, Crown, Users } from "lucide-react";
-import Link from "next/link";
+import { ArrowLeft, Crown, Trophy, Users } from "lucide-react";
 import { useTranslations } from "next-intl";
+import Link from "next/link";
+import { useState } from "react";
 
-import { orpc } from "@/utils/orpc";
 import { Button } from "@/components/ui/button";
-import { StreakBadge } from "@/components/streak-badge";
+import { authClient } from "@/lib/auth-client";
+import { orpc } from "@/utils/orpc";
 
 export function LeaderboardTabs() {
   const [activeTab, setActiveTab] = useState<"global" | "groups">("global");
@@ -23,9 +23,7 @@ export function LeaderboardTabs() {
   const [session, setSession] = useState<any>(null);
 
   useState(() => {
-    import("@/lib/auth-client").then(({ authClient }) => {
-      authClient.getSession().then(setSession);
-    });
+      authClient.getSession().then((res) => setSession(res.data ? res.data : null));
   });
 
   // Find user's rank on global leaderboard
