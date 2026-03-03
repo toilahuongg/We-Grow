@@ -76,7 +76,7 @@ export function ActivityItem({ activity, groupId }: ActivityItemProps) {
   return (
     <div className="relative flex gap-3 py-4 first:pt-0 last:pb-0">
       {/* Timeline connector */}
-      <div className="absolute left-[19px] top-0 bottom-0 w-px bg-white/[0.06] first:top-5 last:bottom-auto" />
+      <div className="absolute left-[19px] top-0 bottom-0 w-px bg-overlay-subtle first:top-5 last:bottom-auto" />
 
       {/* Avatar */}
       <div className="relative z-10 shrink-0">
@@ -94,8 +94,8 @@ export function ActivityItem({ activity, groupId }: ActivityItemProps) {
         {/* Message */}
         <div className={`rounded-2xl p-3.5 ${
           isMilestone
-            ? "bg-gradient-to-r from-[#ff6b6b]/[0.08] via-[#ffa06b]/[0.06] to-transparent border border-white/[0.08]"
-            : "bg-white/[0.04]"
+            ? "bg-gradient-to-r from-[#ff6b6b]/[0.08] via-[#ffa06b]/[0.06] to-transparent border border-overlay-medium"
+            : "bg-overlay-subtle"
         }`}>
           <div className="flex items-start gap-2">
             <span className="text-base leading-none mt-0.5 shrink-0">{emoji}</span>

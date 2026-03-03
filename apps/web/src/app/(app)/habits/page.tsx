@@ -121,11 +121,11 @@ export default function HabitsPage() {
     return (
       <div className="container mx-auto max-w-4xl px-4 py-8">
         <div className="mb-8">
-          <div className="h-9 w-40 animate-pulse rounded bg-white/10 mb-2" />
-          <div className="h-5 w-60 animate-pulse rounded bg-white/5" />
+          <div className="h-9 w-40 animate-pulse rounded bg-overlay-medium mb-2" />
+          <div className="h-5 w-60 animate-pulse rounded bg-overlay-subtle" />
         </div>
         <div className="glass-strong rounded-2xl p-8">
-          <div className="h-48 animate-pulse rounded-xl bg-white/5" />
+          <div className="h-48 animate-pulse rounded-xl bg-overlay-subtle" />
         </div>
       </div>
     );
@@ -174,13 +174,13 @@ export default function HabitsPage() {
                     <div
                       key={habit._id}
                       onClick={() => router.push(`/habits/${habit._id}`)}
-                      className="group/item relative flex items-center gap-4 rounded-xl border border-white/5 bg-white/5 p-4 transition-all hover:border-white/10 hover:bg-white/10 cursor-pointer"
+                      className="group/item relative flex items-center gap-4 rounded-xl border border-overlay-subtle bg-overlay-subtle p-4 transition-all hover:border-overlay-medium hover:bg-overlay-medium cursor-pointer"
                     >
                       <div
                         className={`flex h-12 w-12 items-center justify-center rounded-xl text-2xl ${
                           habit.completedToday
                             ? "bg-gradient-to-br from-[#4ecdc4]/20 to-[#a78bfa]/20"
-                            : "bg-white/5"
+                            : "bg-overlay-subtle"
                         }`}
                       >
                         {getHabitIcon(habit.title)}
@@ -223,7 +223,7 @@ export default function HabitsPage() {
                         className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-all ${
                           habit.completedToday
                             ? "bg-[#4ecdc4] text-white shadow-lg shadow-[#4ecdc4]/30"
-                            : "bg-white/10 text-muted-foreground hover:bg-[#4ecdc4] hover:text-white hover:shadow-lg hover:shadow-[#4ecdc4]/30"
+                            : "bg-overlay-medium text-muted-foreground hover:bg-[#4ecdc4] hover:text-white hover:shadow-lg hover:shadow-[#4ecdc4]/30"
                         } ${completeHabit.isPending || uncompleteHabit.isPending ? "opacity-50 cursor-not-allowed" : ""}`}
                       >
                         <CheckCircle2 className="h-5 w-5" />

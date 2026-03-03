@@ -15,7 +15,7 @@ function RankBadge({ rank }: { rank: number }) {
   if (rank === 2) return <span className="text-xl">🥈</span>;
   if (rank === 3) return <span className="text-xl">🥉</span>;
   return (
-    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-sm font-bold tabular-nums">
+    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-overlay-medium text-sm font-bold tabular-nums">
       {rank}
     </div>
   );
@@ -91,12 +91,12 @@ export function LeaderboardTabs() {
           {globalLoading ? (
             <div className="glass-strong rounded-2xl p-6 space-y-3">
               {[1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="h-16 animate-pulse rounded-xl bg-white/5" style={{ animationDelay: `${i * 100}ms` }} />
+                <div key={i} className="h-16 animate-pulse rounded-xl bg-overlay-subtle" style={{ animationDelay: `${i * 100}ms` }} />
               ))}
             </div>
           ) : !globalLeaderboard || globalLeaderboard.length === 0 ? (
             <div className="glass-strong rounded-2xl p-6 text-center py-16">
-              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white/5 mx-auto mb-4">
+              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-overlay-subtle mx-auto mb-4">
                 <Trophy className="h-10 w-10 text-muted-foreground" />
               </div>
               <h3 className="font-display text-xl font-semibold mb-2">{t("noRankingsTitle")}</h3>
@@ -179,7 +179,7 @@ export function LeaderboardTabs() {
                           className={`group flex items-center gap-4 rounded-xl border p-3.5 transition-all duration-200 hover:translate-y-[-1px] ${
                             isCurrentUser
                               ? "border-[#4ecdc4]/30 bg-[#4ecdc4]/[0.08] shadow-[0_0_15px_rgba(78,205,196,0.08)]"
-                              : "border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.05] hover:border-white/10"
+                              : "border-overlay-subtle bg-overlay-subtle hover:bg-overlay-subtle hover:border-overlay-medium"
                           }`}
                         >
                           <RankBadge rank={actualRank} />

@@ -39,7 +39,7 @@ export function StreakBadge({ count, size = "md", showLabel = true, className }:
   const isImpressive = count >= 7;
   const colorVariant = isImpressive
     ? "bg-gradient-to-r from-[#ff6b6b]/20 to-[#ffa06b]/20 text-[#ff6b6b] border-[#ff6b6b]/30"
-    : "bg-white/5 text-muted-foreground border-white/10";
+    : "bg-overlay-subtle text-muted-foreground border-overlay-medium";
 
   return (
     <div

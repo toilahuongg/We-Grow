@@ -81,12 +81,12 @@ export function XPHistoryList() {
         {isLoading ? (
           <div className="space-y-3">
             {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="h-16 animate-pulse rounded-xl bg-white/5" />
+              <div key={i} className="h-16 animate-pulse rounded-xl bg-overlay-subtle" />
             ))}
           </div>
         ) : transactions.length === 0 ? (
           <div className="text-center py-12">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/5 mx-auto mb-4">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-overlay-subtle mx-auto mb-4">
               <Sparkles className="h-8 w-8 text-muted-foreground" />
             </div>
             <h3 className="font-semibold mb-2">{t("noHistoryTitle")}</h3>
@@ -99,7 +99,7 @@ export function XPHistoryList() {
             {transactions.map((transaction: any) => (
               <div
                 key={transaction._id}
-                className="flex items-center gap-4 rounded-xl border border-white/5 bg-white/5 p-4 transition-all hover:border-white/10 hover:bg-white/10"
+                className="flex items-center gap-4 rounded-xl border border-overlay-subtle bg-overlay-subtle p-4 transition-all hover:border-overlay-medium hover:bg-overlay-medium"
               >
                 <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${
                   SOURCE_COLORS[transaction.source] || "text-muted-foreground"

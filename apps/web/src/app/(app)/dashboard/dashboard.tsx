@@ -179,7 +179,7 @@ export default function Dashboard({ session }: { session: typeof authClient.$Inf
                 <span className="text-muted-foreground">{profile?.totalXp ?? 0} XP</span>
                 <span className="text-muted-foreground">{profile?.nextLevelXp ?? 100} XP</span>
               </div>
-              <div className="h-2 overflow-hidden rounded-full bg-white/10">
+              <div className="h-2 overflow-hidden rounded-full bg-overlay-medium">
                 <div
                   className="h-full rounded-full bg-gradient-to-r from-[#ff6b6b] via-[#ffa06b] to-[#4ecdc4] transition-all duration-500 progress-glow"
                   style={{ width: `${levelProgress}%` }}
@@ -279,14 +279,14 @@ export default function Dashboard({ session }: { session: typeof authClient.$Inf
                   <div
                     key={habit._id}
                     onClick={() => router.push(`/habits/${habit._id}`)}
-                    className="group relative flex items-center gap-4 rounded-xl border border-white/5 bg-white/5 p-4 transition-all hover:border-white/10 hover:bg-white/10 animate-slide-up opacity-0 cursor-pointer"
+                    className="group relative flex items-center gap-4 rounded-xl border border-overlay-subtle bg-overlay-subtle p-4 transition-all hover:border-overlay-medium hover:bg-overlay-medium animate-slide-up opacity-0 cursor-pointer"
                     style={{ animationDelay: `${500 + index * 100}ms`, animationFillMode: "forwards" }}
                   >
                     {/* Habit Icon */}
                     <div className={`flex h-12 w-12 items-center justify-center rounded-xl text-2xl ${
                       habit.completedToday
                         ? "bg-gradient-to-br from-[#4ecdc4]/20 to-[#a78bfa]/20"
-                        : "bg-white/5"
+                        : "bg-overlay-subtle"
                     }`}>
                       {getHabitIcon(habit.title)}
                     </div>
@@ -328,7 +328,7 @@ export default function Dashboard({ session }: { session: typeof authClient.$Inf
                       className={`flex h-10 w-10 items-center justify-center rounded-full transition-all ${
                         habit.completedToday
                           ? "bg-[#4ecdc4] text-white shadow-lg shadow-[#4ecdc4]/30"
-                          : "bg-white/10 text-muted-foreground hover:bg-[#4ecdc4] hover:text-white hover:shadow-lg hover:shadow-[#4ecdc4]/30"
+                          : "bg-overlay-medium text-muted-foreground hover:bg-[#4ecdc4] hover:text-white hover:shadow-lg hover:shadow-[#4ecdc4]/30"
                       } ${completeHabit.isPending || uncompleteHabit.isPending ? "opacity-50 cursor-not-allowed" : ""}`}
                     >
                       <CheckCircle2 className="h-5 w-5" />
@@ -354,7 +354,7 @@ export default function Dashboard({ session }: { session: typeof authClient.$Inf
 
                 return (
                   <div key={`day-${index}`} className="flex flex-col items-center gap-2">
-                    <div className="flex h-24 w-8 items-end justify-center rounded-lg bg-white/5 p-1">
+                    <div className="flex h-24 w-8 items-end justify-center rounded-lg bg-overlay-subtle p-1">
                       <div
                         className={`w-full rounded-md transition-all ${
                           isToday
@@ -384,7 +384,7 @@ export default function Dashboard({ session }: { session: typeof authClient.$Inf
               ].map((achievement) => (
                 <div
                   key={achievement.name}
-                  className="flex items-center gap-3 rounded-xl border border-white/5 bg-white/5 p-3 transition-all hover:border-white/10 hover:bg-white/10"
+                  className="flex items-center gap-3 rounded-xl border border-overlay-subtle bg-overlay-subtle p-3 transition-all hover:border-overlay-medium hover:bg-overlay-medium"
                 >
                   <div
                     className="flex h-10 w-10 items-center justify-center rounded-xl text-xl shadow-lg"

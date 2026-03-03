@@ -54,7 +54,7 @@ export function JournalFeed() {
         <div className="glass-strong rounded-2xl p-8">
           <div className="space-y-4">
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="h-24 animate-pulse rounded-xl bg-white/5" />
+              <div key={i} className="h-24 animate-pulse rounded-xl bg-overlay-subtle" />
             ))}
           </div>
         </div>
@@ -86,7 +86,7 @@ export function JournalFeed() {
                       note: entry.note,
                     })
                   }
-                  className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 text-muted-foreground transition-all hover:bg-white/20 hover:text-foreground"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg bg-overlay-medium text-muted-foreground transition-all hover:bg-overlay-strong hover:text-foreground"
                 >
                   <Edit2 className="h-4 w-4" />
                 </button>

@@ -138,8 +138,8 @@ export function HabitDetail({ habitId, initialData }: HabitDetailProps) {
     return (
       <div className="container mx-auto max-w-4xl px-4 py-8">
         <div className="glass-strong rounded-2xl p-8">
-          <div className="h-8 w-32 animate-pulse rounded bg-white/10 mb-4" />
-          <div className="h-32 animate-pulse rounded bg-white/5" />
+          <div className="h-8 w-32 animate-pulse rounded bg-overlay-medium mb-4" />
+          <div className="h-32 animate-pulse rounded bg-overlay-subtle" />
         </div>
       </div>
     );
@@ -303,7 +303,7 @@ export function HabitDetail({ habitId, initialData }: HabitDetailProps) {
                       ${dayIsToday ? "ring-2 ring-[#ff6b6b]" : ""}
                       ${isCompleted
                         ? "bg-gradient-to-br from-[#4ecdc4] to-[#a78bfa] text-white shadow-lg"
-                        : "bg-white/5 text-muted-foreground hover:bg-white/10"
+                        : "bg-overlay-subtle text-muted-foreground hover:bg-overlay-medium"
                       }
                       disabled:opacity-50
                     `}
@@ -324,7 +324,7 @@ export function HabitDetail({ habitId, initialData }: HabitDetailProps) {
                 <span>{t("completed")}</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="h-3 w-3 rounded bg-white/5" />
+                <div className="h-3 w-3 rounded bg-overlay-subtle" />
                 <span>{t("notCompleted")}</span>
               </div>
               <div className="flex items-center gap-2">
@@ -394,7 +394,7 @@ export function HabitDetail({ habitId, initialData }: HabitDetailProps) {
                 <p className="text-sm text-muted-foreground mb-3">{t("noReminder")}</p>
                 <button
                   onClick={() => toggleReminderMutation.mutate({ habitId, enabled: true })}
-                  className="flex items-center gap-2 mx-auto rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm text-muted-foreground transition-all hover:border-[#4ecdc4] hover:text-[#4ecdc4]"
+                  className="flex items-center gap-2 mx-auto rounded-lg border border-overlay-medium bg-overlay-subtle px-4 py-2 text-sm text-muted-foreground transition-all hover:border-[#4ecdc4] hover:text-[#4ecdc4]"
                   disabled={toggleReminderMutation.isPending}
                 >
                   <Bell className="h-4 w-4" />

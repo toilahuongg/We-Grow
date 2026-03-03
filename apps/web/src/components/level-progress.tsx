@@ -47,7 +47,7 @@ export function LevelProgress({ current, next, level, size = "md", className }: 
           {current} / {next} XP
         </span>
       </div>
-      <div className="w-full overflow-hidden rounded-full bg-white/10">
+      <div className="w-full overflow-hidden rounded-full bg-overlay-medium">
         <div
           className={cn(
             styles.container,

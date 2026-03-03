@@ -40,7 +40,7 @@ export default function NotFound() {
             <Button
               variant="ghost"
               size="lg"
-              className="rounded-full border border-white/10 bg-white/5 text-base font-semibold transition-all hover:bg-white/10 hover:scale-[1.02]"
+              className="rounded-full border border-overlay-medium bg-overlay-subtle text-base font-semibold transition-all hover:bg-overlay-medium hover:scale-[1.02]"
             >
               {t("dashboard")}
             </Button>

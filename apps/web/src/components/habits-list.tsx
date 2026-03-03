@@ -124,12 +124,12 @@ export function HabitsList() {
       <div className="container mx-auto max-w-4xl px-4 py-8">
         <div className="glass-strong rounded-2xl p-8">
           <div className="flex items-center gap-2 mb-6">
-            <div className="h-8 w-8 animate-pulse rounded-lg bg-white/10" />
-            <div className="h-6 w-32 animate-pulse rounded bg-white/10" />
+            <div className="h-8 w-8 animate-pulse rounded-lg bg-overlay-medium" />
+            <div className="h-6 w-32 animate-pulse rounded bg-overlay-medium" />
           </div>
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-20 animate-pulse rounded-xl bg-white/5" />
+              <div key={i} className="h-20 animate-pulse rounded-xl bg-overlay-subtle" />
             ))}
           </div>
         </div>
@@ -208,7 +208,7 @@ export function HabitsList() {
           {filteredHabits.map((habit: any) => (
             <div
               key={habit._id}
-              className="glass-strong group relative rounded-xl border border-white/5 bg-white/5 p-4 transition-all hover:border-white/10 hover:bg-white/10"
+              className="glass-strong group relative rounded-xl border border-overlay-subtle bg-overlay-subtle p-4 transition-all hover:border-overlay-medium hover:bg-overlay-medium"
             >
               <div className="flex items-center gap-4">
                 {/* Habit Icon */}
@@ -257,7 +257,7 @@ export function HabitsList() {
                   {!habit.archived && (
                     <button
                       onClick={() => completeMutation.mutate(habit._id)}
-                      className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-muted-foreground transition-all hover:bg-[#4ecdc4] hover:text-white hover:shadow-lg hover:shadow-[#4ecdc4]/30"
+                      className="flex h-8 w-8 items-center justify-center rounded-full bg-overlay-medium text-muted-foreground transition-all hover:bg-[#4ecdc4] hover:text-white hover:shadow-lg hover:shadow-[#4ecdc4]/30"
                       title="Complete habit"
                     >
                       <CheckCircle2 className="h-4 w-4" />
@@ -272,7 +272,7 @@ export function HabitsList() {
                         className={`flex h-8 w-8 items-center justify-center rounded-full transition-all ${
                           isEnabled
                             ? "bg-[#4ecdc4]/20 text-[#4ecdc4]"
-                            : "bg-white/10 text-muted-foreground hover:bg-[#4ecdc4]/10 hover:text-[#4ecdc4]"
+                            : "bg-overlay-medium text-muted-foreground hover:bg-[#4ecdc4]/10 hover:text-[#4ecdc4]"
                         }`}
                         title={isEnabled ? `Reminder ${reminder?.time}` : "Set reminder"}
                       >
@@ -288,7 +288,7 @@ export function HabitsList() {
                   {!habit.archived ? (
                     <button
                       onClick={() => setArchiveDialog({ open: true, habitId: habit._id, habitTitle: habit.title })}
-                      className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-muted-foreground transition-all hover:bg-yellow-500/20 hover:text-yellow-500"
+                      className="flex h-8 w-8 items-center justify-center rounded-full bg-overlay-medium text-muted-foreground transition-all hover:bg-yellow-500/20 hover:text-yellow-500"
                       title="Archive habit"
                     >
                       <Archive className="h-4 w-4" />
@@ -296,7 +296,7 @@ export function HabitsList() {
                   ) : (
                     <button
                       onClick={() => archiveMutation.mutate(habit._id)}
-                      className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-muted-foreground transition-all hover:bg-[#4ecdc4]/20 hover:text-[#4ecdc4]"
+                      className="flex h-8 w-8 items-center justify-center rounded-full bg-overlay-medium text-muted-foreground transition-all hover:bg-[#4ecdc4]/20 hover:text-[#4ecdc4]"
                       title="Unarchive habit"
                     >
                       <Archive className="h-4 w-4" />
@@ -304,7 +304,7 @@ export function HabitsList() {
                   )}
                   <button
                     onClick={() => setDeleteDialog({ open: true, habitId: habit._id, habitTitle: habit.title })}
-                    className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-muted-foreground transition-all hover:bg-red-500/20 hover:text-red-500"
+                    className="flex h-8 w-8 items-center justify-center rounded-full bg-overlay-medium text-muted-foreground transition-all hover:bg-red-500/20 hover:text-red-500"
                     title="Delete habit"
                   >
                     <Trash2 className="h-4 w-4" />
@@ -313,7 +313,7 @@ export function HabitsList() {
               </div>
 
               {habit.description && (
-                <p className="mt-3 text-sm text-muted-foreground border-t border-white/5 pt-3">
+                <p className="mt-3 text-sm text-muted-foreground border-t border-overlay-subtle pt-3">
                   {habit.description}
                 </p>
               )}

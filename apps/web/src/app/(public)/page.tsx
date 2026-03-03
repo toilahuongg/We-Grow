@@ -70,7 +70,7 @@ export default function Home() {
 
             <Link
               href="#learn-more"
-              className="glass-strong rounded-full px-8 py-4 font-semibold transition-all hover:bg-white/10 hover:scale-105"
+              className="glass-strong rounded-full px-8 py-4 font-semibold transition-all hover:bg-overlay-medium hover:scale-105"
             >
               {t("ctaLearnMore")}
             </Link>
@@ -199,7 +199,7 @@ export default function Home() {
       </div>
 
       {/* Footer */}
-      <footer className="relative z-10 border-t border-white/5 px-4 py-8">
+      <footer className="relative z-10 border-t border-overlay-subtle px-4 py-8">
         <div className="mx-auto max-w-6xl text-center">
           <p className="text-sm text-muted-foreground">
             {t("footer")}

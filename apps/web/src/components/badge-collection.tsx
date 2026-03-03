@@ -41,10 +41,10 @@ export function BadgeCollection() {
     return (
       <div className="container mx-auto max-w-4xl px-4 py-8">
         <div className="glass-strong rounded-2xl p-8">
-          <div className="h-8 w-32 animate-pulse rounded bg-white/10 mb-6" />
+          <div className="h-8 w-32 animate-pulse rounded bg-overlay-medium mb-6" />
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
             {Array.from({ length: 10 }).map((_, i) => (
-              <div key={i} className="h-32 animate-pulse rounded-xl bg-white/5" />
+              <div key={i} className="h-32 animate-pulse rounded-xl bg-overlay-subtle" />
             ))}
           </div>
         </div>
@@ -82,7 +82,7 @@ export function BadgeCollection() {
                 className={`flex flex-col items-center justify-center rounded-xl border p-4 transition-all ${
                   earned
                     ? "border-[#4ecdc4]/30 bg-gradient-to-br from-[#4ecdc4]/10 to-[#a78bfa]/10"
-                    : "border-white/5 bg-white/5 opacity-40 grayscale"
+                    : "border-overlay-subtle bg-overlay-subtle opacity-40 grayscale"
                 }`}
               >
                 <span className="text-4xl mb-2">{info.icon}</span>

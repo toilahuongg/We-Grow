@@ -266,8 +266,8 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
     return (
       <div className="container mx-auto max-w-4xl px-4 py-8">
         <div className="glass-strong rounded-2xl p-8">
-          <div className="h-8 w-32 animate-pulse rounded bg-white/10 mb-6" />
-          <div className="h-48 animate-pulse rounded-xl bg-white/5" />
+          <div className="h-8 w-32 animate-pulse rounded bg-overlay-medium mb-6" />
+          <div className="h-48 animate-pulse rounded-xl bg-overlay-subtle" />
         </div>
       </div>
     );
@@ -384,11 +384,11 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                   <div
                     key={habit._id}
                     onClick={() => router.push(`/habits/${habit._id}`)}
-                    className="group relative flex items-center gap-4 rounded-xl border border-white/5 bg-white/5 p-4 transition-all hover:border-white/10 hover:bg-white/10 cursor-pointer"
+                    className="group relative flex items-center gap-4 rounded-xl border border-overlay-subtle bg-overlay-subtle p-4 transition-all hover:border-overlay-medium hover:bg-overlay-medium cursor-pointer"
                   >
                     <div className={`flex h-12 w-12 items-center justify-center rounded-xl text-2xl ${habit.completedToday
                       ? "bg-gradient-to-br from-[#4ecdc4]/20 to-[#a78bfa]/20"
-                      : "bg-white/5"
+                      : "bg-overlay-subtle"
                       }`}>
                       {getHabitIcon(habit.title)}
                     </div>
@@ -426,7 +426,7 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                       disabled={completeHabit.isPending || uncompleteHabit.isPending}
                       className={`flex h-10 w-10 items-center justify-center rounded-full transition-all ${habit.completedToday
                         ? "bg-[#4ecdc4] text-white shadow-lg shadow-[#4ecdc4]/30"
-                        : "bg-white/10 text-muted-foreground hover:bg-[#4ecdc4] hover:text-white hover:shadow-lg hover:shadow-[#4ecdc4]/30"
+                        : "bg-overlay-medium text-muted-foreground hover:bg-[#4ecdc4] hover:text-white hover:shadow-lg hover:shadow-[#4ecdc4]/30"
                         } ${completeHabit.isPending || uncompleteHabit.isPending ? "opacity-50 cursor-not-allowed" : ""}`}
                     >
                       <CheckCircle2 className="h-5 w-5" />
@@ -541,13 +541,13 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                           className={`group flex items-center gap-4 rounded-xl border p-3.5 transition-all duration-200 hover:translate-y-[-1px] ${
                             isCurrentUser
                               ? "border-[#4ecdc4]/30 bg-[#4ecdc4]/[0.08] shadow-[0_0_15px_rgba(78,205,196,0.08)]"
-                              : "border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.05] hover:border-white/10"
+                              : "border-overlay-subtle bg-overlay-subtle hover:bg-overlay-subtle hover:border-overlay-medium"
                           }`}
                         >
                           {actualRank <= 3 ? (
                             <span className="text-xl w-8 text-center">{actualRank === 1 ? "🥇" : actualRank === 2 ? "🥈" : "🥉"}</span>
                           ) : (
-                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-sm font-bold tabular-nums">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-overlay-medium text-sm font-bold tabular-nums">
                               {actualRank}
                             </div>
                           )}
@@ -601,7 +601,7 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                     key={member._id}
                     className={`flex items-center gap-3 rounded-xl border p-3 ${isCurrentUser
                       ? "border-[#4ecdc4] bg-[#4ecdc4]/10"
-                      : "border-white/10 bg-white/5"
+                      : "border-overlay-medium bg-overlay-subtle"
                       }`}
                   >
                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#ffa06b] to-[#f472b6] text-white font-semibold">
@@ -625,7 +625,7 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                               const newRole = e.target.value as "moderator" | "member";
                               changeRoleMutation.mutate({ userId: member.userId, role: newRole });
                             }}
-                            className="bg-white/5 border border-white/10 rounded px-2 py-1 text-xs"
+                            className="bg-overlay-subtle border border-overlay-medium rounded px-2 py-1 text-xs"
                             disabled={changeRoleMutation.isPending}
                           >
                             <option value="member">{t("member")}</option>
@@ -635,7 +635,7 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                         {canManage && (isOwner || member.role === "member") && (
                           <button
                             onClick={() => setRemoveMemberTarget({ userId: member.userId, userName: member.userName })}
-                            className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 text-muted-foreground transition-all hover:bg-red-500/20 hover:text-red-500"
+                            className="flex h-8 w-8 items-center justify-center rounded-lg bg-overlay-medium text-muted-foreground transition-all hover:bg-red-500/20 hover:text-red-500"
                             title={t("removeMember")}
                             disabled={removeMemberMutation.isPending}
                           >
@@ -669,7 +669,7 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                     <div className="flex gap-1">
                       <button
                         onClick={() => approveMemberMutation.mutate(member.userId)}
-                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 text-muted-foreground transition-all hover:bg-green-500/20 hover:text-green-500"
+                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-overlay-medium text-muted-foreground transition-all hover:bg-green-500/20 hover:text-green-500"
                         title={t("approve")}
                         disabled={approveMemberMutation.isPending}
                       >
@@ -677,7 +677,7 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                       </button>
                       <button
                         onClick={() => setRemoveMemberTarget({ userId: member.userId, userName: member.userName })}
-                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 text-muted-foreground transition-all hover:bg-red-500/20 hover:text-red-500"
+                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-overlay-medium text-muted-foreground transition-all hover:bg-red-500/20 hover:text-red-500"
                         title={t("reject")}
                         disabled={removeMemberMutation.isPending}
                       >
@@ -722,7 +722,7 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                   <input
                     value={editName}
                     onChange={(e) => setEditName(e.target.value)}
-                    className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm"
+                    className="w-full rounded-lg border border-overlay-medium bg-overlay-subtle px-3 py-2 text-sm"
                   />
                 </div>
                 <div>
@@ -731,7 +731,7 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                     value={editDescription}
                     onChange={(e) => setEditDescription(e.target.value)}
                     rows={3}
-                    className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm resize-none"
+                    className="w-full rounded-lg border border-overlay-medium bg-overlay-subtle px-3 py-2 text-sm resize-none"
                   />
                 </div>
                 <div className="flex gap-2">
@@ -757,7 +757,7 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                   {group.description || t("noDescriptionProvided")}
                 </p>
                 <div className="flex items-center gap-2 mb-4">
-                  <span className="rounded-full bg-white/10 px-3 py-1.5 text-sm">
+                  <span className="rounded-full bg-overlay-medium px-3 py-1.5 text-sm">
                     {t("membersTitle", { count: activeMembers.length })}
                   </span>
                   <span className={`rounded-full border px-2.5 py-1 text-xs font-medium ${group.mode === "together"
@@ -771,7 +771,7 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
             )}
 
             {/* Invite Code */}
-            <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+            <div className="rounded-xl border border-overlay-medium bg-overlay-subtle p-4">
               <div className="flex items-center justify-between">
                 <div className="flex-1">
                   <Label className="text-xs text-muted-foreground mb-1">{t("inviteCode")}</Label>
@@ -833,7 +833,7 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
           <div className="glass-strong rounded-2xl p-6 border border-red-500/10">
             <h3 className="font-semibold mb-4 text-red-400">{t("dangerZone")}</h3>
             <div className="space-y-3">
-              <div className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 p-4">
+              <div className="flex items-center justify-between rounded-xl border border-overlay-medium bg-overlay-subtle p-4">
                 <div>
                   <p className="font-medium">{t("leaveGroup")}</p>
                   <p className="text-sm text-muted-foreground">{t("leaveGroupDesc")}</p>

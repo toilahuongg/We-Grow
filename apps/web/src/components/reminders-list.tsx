@@ -58,10 +58,10 @@ export function RemindersList() {
     return (
       <div className="container mx-auto max-w-3xl px-4 py-8">
         <div className="glass-strong rounded-2xl p-8">
-          <div className="h-8 w-32 animate-pulse rounded bg-white/10 mb-6" />
+          <div className="h-8 w-32 animate-pulse rounded bg-overlay-medium mb-6" />
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-20 animate-pulse rounded-xl bg-white/5" />
+              <div key={i} className="h-20 animate-pulse rounded-xl bg-overlay-subtle" />
             ))}
           </div>
         </div>
@@ -116,15 +116,15 @@ export function RemindersList() {
                 key={reminder._id}
                 className={`glass-strong group relative rounded-xl border p-4 transition-all ${
                   reminder.enabled
-                    ? "border-white/5 bg-white/5"
-                    : "border-white/5 bg-white/5 opacity-60"
+                    ? "border-overlay-subtle bg-overlay-subtle"
+                    : "border-overlay-subtle bg-overlay-subtle opacity-60"
                 }`}
               >
                 <div className="flex items-center gap-4">
                   <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${
                     reminder.enabled
                       ? "bg-gradient-to-br from-[#4ecdc4]/20 to-[#a78bfa]/20"
-                      : "bg-white/5"
+                      : "bg-overlay-subtle"
                   }`}>
                     {reminder.enabled ? (
                       <Bell className="h-6 w-6 text-[#4ecdc4]" />
@@ -159,21 +159,21 @@ export function RemindersList() {
                           enabled: !reminder.enabled,
                         })
                       }
-                      className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 text-muted-foreground transition-all hover:bg-[#4ecdc4]/20 hover:text-[#4ecdc4]"
+                      className="flex h-8 w-8 items-center justify-center rounded-lg bg-overlay-medium text-muted-foreground transition-all hover:bg-[#4ecdc4]/20 hover:text-[#4ecdc4]"
                       title={reminder.enabled ? t("disable") : t("enable")}
                     >
                       {reminder.enabled ? <Bell className="h-4 w-4" /> : <BellOff className="h-4 w-4" />}
                     </button>
                     <button
                       onClick={() => setEditingReminder(reminder)}
-                      className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 text-muted-foreground transition-all hover:bg-white/20 hover:text-foreground"
+                      className="flex h-8 w-8 items-center justify-center rounded-lg bg-overlay-medium text-muted-foreground transition-all hover:bg-overlay-strong hover:text-foreground"
                       title={tc("edit")}
                     >
                       <Edit2 className="h-4 w-4" />
                     </button>
                     <button
                       onClick={() => setDeleteDialog({ open: true, reminderId: reminder._id })}
-                      className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 text-muted-foreground transition-all hover:bg-red-500/20 hover:text-red-500"
+                      className="flex h-8 w-8 items-center justify-center rounded-lg bg-overlay-medium text-muted-foreground transition-all hover:bg-red-500/20 hover:text-red-500"
                       title={tc("delete")}
                     >
                       <Trash2 className="h-4 w-4" />
@@ -319,7 +319,7 @@ function ReminderForm({
             className={`rounded-lg border p-2 text-center text-sm transition-all ${
               linkedType === "none"
                 ? "border-[#4ecdc4] bg-[#4ecdc4]/10"
-                : "border-white/10 bg-white/5 hover:border-white/20"
+                : "border-overlay-medium bg-overlay-subtle hover:border-overlay-strong"
             }`}
           >
             {t("none")}
@@ -333,7 +333,7 @@ function ReminderForm({
             className={`rounded-lg border p-2 text-center text-sm transition-all ${
               linkedType === "habit"
                 ? "border-[#4ecdc4] bg-[#4ecdc4]/10"
-                : "border-white/10 bg-white/5 hover:border-white/20"
+                : "border-overlay-medium bg-overlay-subtle hover:border-overlay-strong"
             }`}
           >
             {t("habitLabel")}
@@ -344,7 +344,7 @@ function ReminderForm({
           <select
             value={linkedId}
             onChange={(e) => setLinkedId(e.target.value)}
-            className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 focus:border-[#4ecdc4] outline-none"
+            className="w-full px-3 py-2 rounded-lg bg-overlay-subtle border border-overlay-medium focus:border-[#4ecdc4] outline-none"
           >
             <option value="">{t("selectHabit")}</option>
             {habits.map((habit) => (

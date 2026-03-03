@@ -273,7 +273,7 @@ export function Dashboard() {
         {habitsLoading ? (
           <div className="space-y-3">
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="h-16 animate-pulse rounded-xl bg-white/5" />
+              <div key={i} className="h-16 animate-pulse rounded-xl bg-overlay-subtle" />
             ))}
           </div>
         ) : dueHabits.length === 0 ? (
@@ -284,12 +284,12 @@ export function Dashboard() {
               <div
                 key={habit._id}
                 onClick={() => router.push(`/habits/${habit._id}`)}
-                className="group relative flex items-center gap-4 rounded-xl border border-white/5 bg-white/5 p-4 transition-all hover:border-white/10 hover:bg-white/10 cursor-pointer"
+                className="group relative flex items-center gap-4 rounded-xl border border-overlay-subtle bg-overlay-subtle p-4 transition-all hover:border-overlay-medium hover:bg-overlay-medium cursor-pointer"
               >
                 <div className={`flex h-10 w-10 items-center justify-center rounded-xl text-xl ${
                   habit.completedToday
                     ? "bg-gradient-to-br from-[#4ecdc4]/20 to-[#a78bfa]/20"
-                    : "bg-white/5"
+                    : "bg-overlay-subtle"
                 }`}>
                   {getHabitIcon(habit.title)}
                 </div>
@@ -317,7 +317,7 @@ export function Dashboard() {
                   className={`flex h-10 w-10 items-center justify-center rounded-full transition-all ${
                     habit.completedToday
                       ? "bg-[#4ecdc4] text-white shadow-lg shadow-[#4ecdc4]/30"
-                      : "bg-white/10 text-muted-foreground hover:bg-[#4ecdc4] hover:text-white hover:shadow-lg hover:shadow-[#4ecdc4]/30"
+                      : "bg-overlay-medium text-muted-foreground hover:bg-[#4ecdc4] hover:text-white hover:shadow-lg hover:shadow-[#4ecdc4]/30"
                   } ${completeHabit.isPending || uncompleteHabit.isPending ? "opacity-50 cursor-not-allowed" : ""}`}
                 >
                   <CheckCircle2 className="h-5 w-5" />

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { client, orpc } from "@/utils/orpc";
 
@@ -20,49 +21,55 @@ interface ReactionBarProps {
 
 export function ReactionBar({ activityId, groupId, reactionCounts, myReactions }: ReactionBarProps) {
   const queryClient = useQueryClient();
+  const [localCounts, setLocalCounts] = useState(reactionCounts);
+  const [localMyReactions, setLocalMyReactions] = useState(myReactions);
+
+  // Sync from server data when props change
+  useEffect(() => {
+    setLocalCounts(reactionCounts);
+    setLocalMyReactions(myReactions);
+  }, [reactionCounts, myReactions]);
 
   const toggleMutation = useMutation({
     mutationFn: (emoji: "fire" | "clap" | "heart" | "star" | "muscle") =>
       client.feed.toggleReaction({ activityId, emoji }),
     onMutate: async (emoji) => {
-      await queryClient.cancelQueries({ queryKey: orpc.feed.getGroupFeed.queryOptions({ input: { groupId } }).queryKey });
-      const queryKey = orpc.feed.getGroupFeed.queryOptions({ input: { groupId } }).queryKey;
-      const previous = queryClient.getQueryData(queryKey);
+      const prevCounts = localCounts;
+      const prevMyReactions = localMyReactions;
+      const isAdding = !localMyReactions.includes(emoji);
 
-      queryClient.setQueryData(queryKey, (old: any) => {
-        if (!old) return old;
-        return {
-          ...old,
-          activities: old.activities.map((a: any) => {
-            if (a._id !== activityId) return a;
-            const isAdding = !a.myReactions.includes(emoji);
-            const counts = { ...a.reactionCounts };
-            counts[emoji] = (counts[emoji] ?? 0) + (isAdding ? 1 : -1);
-            if (counts[emoji] <= 0) delete counts[emoji];
-            return {
-              ...a,
-              reactionCounts: counts,
-              myReactions: isAdding
-                ? [...a.myReactions, emoji]
-                : a.myReactions.filter((e: string) => e !== emoji),
-            };
-          }),
-        };
-      });
+      const newCounts = { ...localCounts };
+      newCounts[emoji] = (newCounts[emoji] ?? 0) + (isAdding ? 1 : -1);
+      if (newCounts[emoji] !== undefined && newCounts[emoji] <= 0) delete newCounts[emoji];
 
-      return { previous };
+      setLocalCounts(newCounts);
+      setLocalMyReactions(
+        isAdding
+          ? [...localMyReactions, emoji]
+          : localMyReactions.filter((e) => e !== emoji),
+      );
+
+      return { prevCounts, prevMyReactions };
     },
     onError: (_error, _variables, context) => {
-      const queryKey = orpc.feed.getGroupFeed.queryOptions({ input: { groupId } }).queryKey;
-      queryClient.setQueryData(queryKey, context?.previous);
+      if (context) {
+        setLocalCounts(context.prevCounts);
+        setLocalMyReactions(context.prevMyReactions);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({
+        queryKey: orpc.feed.getGroupFeed.queryOptions({ input: { groupId } }).queryKey,
+        exact: false,
+      });
     },
   });
 
   return (
     <div className="flex flex-wrap gap-1">
       {EMOJIS.map(({ key, display }) => {
-        const count = reactionCounts[key] ?? 0;
-        const isActive = myReactions.includes(key);
+        const count = localCounts[key] ?? 0;
+        const isActive = localMyReactions.includes(key);
 
         if (count === 0 && !isActive) {
           return (
@@ -85,7 +92,7 @@ export function ReactionBar({ activityId, groupId, reactionCounts, myReactions }
             className={`flex items-center gap-1 rounded-full px-1.5 py-0.5 text-xs transition-all duration-150 active:scale-90 ${
               isActive
                 ? "bg-[#4ecdc4]/15 text-[#4ecdc4]"
-                : "bg-white/[0.04] text-muted-foreground hover:bg-white/[0.08]"
+                : "bg-overlay-subtle text-muted-foreground hover:bg-overlay-medium"
             }`}
           >
             <span className="text-[11px]">{display}</span>

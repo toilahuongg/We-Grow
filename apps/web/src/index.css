@@ -64,6 +64,11 @@
   --gradient-accent: linear-gradient(135deg, #ffa06b 0%, #f472b6 100%);
   --gradient-dark: linear-gradient(180deg, #0a0a0b 0%, #1a1a1f 100%);
 
+  /* Overlay colors for components */
+  --overlay-subtle: rgba(255, 255, 255, 0.05);
+  --overlay-medium: rgba(255, 255, 255, 0.1);
+  --overlay-strong: rgba(255, 255, 255, 0.15);
+
   /* Spacing */
   --radius: 1rem;
   --header-height: 56px;
@@ -92,14 +97,41 @@
   --accent: #ff8c42;
   --accent-foreground: #ffffff;
 
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+
   --border: rgba(24, 24, 27, 0.12);
   --input: rgba(24, 24, 27, 0.15);
   --ring: #ff5252;
 
+  /* Chart colors - slightly adjusted for light backgrounds */
+  --chart-1: #ef4444;
+  --chart-2: #f97316;
+  --chart-3: #14b8a6;
+  --chart-4: #8b5cf6;
+  --chart-5: #ec4899;
+
+  /* XP/Gamification colors */
+  --xp-bronze: #b8690e;
+  --xp-silver: #6b7280;
+  --xp-gold: #d4a017;
+  --xp-diamond: #0ea5e9;
+
+  /* Glass effect */
   --glass-bg: rgba(0, 0, 0, 0.03);
   --glass-border: rgba(0, 0, 0, 0.08);
+  --glass-blur: 20px;
 
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, #ef4444 0%, #f97316 50%, #14b8a6 100%);
+  --gradient-secondary: linear-gradient(135deg, #14b8a6 0%, #8b5cf6 100%);
+  --gradient-accent: linear-gradient(135deg, #f97316 0%, #ec4899 100%);
   --gradient-dark: linear-gradient(180deg, #fafafa 0%, #f0f0f0 100%);
+
+  /* Light-theme specific overlay colors */
+  --overlay-subtle: rgba(0, 0, 0, 0.04);
+  --overlay-medium: rgba(0, 0, 0, 0.08);
+  --overlay-strong: rgba(0, 0, 0, 0.12);
 }
 
 @theme inline {
@@ -129,6 +161,9 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
+  --color-overlay-subtle: var(--overlay-subtle);
+  --color-overlay-medium: var(--overlay-medium);
+  --color-overlay-strong: var(--overlay-strong);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -311,10 +346,10 @@
 }
 
 .glass-strong {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--overlay-medium);
   backdrop-filter: blur(40px) saturate(180%);
   -webkit-backdrop-filter: blur(40px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid var(--overlay-strong);
 }
 
 /* Gradient text */
@@ -330,7 +365,7 @@
 .shimmer {
   background: linear-gradient(90deg,
       transparent 0%,
-      rgba(255, 255, 255, 0.1) 50%,
+      var(--overlay-medium) 50%,
       transparent 100%);
   background-size: 200% 100%;
   animation: shimmer 2s infinite;
@@ -372,18 +407,18 @@
 
 .bg-grid-pattern {
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    linear-gradient(var(--overlay-subtle) 1px, transparent 1px),
+    linear-gradient(90deg, var(--overlay-subtle) 1px, transparent 1px);
   background-size: 60px 60px;
 }
 
 .bg-gradient-mesh {
   background:
-    radial-gradient(at 40% 20%, rgba(255, 107, 107, 0.15) 0px, transparent 50%),
-    radial-gradient(at 80% 0%, rgba(255, 160, 107, 0.1) 0px, transparent 50%),
-    radial-gradient(at 0% 50%, rgba(78, 205, 196, 0.1) 0px, transparent 50%),
-    radial-gradient(at 80% 50%, rgba(167, 139, 250, 0.1) 0px, transparent 50%),
-    radial-gradient(at 0% 100%, rgba(244, 114, 182, 0.1) 0px, transparent 50%);
+    radial-gradient(at 40% 20%, rgba(255, 107, 107, 0.12) 0px, transparent 50%),
+    radial-gradient(at 80% 0%, rgba(255, 160, 107, 0.08) 0px, transparent 50%),
+    radial-gradient(at 0% 50%, rgba(78, 205, 196, 0.08) 0px, transparent 50%),
+    radial-gradient(at 80% 50%, rgba(167, 139, 250, 0.08) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, rgba(244, 114, 182, 0.08) 0px, transparent 50%);
 }
 
 /* ===== SCROLLBAR ===== */

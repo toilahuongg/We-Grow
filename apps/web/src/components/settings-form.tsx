@@ -325,11 +325,11 @@ export function SettingsForm({ session: _serverSession }: { session: any }) {
 
         {/* Account Info */}
         <div className="space-y-3">
-          <div className="flex justify-between items-center py-2 border-b border-white/5">
+          <div className="flex justify-between items-center py-2 border-b border-overlay-subtle">
             <span className="text-sm text-muted-foreground">{t("email")}</span>
             <span className="text-sm font-medium">{user?.email}</span>
           </div>
-          <div className="flex justify-between items-center py-2 border-b border-white/5">
+          <div className="flex justify-between items-center py-2 border-b border-overlay-subtle">
             <span className="text-sm text-muted-foreground">{t("displayName")}</span>
             {editingName ? (
               <div className="flex items-center gap-2">
@@ -339,7 +339,7 @@ export function SettingsForm({ session: _serverSession }: { session: any }) {
                   value={nameValue}
                   onChange={(e) => setNameValue(e.target.value)}
                   onKeyDown={handleNameKeyDown}
-                  className="h-8 w-40 rounded-lg border border-white/10 bg-white/5 px-3 text-sm font-medium focus:border-[#4ecdc4] focus:outline-none"
+                  className="h-8 w-40 rounded-lg border border-overlay-medium bg-overlay-subtle px-3 text-sm font-medium focus:border-[#4ecdc4] focus:outline-none"
                   disabled={nameMutation.isPending}
                 />
                 <button
@@ -353,7 +353,7 @@ export function SettingsForm({ session: _serverSession }: { session: any }) {
                 <button
                   type="button"
                   onClick={() => setEditingName(false)}
-                  className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/5 text-muted-foreground hover:bg-white/10 transition-colors"
+                  className="flex h-7 w-7 items-center justify-center rounded-lg bg-overlay-subtle text-muted-foreground hover:bg-overlay-medium transition-colors"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -391,7 +391,7 @@ export function SettingsForm({ session: _serverSession }: { session: any }) {
             }}
             placeholder={t("bioPlaceholder")}
             rows={3}
-            className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm placeholder:text-muted-foreground/50 focus:border-[#4ecdc4] focus:outline-none resize-none"
+            className="w-full rounded-xl border border-overlay-medium bg-overlay-subtle px-4 py-3 text-sm placeholder:text-muted-foreground/50 focus:border-[#4ecdc4] focus:outline-none resize-none"
           />
           {bioChanged && (
             <div className="flex justify-end mt-2">
@@ -429,7 +429,7 @@ export function SettingsForm({ session: _serverSession }: { session: any }) {
                 className={`w-full text-left rounded-xl border p-3 transition-all ${
                   isSelected
                     ? "border-[#a78bfa] bg-[#a78bfa]/10"
-                    : "border-white/10 bg-white/5 hover:border-white/20"
+                    : "border-overlay-medium bg-overlay-subtle hover:border-overlay-strong"
                 }`}
               >
                 <div className="flex items-center justify-between">
@@ -477,7 +477,7 @@ export function SettingsForm({ session: _serverSession }: { session: any }) {
                 className={`w-full text-left rounded-xl border p-3 transition-all ${
                   isSelected
                     ? "border-[#4ecdc4] bg-[#4ecdc4]/10"
-                    : "border-white/10 bg-white/5 hover:border-white/20"
+                    : "border-overlay-medium bg-overlay-subtle hover:border-overlay-strong"
                 }`}
               >
                 <div className="flex items-center justify-between">
@@ -519,7 +519,7 @@ export function SettingsForm({ session: _serverSession }: { session: any }) {
                 type="password"
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm focus:border-[#f472b6] focus:outline-none"
+                className="w-full rounded-xl border border-overlay-medium bg-overlay-subtle px-4 py-2.5 text-sm focus:border-[#f472b6] focus:outline-none"
                 required
               />
             </div>
@@ -529,7 +529,7 @@ export function SettingsForm({ session: _serverSession }: { session: any }) {
                 type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm focus:border-[#f472b6] focus:outline-none"
+                className="w-full rounded-xl border border-overlay-medium bg-overlay-subtle px-4 py-2.5 text-sm focus:border-[#f472b6] focus:outline-none"
                 required
                 minLength={8}
               />
@@ -540,7 +540,7 @@ export function SettingsForm({ session: _serverSession }: { session: any }) {
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm focus:border-[#f472b6] focus:outline-none"
+                className="w-full rounded-xl border border-overlay-medium bg-overlay-subtle px-4 py-2.5 text-sm focus:border-[#f472b6] focus:outline-none"
                 required
                 minLength={8}
               />

@@ -53,7 +53,7 @@ export function TelegramSettings({ groupId, t }: TelegramSettingsProps) {
 
   if (!configStatus?.configured) {
     return (
-      <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+      <div className="rounded-xl border border-overlay-medium bg-overlay-subtle p-4">
         <div className="flex items-center gap-3">
           <span className="text-lg">🤖</span>
           <div>
@@ -67,7 +67,7 @@ export function TelegramSettings({ groupId, t }: TelegramSettingsProps) {
 
   if (!groupStatus?.connected) {
     return (
-      <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+      <div className="rounded-xl border border-overlay-medium bg-overlay-subtle p-4">
         <div className="flex items-center gap-3">
           <span className="text-lg">🤖</span>
           <div>
@@ -81,7 +81,7 @@ export function TelegramSettings({ groupId, t }: TelegramSettingsProps) {
   }
 
   return (
-    <div className="rounded-xl border border-white/10 bg-white/5 p-4 space-y-4">
+    <div className="rounded-xl border border-overlay-medium bg-overlay-subtle p-4 space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <span className="text-lg">🤖</span>
@@ -111,7 +111,7 @@ export function TelegramSettings({ groupId, t }: TelegramSettingsProps) {
           <button
             onClick={() => updateMutation.mutate({ notifyActivities: !groupStatus.notifyActivities })}
             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-              groupStatus.notifyActivities ? "bg-[#4ecdc4]" : "bg-white/20"
+              groupStatus.notifyActivities ? "bg-[#4ecdc4]" : "bg-overlay-strong"
             }`}
           >
             <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
@@ -125,7 +125,7 @@ export function TelegramSettings({ groupId, t }: TelegramSettingsProps) {
           <button
             onClick={() => updateMutation.mutate({ dailyReminderEnabled: !groupStatus.dailyReminderEnabled })}
             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-              groupStatus.dailyReminderEnabled ? "bg-[#4ecdc4]" : "bg-white/20"
+              groupStatus.dailyReminderEnabled ? "bg-[#4ecdc4]" : "bg-overlay-strong"
             }`}
           >
             <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
@@ -141,7 +141,7 @@ export function TelegramSettings({ groupId, t }: TelegramSettingsProps) {
               type="time"
               value={groupStatus.dailyReminderTime}
               onChange={(e) => updateMutation.mutate({ dailyReminderTime: e.target.value })}
-              className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-sm"
+              className="rounded-lg border border-overlay-medium bg-overlay-subtle px-3 py-1.5 text-sm"
             />
           </div>
         )}

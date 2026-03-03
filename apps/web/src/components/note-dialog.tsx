@@ -39,7 +39,7 @@ export function NoteDialog({ open, onOpenChange, onSave, initialNote, isLoading 
           maxLength={1000}
           rows={4}
           placeholder={t("placeholder")}
-          className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#4ecdc4]/50"
+          className="w-full rounded-lg border border-overlay-medium bg-overlay-subtle px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#4ecdc4]/50"
         />
         <p className="text-xs text-muted-foreground mt-1 text-right">
           {note.length}/1000

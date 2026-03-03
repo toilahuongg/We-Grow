@@ -248,7 +248,7 @@ export function HabitForm({ habit, isEditing = false, groupId }: HabitFormProps)
                       className={`cursor-pointer rounded-lg border p-3 text-center transition-all ${
                         field.state.value === freq
                           ? "border-[#4ecdc4] bg-[#4ecdc4]/10"
-                          : "border-white/10 bg-white/5 hover:border-white/20"
+                          : "border-overlay-medium bg-overlay-subtle hover:border-overlay-strong"
                       }`}
                     >
                       <input
@@ -282,7 +282,7 @@ export function HabitForm({ habit, isEditing = false, groupId }: HabitFormProps)
                             className={`cursor-pointer rounded-lg border p-2 text-center transition-all ${
                               (targetDaysField.state.value as number[])?.includes(index)
                                 ? "border-[#4ecdc4] bg-[#4ecdc4]/10"
-                                : "border-white/10 bg-white/5 hover:border-white/20"
+                                : "border-overlay-medium bg-overlay-subtle hover:border-overlay-strong"
                             }`}
                           >
                             <input
@@ -354,7 +354,7 @@ export function HabitForm({ habit, isEditing = false, groupId }: HabitFormProps)
                 className={`flex h-10 items-center gap-2 rounded-lg border px-4 transition-all ${
                   reminderEnabled
                     ? "border-[#4ecdc4] bg-[#4ecdc4]/10 text-[#4ecdc4]"
-                    : "border-white/10 bg-white/5 text-muted-foreground hover:border-white/20"
+                    : "border-overlay-medium bg-overlay-subtle text-muted-foreground hover:border-overlay-strong"
                 }`}
               >
                 {reminderEnabled ? <Bell className="h-4 w-4" /> : <BellOff className="h-4 w-4" />}
@@ -370,7 +370,7 @@ export function HabitForm({ habit, isEditing = false, groupId }: HabitFormProps)
                       const mins = reminderTime.split(":")[1] ?? "00";
                       setReminderTime(`${e.target.value}:${mins}`);
                     }}
-                    className="h-10 rounded-lg border border-white/10 bg-white/5 px-2 text-sm text-foreground"
+                    className="h-10 rounded-lg border border-overlay-medium bg-overlay-subtle px-2 text-sm text-foreground"
                   >
                     {Array.from({ length: 24 }, (_, i) => (
                       <option key={i} value={String(i).padStart(2, "0")}>
@@ -385,7 +385,7 @@ export function HabitForm({ habit, isEditing = false, groupId }: HabitFormProps)
                       const hrs = reminderTime.split(":")[0] ?? "09";
                       setReminderTime(`${hrs}:${e.target.value}`);
                     }}
-                    className="h-10 rounded-lg border border-white/10 bg-white/5 px-2 text-sm text-foreground"
+                    className="h-10 rounded-lg border border-overlay-medium bg-overlay-subtle px-2 text-sm text-foreground"
                   >
                     {Array.from({ length: 60 }, (_, i) => (
                       <option key={i} value={String(i).padStart(2, "0")}>

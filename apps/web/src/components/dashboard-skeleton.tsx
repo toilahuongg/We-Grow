@@ -38,7 +38,7 @@ export function DashboardSkeleton() {
 
             <div className="space-y-3">
               {[1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="flex items-center gap-4 rounded-xl border border-white/5 bg-white/5 p-4">
+                <div key={i} className="flex items-center gap-4 rounded-xl border border-overlay-subtle bg-overlay-subtle p-4">
                   <Skeleton className="h-12 w-12 rounded-xl" />
                   <div className="flex-1 space-y-1">
                     <Skeleton className="h-5 w-48" />
@@ -72,7 +72,7 @@ export function DashboardSkeleton() {
             <Skeleton className="h-6 w-48 mb-4" />
             <div className="space-y-3">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="flex items-center gap-3 rounded-xl border border-white/5 bg-white/5 p-3">
+                <div key={i} className="flex items-center gap-3 rounded-xl border border-overlay-subtle bg-overlay-subtle p-3">
                   <Skeleton className="h-10 w-10 rounded-xl" />
                   <div className="flex-1 space-y-1">
                     <Skeleton className="h-4 w-32" />

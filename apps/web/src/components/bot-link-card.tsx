@@ -56,7 +56,7 @@ export function BotLinkCard({ t }: BotLinkCardProps) {
 
   if (!configStatus?.configured) {
     return (
-      <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+      <div className="rounded-xl border border-overlay-medium bg-overlay-subtle p-4">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0088cc]/20">
             <span className="text-lg">🤖</span>
@@ -73,7 +73,7 @@ export function BotLinkCard({ t }: BotLinkCardProps) {
   const isLinked = linkStatus?.linked === true;
 
   return (
-    <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+    <div className="rounded-xl border border-overlay-medium bg-overlay-subtle p-4">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0088cc]/20">
@@ -117,7 +117,7 @@ export function BotLinkCard({ t }: BotLinkCardProps) {
             </Button>
           ) : (
             <div className="space-y-2">
-              <div className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2">
+              <div className="flex items-center gap-2 rounded-lg border border-overlay-medium bg-overlay-subtle px-3 py-2">
                 <code className="flex-1 text-center text-lg font-mono tracking-widest">
                   {generatedToken}
                 </code>

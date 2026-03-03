@@ -126,7 +126,7 @@ export function AnalyticsDashboard() {
           <div className="glass-strong rounded-2xl p-6">
             <h2 className="font-display text-lg font-bold mb-4">{t("completionTrend")}</h2>
             {trendsLoading ? (
-              <div className="h-48 animate-pulse rounded-xl bg-white/5" />
+              <div className="h-48 animate-pulse rounded-xl bg-overlay-subtle" />
             ) : (
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
@@ -185,7 +185,7 @@ export function AnalyticsDashboard() {
                     <div key={habit.habitId} className="flex items-center gap-3">
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium truncate">{habit.title}</p>
-                        <div className="w-full h-2 rounded-full bg-white/10 mt-1">
+                        <div className="w-full h-2 rounded-full bg-overlay-medium mt-1">
                           <div
                             className="h-full rounded-full bg-gradient-to-r from-[#4ecdc4] to-[#a78bfa] transition-all"
                             style={{ width: `${habit.completionRate}%` }}
@@ -206,22 +206,22 @@ export function AnalyticsDashboard() {
               <h2 className="font-display text-lg font-bold mb-4">{t("streakOverview")}</h2>
               {streaks && (
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="rounded-xl border border-white/10 bg-white/5 p-4 text-center">
+                  <div className="rounded-xl border border-overlay-medium bg-overlay-subtle p-4 text-center">
                     <Flame className="h-5 w-5 text-[#ff6b6b] mx-auto mb-2" />
                     <p className="text-2xl font-bold">{streaks.totalActiveStreaks}</p>
                     <p className="text-xs text-muted-foreground">{t("activeStreaks")}</p>
                   </div>
-                  <div className="rounded-xl border border-white/10 bg-white/5 p-4 text-center">
+                  <div className="rounded-xl border border-overlay-medium bg-overlay-subtle p-4 text-center">
                     <TrendingUp className="h-5 w-5 text-[#4ecdc4] mx-auto mb-2" />
                     <p className="text-2xl font-bold">{streaks.longestEver}</p>
                     <p className="text-xs text-muted-foreground">{t("longestEver")}</p>
                   </div>
-                  <div className="rounded-xl border border-white/10 bg-white/5 p-4 text-center">
+                  <div className="rounded-xl border border-overlay-medium bg-overlay-subtle p-4 text-center">
                     <Flame className="h-5 w-5 text-[#ffa06b] mx-auto mb-2" />
                     <p className="text-2xl font-bold">{streaks.longestCurrent}</p>
                     <p className="text-xs text-muted-foreground">{t("longestCurrent")}</p>
                   </div>
-                  <div className="rounded-xl border border-white/10 bg-white/5 p-4 text-center">
+                  <div className="rounded-xl border border-overlay-medium bg-overlay-subtle p-4 text-center">
                     <AlertTriangle className="h-5 w-5 text-yellow-500 mx-auto mb-2" />
                     <p className="text-2xl font-bold">{streaks.atRiskStreaks}</p>
                     <p className="text-xs text-muted-foreground">{t("atRisk")}</p>
@@ -256,7 +256,7 @@ export function AnalyticsDashboard() {
                 </div>
               </div>
               {weeklyReport.bestDay && (
-                <div className="flex justify-center gap-8 mt-4 pt-4 border-t border-white/10">
+                <div className="flex justify-center gap-8 mt-4 pt-4 border-t border-overlay-medium">
                   <div className="text-center">
                     <p className="text-sm font-semibold text-[#4ecdc4]">{weeklyReport.bestDay}</p>
                     <p className="text-xs text-muted-foreground">{t("bestDay")}</p>
