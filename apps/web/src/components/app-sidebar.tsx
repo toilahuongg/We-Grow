@@ -95,8 +95,16 @@ function UserSection() {
   return (
     <div className="border-t border-border px-3 py-3">
       <div className="flex items-center gap-3">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#ff6b6b] via-[#ffa06b] to-[#4ecdc4] text-xs font-bold text-white">
-          {userInitials}
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#ff6b6b] via-[#ffa06b] to-[#4ecdc4] text-xs font-bold text-white overflow-hidden">
+          {session.user.image ? (
+            <img
+              src={session.user.image}
+              alt={session.user.name || ""}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            userInitials
+          )}
         </div>
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-semibold">{session.user.name}</p>

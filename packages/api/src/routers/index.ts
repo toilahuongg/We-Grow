@@ -5,6 +5,9 @@ import { habitsRouter } from "./habits";
 import { groupsRouter } from "./groups";
 import { gamificationRouter } from "./gamification";
 import { notificationsRouter } from "./notifications";
+import { profileRouter } from "./profile";
+import { analyticsRouter } from "./analytics";
+import { feedRouter } from "./feed";
 
 export const appRouter = {
   healthCheck: publicProcedure.handler(() => {
@@ -20,6 +23,9 @@ export const appRouter = {
   groups: groupsRouter,
   gamification: gamificationRouter,
   notifications: notificationsRouter,
+  profile: profileRouter,
+  analytics: analyticsRouter,
+  feed: feedRouter,
 };
 export type AppRouter = typeof appRouter;
 export type AppRouterClient = RouterClient<typeof appRouter>;

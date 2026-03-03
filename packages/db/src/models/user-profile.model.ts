@@ -7,6 +7,7 @@ const userProfileSchema = new Schema(
     _id: { type: String },
     userId: { type: String, ref: "User", required: true, unique: true },
     goals: { type: [String], default: [] },
+    bio: { type: String, default: "" },
     timezone: { type: String, default: "UTC" },
     totalXp: { type: Number, default: 0 },
     level: { type: Number, default: 1 },

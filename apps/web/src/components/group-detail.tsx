@@ -28,8 +28,10 @@ import { orpc, client } from "@/utils/orpc";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { LevelUpModal } from "@/components/level-up-modal";
+import { NoteDialog } from "@/components/note-dialog";
 import { Label } from "@/components/ui/label";
 import { EmptyState } from "@/components/empty-state";
+import { ActivityFeed } from "@/components/activity-feed";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
 
@@ -80,7 +82,7 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
   const t = useTranslations("groupDetail");
   const tc = useTranslations("common");
   const [session, setSession] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState<"today" | "leaderboard" | "members" | "settings">("today");
+  const [activeTab, setActiveTab] = useState<"today" | "feed" | "leaderboard" | "members" | "settings">("today");
   const [showInviteCode, setShowInviteCode] = useState(false);
   const [leaveDialog, setLeaveDialog] = useState(false);
   const [deleteDialog, setDeleteDialog] = useState(false);
@@ -89,6 +91,7 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
   const [editName, setEditName] = useState("");
   const [editDescription, setEditDescription] = useState("");
   const [levelUpLevel, setLevelUpLevel] = useState<number | null>(null);
+  const [noteDialogHabitId, setNoteDialogHabitId] = useState<string | null>(null);
 
   useState(() => {
     authClient.getSession().then((res) => setSession(res.data ? res.data : null));
@@ -125,12 +128,13 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
 
       return { previousHabits };
     },
-    onSuccess: (result: any) => {
+    onSuccess: (result: any, habitId: string) => {
       if (!result.alreadyCompleted) {
         toast.success(t("xpAwarded", { amount: result.xpAwarded ?? 0 }));
         if (result.leveledUp && result.newLevel) {
           setLevelUpLevel(result.newLevel);
         }
+        setNoteDialogHabitId(habitId);
       }
       queryClient.invalidateQueries({ queryKey: orpc.gamification.getProfile.queryKey() });
     },
@@ -140,6 +144,14 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
         context?.previousHabits
       );
       toast.error(t("failedComplete"));
+    },
+  });
+
+  const saveNoteMutation = useMutation({
+    mutationFn: (input: { habitId: string; date: string; note: string | null }) =>
+      client.habits.updateNote(input),
+    onSuccess: () => {
+      setNoteDialogHabitId(null);
     },
   });
 
@@ -298,6 +310,7 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
 
   const tabs = [
     { key: "today" as const, label: t("tabToday") },
+    { key: "feed" as const, label: t("tabFeed") },
     { key: "leaderboard" as const, label: t("tabLeaderboard") },
     { key: "members" as const, label: t("tabMembers") },
     { key: "settings" as const, label: t("tabSettings") },
@@ -423,6 +436,14 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
               )}
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Tab: Feed */}
+      {activeTab === "feed" && (
+        <div className="glass-strong rounded-2xl p-6">
+          <h3 className="font-semibold mb-4">{t("tabFeed")}</h3>
+          <ActivityFeed groupId={groupId} />
         </div>
       )}
 
@@ -866,6 +887,21 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
           setRemoveMemberTarget(null);
         }}
         isLoading={removeMemberMutation.isPending}
+      />
+
+      {/* Note Dialog */}
+      <NoteDialog
+        open={!!noteDialogHabitId}
+        onOpenChange={(open) => !open && setNoteDialogHabitId(null)}
+        isLoading={saveNoteMutation.isPending}
+        onSave={(note) => {
+          if (noteDialogHabitId && note) {
+            const today = new Date().toISOString().split("T")[0]!;
+            saveNoteMutation.mutate({ habitId: noteDialogHabitId, date: today, note });
+          } else {
+            setNoteDialogHabitId(null);
+          }
+        }}
       />
 
       {/* Level Up Modal */}

@@ -10,7 +10,7 @@ export default async function PublicLayout({
   const session = await auth.api.getSession({ headers: await headers() });
 
   if (session) {
-    redirect("/groups");
+    redirect("/dashboard");
   }
 
   return <>{children}</>;

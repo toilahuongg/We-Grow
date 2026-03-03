@@ -10,6 +10,7 @@ import { orpc, client } from "@/utils/orpc";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { LevelUpModal } from "@/components/level-up-modal";
+import { NoteDialog } from "@/components/note-dialog";
 import { StreakBadge } from "@/components/streak-badge";
 import { toast } from "sonner";
 import { HabitForm } from "./habit-form";
@@ -53,6 +54,7 @@ export function HabitDetail({ habitId, initialData }: HabitDetailProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [deleteDialog, setDeleteDialog] = useState(false);
   const [levelUpLevel, setLevelUpLevel] = useState<number | null>(null);
+  const [noteDialog, setNoteDialog] = useState<{ date: string; note: string | null } | null>(null);
 
   const t = useTranslations("habitDetail");
   const tc = useTranslations("common");
@@ -123,6 +125,15 @@ export function HabitDetail({ habitId, initialData }: HabitDetailProps) {
     },
   });
 
+  const updateNoteMutation = useMutation({
+    mutationFn: (input: { habitId: string; date: string; note: string | null }) =>
+      client.habits.updateNote(input),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: orpc.habits.getCompletions.queryKey({ input: { habitId } } as any) });
+      setNoteDialog(null);
+    },
+  });
+
   if (isLoading) {
     return (
       <div className="container mx-auto max-w-4xl px-4 py-8">
@@ -167,6 +178,8 @@ export function HabitDetail({ habitId, initialData }: HabitDetailProps) {
   const monthEnd = endOfMonth(currentMonth);
   const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
   const completedDates = new Set(completions?.map((c: any) => c.date) ?? []);
+  const noteDates = new Map<string, string>();
+  completions?.forEach((c: any) => { if (c.note) noteDates.set(c.date, c.note); });
 
   // Calculate completion rate
   const totalCompletions = completions?.length ?? 0;
@@ -270,12 +283,15 @@ export function HabitDetail({ habitId, initialData }: HabitDetailProps) {
                 const dateStr = format(day, "yyyy-MM-dd");
                 const isCompleted = completedDates.has(dateStr);
                 const dayIsToday = isToday(day);
+                const hasNote = noteDates.has(dateStr);
 
                 return (
                   <button
                     key={dateStr}
                     onClick={() => {
-                      if (isCompleted) {
+                      if (isCompleted && hasNote) {
+                        setNoteDialog({ date: dateStr, note: noteDates.get(dateStr) ?? null });
+                      } else if (isCompleted) {
                         uncompleteMutation.mutate(dateStr);
                       } else {
                         completeMutation.mutate(dateStr);
@@ -283,7 +299,7 @@ export function HabitDetail({ habitId, initialData }: HabitDetailProps) {
                     }}
                     disabled={completeMutation.isPending || uncompleteMutation.isPending}
                     className={`
-                      aspect-square rounded-lg text-sm font-medium transition-all
+                      relative aspect-square rounded-lg text-sm font-medium transition-all
                       ${dayIsToday ? "ring-2 ring-[#ff6b6b]" : ""}
                       ${isCompleted
                         ? "bg-gradient-to-br from-[#4ecdc4] to-[#a78bfa] text-white shadow-lg"
@@ -294,6 +310,9 @@ export function HabitDetail({ habitId, initialData }: HabitDetailProps) {
                     title={format(day, "MMM d, yyyy", { locale: dateLocale })}
                   >
                     {format(day, "d")}
+                    {hasNote && (
+                      <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 h-1 w-1 rounded-full bg-white/80" />
+                    )}
                   </button>
                 );
               })}
@@ -416,6 +435,19 @@ export function HabitDetail({ habitId, initialData }: HabitDetailProps) {
           </div>
         </div>
       </div>
+
+      {/* Note Dialog */}
+      {noteDialog && (
+        <NoteDialog
+          open={!!noteDialog}
+          onOpenChange={(open) => !open && setNoteDialog(null)}
+          initialNote={noteDialog.note}
+          isLoading={updateNoteMutation.isPending}
+          onSave={(note) => {
+            updateNoteMutation.mutate({ habitId, date: noteDialog.date, note });
+          }}
+        />
+      )}
 
       {/* Delete Confirmation */}
       <ConfirmDialog

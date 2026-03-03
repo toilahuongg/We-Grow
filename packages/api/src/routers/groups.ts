@@ -14,6 +14,7 @@ import { protectedProcedure } from "../index";
 import { requireGroupRole } from "../middlewares/group-auth";
 import { generateInviteCode } from "../lib/invite-code";
 import { getUserInfoMap } from "../lib/user-lookup";
+import { createActivity } from "../lib/activity";
 
 function getDateStr(date: Date): string {
   return date.toISOString().split("T")[0]!;
@@ -244,6 +245,9 @@ export const groupsRouter = {
         });
       }
 
+      // Create member_joined activity
+      createActivity(group._id as string, userId, "member_joined", {});
+
       return { success: true, status: member.status };
     }),
 
@@ -274,6 +278,9 @@ export const groupsRouter = {
         { status: "active", updatedAt: new Date() },
         { new: true },
       );
+      if (member) {
+        createActivity(input.groupId, input.userId, "member_joined", {});
+      }
       return { success: !!member };
     }),
 

@@ -12,6 +12,7 @@ import { generateId } from "@we-grow/db/utils/id";
 import { protectedProcedure } from "../index";
 import { requireGroupRole } from "../middlewares/group-auth";
 import { XP_REWARDS, getLevelFromXp } from "../lib/xp";
+import { createActivity, createActivityForUserGroups } from "../lib/activity";
 
 function getDateStr(date: Date): string {
   return date.toISOString().split("T")[0]!;
@@ -471,6 +472,7 @@ export const habitsRouter = {
       z.object({
         habitId: z.string(),
         date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+        note: z.string().max(1000).optional(),
       }),
     )
     .handler(async ({ context, input }) => {
@@ -497,6 +499,7 @@ export const habitsRouter = {
         habitId: input.habitId,
         userId,
         date,
+        note: input.note ?? null,
         createdAt: now,
         updatedAt: now,
       });
@@ -518,6 +521,26 @@ export const habitsRouter = {
       const finalLevel = finalProfile?.level ?? 1;
       const xpBeforeAll = (finalProfile?.totalXp ?? 0) - XP_REWARDS.HABIT_COMPLETION;
       const levelBeforeAll = getLevelFromXp(Math.max(0, xpBeforeAll));
+
+      // Create activity entries (non-blocking)
+      if (habit.groupId) {
+        createActivity(habit.groupId as string, userId, "habit_completed", {
+          habitId: habitId,
+          habitTitle: habit.title,
+          date,
+        });
+        if (newStreak === 7 || newStreak === 30 || newStreak === 100) {
+          createActivity(habit.groupId as string, userId, "streak_milestone", {
+            habitId: habitId,
+            habitTitle: habit.title,
+            streak: newStreak,
+            date,
+          });
+        }
+      }
+      if (finalLevel > levelBeforeAll) {
+        createActivityForUserGroups(userId, "level_up", { level: finalLevel, date });
+      }
 
       return {
         success: true,
@@ -616,4 +639,63 @@ export const habitsRouter = {
       };
     });
   }),
+
+  updateNote: protectedProcedure
+    .input(
+      z.object({
+        habitId: z.string(),
+        date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+        note: z.string().max(1000).nullable(),
+      }),
+    )
+    .handler(async ({ context, input }) => {
+      const completion = await HabitCompletion.findOneAndUpdate(
+        { habitId: input.habitId, userId: context.session.user.id, date: input.date },
+        { note: input.note, updatedAt: new Date() },
+        { new: true },
+      );
+      if (!completion) {
+        throw new Error("Completion not found");
+      }
+      return completion;
+    }),
+
+  getNotes: protectedProcedure
+    .input(
+      z.object({
+        habitId: z.string().optional(),
+        limit: z.number().min(1).max(50).optional(),
+        offset: z.number().min(0).optional(),
+      }).optional(),
+    )
+    .handler(async ({ context, input }) => {
+      const userId = context.session.user.id;
+      const limit = input?.limit ?? 20;
+      const offset = input?.offset ?? 0;
+
+      const query: Record<string, unknown> = { userId, note: { $exists: true, $nin: [null, ""] } };
+      if (input?.habitId) {
+        query.habitId = input.habitId;
+      }
+
+      const [completions, total] = await Promise.all([
+        HabitCompletion.find(query).sort({ date: -1 }).skip(offset).limit(limit),
+        HabitCompletion.countDocuments(query),
+      ]);
+
+      // Enrich with habit titles
+      const habitIds = [...new Set(completions.map((c) => c.habitId as string))];
+      const habits = await Habit.find({ _id: { $in: habitIds } });
+      const habitMap = new Map(habits.map((h) => [h._id as string, h.title as string]));
+
+      return {
+        notes: completions.map((c) => ({
+          ...c.toObject(),
+          habitTitle: habitMap.get(c.habitId as string) ?? "Unknown",
+        })),
+        total,
+        limit,
+        offset,
+      };
+    }),
 };

@@ -10,3 +10,5 @@ export { XpTransaction } from "./xp-transaction.model";
 export { PushSubscription } from "./push-subscription.model";
 export { Reminder } from "./reminder.model";
 export { UserBadge } from "./user-badge.model";
+export { Activity } from "./activity.model";
+export { Reaction } from "./reaction.model";
