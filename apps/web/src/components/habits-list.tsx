@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Plus, Calendar, Archive, Trash2, Edit2 } from "lucide-react";
+import { ArrowLeft, Plus, Calendar, Archive, Trash2, Edit2, Bell, BellOff } from "lucide-react";
 import Link from "next/link";
 
 import { orpc, client } from "@/utils/orpc";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/confirm-dialog";
+import { LevelUpModal } from "@/components/level-up-modal";
 import { EmptyState } from "@/components/empty-state";
 import { toast } from "sonner";
 import { Flame, CheckCircle2 } from "lucide-react";
@@ -52,10 +53,28 @@ export function HabitsList() {
     habitId: null,
     habitTitle: "",
   });
+  const [levelUpLevel, setLevelUpLevel] = useState<number | null>(null);
 
   const { data: habits, isLoading } = useQuery({
     ...orpc.habits.list.queryOptions({ input: { includeArchived: filter !== "active" } }),
     staleTime: 1000 * 60,
+  });
+
+  const { data: reminders } = useQuery({
+    ...orpc.notifications.listReminders.queryOptions(),
+    staleTime: 1000 * 60,
+  });
+
+  const reminderMap = new Map(
+    (reminders ?? []).filter((r: any) => r.habitId).map((r: any) => [r.habitId, r])
+  );
+
+  const toggleReminderMutation = useMutation({
+    mutationFn: (input: { habitId: string; enabled: boolean }) =>
+      client.notifications.toggleHabitReminder(input),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: orpc.notifications.listReminders.queryKey() });
+    },
   });
 
   const archiveMutation = useMutation({
@@ -82,9 +101,12 @@ export function HabitsList() {
 
   const completeMutation = useMutation({
     mutationFn: (habitId: string) => client.habits.complete({ habitId }),
-    onSuccess: (result) => {
+    onSuccess: (result: any) => {
       if (!result.alreadyCompleted) {
         toast.success(`+${result.xpAwarded} XP! ✨`);
+        if (result.leveledUp && result.newLevel) {
+          setLevelUpLevel(result.newLevel);
+        }
       }
       queryClient.invalidateQueries({ queryKey: orpc.habits.list.queryKey() });
       queryClient.invalidateQueries({ queryKey: orpc.gamification.getProfile.queryKey() });
@@ -218,6 +240,15 @@ export function HabitsList() {
                     </span>
                     <span>·</span>
                     <span>Best: {habit.longestStreak ?? 0} days</span>
+                    {reminderMap.get(habit._id)?.enabled && (
+                      <>
+                        <span>·</span>
+                        <span className="flex items-center gap-1 text-[#4ecdc4]">
+                          <Bell className="h-3 w-3" />
+                          {reminderMap.get(habit._id)?.time}
+                        </span>
+                      </>
+                    )}
                   </div>
                 </div>
 
@@ -232,6 +263,23 @@ export function HabitsList() {
                       <CheckCircle2 className="h-4 w-4" />
                     </button>
                   )}
+                  {!habit.archived && (() => {
+                    const reminder = reminderMap.get(habit._id);
+                    const isEnabled = reminder?.enabled ?? false;
+                    return (
+                      <button
+                        onClick={() => toggleReminderMutation.mutate({ habitId: habit._id, enabled: !isEnabled })}
+                        className={`flex h-8 w-8 items-center justify-center rounded-full transition-all ${
+                          isEnabled
+                            ? "bg-[#4ecdc4]/20 text-[#4ecdc4]"
+                            : "bg-white/10 text-muted-foreground hover:bg-[#4ecdc4]/10 hover:text-[#4ecdc4]"
+                        }`}
+                        title={isEnabled ? `Reminder ${reminder?.time}` : "Set reminder"}
+                      >
+                        {isEnabled ? <Bell className="h-4 w-4" /> : <BellOff className="h-4 w-4" />}
+                      </button>
+                    );
+                  })()}
                   <Link href={`/habits/${habit._id}`}>
                     <Button variant="ghost" size="icon-xs">
                       <Edit2 className="h-3 w-3" />
@@ -305,6 +353,9 @@ export function HabitsList() {
         }}
         isLoading={archiveMutation.isPending}
       />
+
+      {/* Level Up Modal */}
+      <LevelUpModal level={levelUpLevel} onClose={() => setLevelUpLevel(null)} />
     </div>
   );
 }

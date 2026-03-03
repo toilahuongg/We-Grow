@@ -1,9 +1,9 @@
 import { z } from "zod";
-import { UserProfile, XpTransaction, GroupMember, Habit } from "@we-grow/db/models/index";
+import { UserProfile, XpTransaction, GroupMember, Habit, UserBadge } from "@we-grow/db/models/index";
 
 import { protectedProcedure } from "../index";
 import { requireGroupRole } from "../middlewares/group-auth";
-import { getProgressToNextLevel } from "../lib/xp";
+import { getProgressToNextLevel, getLevelInfo } from "../lib/xp";
 import { getUserInfoMap } from "../lib/user-lookup";
 
 export const gamificationRouter = {
@@ -12,6 +12,7 @@ export const gamificationRouter = {
     const profile = await UserProfile.findOne({ userId });
 
     if (!profile) {
+      const levelInfo = getLevelInfo(1);
       return {
         totalXp: 0,
         level: 1,
@@ -19,15 +20,24 @@ export const gamificationRouter = {
         currentLevelXp: 0,
         nextLevelXp: 100,
         progressXp: 0,
+        levelInfo,
       };
     }
 
     const progress = getProgressToNextLevel(profile.totalXp ?? 0);
+    const levelInfo = getLevelInfo(profile.level ?? 1);
     return {
       totalXp: profile.totalXp,
       level: profile.level,
       ...progress,
+      levelInfo,
     };
+  }),
+
+  getBadges: protectedProcedure.handler(async ({ context }) => {
+    const userId = context.session.user.id;
+    const badges = await UserBadge.find({ userId }).sort({ level: 1 });
+    return badges;
   }),
 
   getXpHistory: protectedProcedure
@@ -92,13 +102,15 @@ export const gamificationRouter = {
           );
 
           const info = userInfoMap.get(member.userId as string);
+          const memberLevel = profile?.level ?? 1;
           return {
             userId: member.userId,
             userName: info?.name ?? "Unknown",
             userImage: info?.image ?? null,
             role: member.role,
             totalXp: profile?.totalXp ?? 0,
-            level: profile?.level ?? 1,
+            level: memberLevel,
+            levelInfo: getLevelInfo(memberLevel),
             bestStreak: maxStreak,
           };
         }),

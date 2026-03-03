@@ -20,6 +20,7 @@
   "nav": {
     "myGroups": "Nhóm của tôi",
     "myHabits": "Thói quen của tôi",
+    "badges": "Huy hiệu",
     "xpHistory": "Lịch sử XP",
     "reminders": "Nhắc nhở",
     "settings": "Cài đặt",
@@ -256,7 +257,9 @@
     "togetherModeDesc": "Thói quen này sẽ được tạo cho tất cả thành viên nhóm. Mỗi thành viên sẽ theo dõi tiến trình riêng, và bạn có thể xem mọi người đang làm thế nào trên bảng xếp hạng!",
     "createGroupHabitButton": "Tạo Thói Quen Nhóm",
     "groupHabitCreated": "Đã tạo thói quen nhóm! Tất cả thành viên giờ có thể theo dõi thói quen này. 🎉",
-    "failedCreateGroupHabit": "Tạo thói quen nhóm thất bại"
+    "failedCreateGroupHabit": "Tạo thói quen nhóm thất bại",
+    "reminder": "Nhắc nhở",
+    "reminderTime": "Giờ nhắc nhở"
   },
   "habitDetail": {
     "statistics": "Thống Kê",
@@ -285,7 +288,9 @@
     "deleteConfirmDesc": "Bạn có chắc muốn xóa \"{title}\" không? Hành động này không thể hoàn tác và tất cả lịch sử hoàn thành sẽ bị mất.",
     "habitDeleted": "Đã xóa thói quen",
     "xpAwarded": "+{amount} XP! ✨",
-    "dayStreak": "chuỗi ngày"
+    "dayStreak": "chuỗi ngày",
+    "reminder": "Nhắc nhở",
+    "noReminder": "Chưa đặt nhắc nhở"
   },
   "reminders": {
     "title": "Nhắc Nhở",
@@ -374,6 +379,17 @@
     "failedComplete": "Hoàn thành thói quen thất bại.",
     "failedUncomplete": "Hủy hoàn thành thói quen thất bại.",
     "xpAwarded": "+{amount} XP!"
+  },
+  "levelUp": {
+    "title": "Lên cấp!",
+    "description": "Chúc mừng! Bạn đã đạt được cấp độ mới!",
+    "levelLabel": "Cấp {level}",
+    "awesome": "Tuyệt vời!"
+  },
+  "badges": {
+    "title": "Bộ Sưu Tập Huy Hiệu",
+    "subtitle": "{earned} / {total} huy hiệu đã đạt",
+    "levelLabel": "Cấp {level}"
   },
   "notFound": {
     "title": "Không Tìm Thấy",

@@ -2,7 +2,9 @@ import { z } from "zod";
 import {
   Habit,
   HabitCompletion,
+  Reminder,
   UserProfile,
+  UserBadge,
   XpTransaction,
 } from "@we-grow/db/models/index";
 import { generateId } from "@we-grow/db/utils/id";
@@ -216,7 +218,7 @@ async function awardXp(
   source: string,
   sourceId: string | null,
   description: string,
-) {
+): Promise<{ previousLevel: number; newLevel: number; leveledUp: boolean }> {
   const now = new Date();
   await XpTransaction.create({
     _id: generateId(),
@@ -229,7 +231,9 @@ async function awardXp(
     updatedAt: now,
   });
   let profile = await UserProfile.findOne({ userId });
+  let isNewProfile = false;
   if (!profile) {
+    isNewProfile = true;
     profile = await UserProfile.create({
       _id: generateId(),
       userId,
@@ -240,10 +244,45 @@ async function awardXp(
       updatedAt: now,
     });
   }
+  const previousLevel = profile.level ?? 1;
   profile.totalXp = (profile.totalXp ?? 0) + amount;
   profile.level = getLevelFromXp(profile.totalXp);
   profile.updatedAt = now;
   await profile.save();
+
+  const newLevel = profile.level ?? 1;
+
+  // Award badge for new profile (level 1)
+  if (isNewProfile) {
+    await UserBadge.create({
+      _id: generateId(),
+      userId,
+      badgeType: "level",
+      badgeKey: "level_1",
+      level: 1,
+      awardedAt: now,
+      createdAt: now,
+      updatedAt: now,
+    }).catch(() => {/* ignore duplicate */});
+  }
+
+  // Award badges for each level gained (handles multi-level jumps)
+  if (newLevel > previousLevel) {
+    for (let lvl = previousLevel + 1; lvl <= newLevel; lvl++) {
+      await UserBadge.create({
+        _id: generateId(),
+        userId,
+        badgeType: "level",
+        badgeKey: `level_${lvl}`,
+        level: lvl,
+        awardedAt: now,
+        createdAt: now,
+        updatedAt: now,
+      }).catch(() => {/* ignore duplicate */});
+    }
+  }
+
+  return { previousLevel, newLevel, leveledUp: newLevel > previousLevel };
 }
 
 async function reverseXp(
@@ -423,6 +462,7 @@ export const habitsRouter = {
       const userId = context.session.user.id;
       await Habit.deleteOne({ _id: input.habitId, userId });
       await HabitCompletion.deleteMany({ habitId: input.habitId, userId });
+      await Reminder.deleteMany({ habitId: input.habitId, userId });
       return { success: true };
     }),
 
@@ -473,11 +513,19 @@ export const habitsRouter = {
       await checkStreakBonuses(userId, habitId, newStreak, date);
       await checkAllHabitsBonus(userId, date);
 
+      // Re-read profile to get final level after all XP awards
+      const finalProfile = await UserProfile.findOne({ userId });
+      const finalLevel = finalProfile?.level ?? 1;
+      const xpBeforeAll = (finalProfile?.totalXp ?? 0) - XP_REWARDS.HABIT_COMPLETION;
+      const levelBeforeAll = getLevelFromXp(Math.max(0, xpBeforeAll));
+
       return {
         success: true,
         alreadyCompleted: false,
         streak: newStreak,
         xpAwarded: XP_REWARDS.HABIT_COMPLETION,
+        leveledUp: finalLevel > levelBeforeAll,
+        newLevel: finalLevel,
       };
     }),
 

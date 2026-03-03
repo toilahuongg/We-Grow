@@ -20,6 +20,7 @@
   "nav": {
     "myGroups": "Mes groupes",
     "myHabits": "Mes habitudes",
+    "badges": "Badges",
     "xpHistory": "Historique XP",
     "reminders": "Rappels",
     "settings": "Paramètres",
@@ -256,7 +257,9 @@
     "togetherModeDesc": "Cette habitude sera créée pour tous les membres du groupe. Chaque membre suivra sa propre progression et vous pourrez voir comment chacun progresse dans le classement !",
     "createGroupHabitButton": "Créer l'habitude de groupe",
     "groupHabitCreated": "Habitude de groupe créée ! Tous les membres peuvent maintenant suivre cette habitude. 🎉",
-    "failedCreateGroupHabit": "Échec de la création de l'habitude de groupe"
+    "failedCreateGroupHabit": "Échec de la création de l'habitude de groupe",
+    "reminder": "Rappel",
+    "reminderTime": "Heure du rappel"
   },
   "habitDetail": {
     "statistics": "Statistiques",
@@ -285,7 +288,9 @@
     "deleteConfirmDesc": "Êtes-vous sûr de vouloir supprimer « {title} » ? Cette action est irréversible et tout l'historique de complétion sera perdu.",
     "habitDeleted": "Habitude supprimée",
     "xpAwarded": "+{amount} XP ! ✨",
-    "dayStreak": "jours de série"
+    "dayStreak": "jours de série",
+    "reminder": "Rappel",
+    "noReminder": "Aucun rappel défini"
   },
   "reminders": {
     "title": "Rappels",
@@ -374,6 +379,17 @@
     "failedComplete": "Échec de la complétion de l'habitude.",
     "failedUncomplete": "Échec de l'annulation de la complétion.",
     "xpAwarded": "+{amount} XP !"
+  },
+  "levelUp": {
+    "title": "Niveau supérieur !",
+    "description": "Félicitations ! Vous avez atteint un nouveau niveau !",
+    "levelLabel": "Niveau {level}",
+    "awesome": "Génial !"
+  },
+  "badges": {
+    "title": "Collection de badges",
+    "subtitle": "{earned} / {total} badges obtenus",
+    "levelLabel": "Niveau {level}"
   },
   "notFound": {
     "title": "Page",

@@ -27,6 +27,7 @@ import { useTranslations } from "next-intl";
 import { orpc, client } from "@/utils/orpc";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/confirm-dialog";
+import { LevelUpModal } from "@/components/level-up-modal";
 import { Label } from "@/components/ui/label";
 import { EmptyState } from "@/components/empty-state";
 import { toast } from "sonner";
@@ -87,6 +88,7 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
   const [editingGroup, setEditingGroup] = useState(false);
   const [editName, setEditName] = useState("");
   const [editDescription, setEditDescription] = useState("");
+  const [levelUpLevel, setLevelUpLevel] = useState<number | null>(null);
 
   useState(() => {
     authClient.getSession().then((res) => setSession(res.data ? res.data : null));
@@ -123,9 +125,12 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
 
       return { previousHabits };
     },
-    onSuccess: (result) => {
+    onSuccess: (result: any) => {
       if (!result.alreadyCompleted) {
         toast.success(t("xpAwarded", { amount: result.xpAwarded ?? 0 }));
+        if (result.leveledUp && result.newLevel) {
+          setLevelUpLevel(result.newLevel);
+        }
       }
       queryClient.invalidateQueries({ queryKey: orpc.gamification.getProfile.queryKey() });
     },
@@ -463,7 +468,9 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                           : leaderboard[0]?.userName}
                       </p>
                       <p className="text-xl font-bold gradient-text">{leaderboard[0]?.totalXp} XP</p>
-                      <p className="text-xs text-muted-foreground">{t("levelLabel", { level: leaderboard[0]?.level })}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {leaderboard[0]?.levelInfo?.icon} {t("levelLabel", { level: leaderboard[0]?.level })}
+                      </p>
                     </div>
                   </div>
 
@@ -505,7 +512,7 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                             {isCurrentUser ? tc("you") : entry.userName}
                           </p>
                           <p className="text-xs text-muted-foreground">
-                            {t("levelLabel", { level: entry.level })} · {t("dayStreakLabel", { count: entry.bestStreak })}
+                            {entry.levelInfo?.icon} {t("levelLabel", { level: entry.level })} · {t("dayStreakLabel", { count: entry.bestStreak })}
                           </p>
                         </div>
                         <div className="text-right">
@@ -536,7 +543,7 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                             {isCurrentUser ? tc("you") : entry.userName}
                           </p>
                           <p className="text-xs text-muted-foreground">
-                            {t("levelLabel", { level: entry.level })} · {t("dayStreakLabel", { count: entry.bestStreak })}
+                            {entry.levelInfo?.icon} {t("levelLabel", { level: entry.level })} · {t("dayStreakLabel", { count: entry.bestStreak })}
                           </p>
                         </div>
                         <div className="text-right">
@@ -860,6 +867,9 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
         }}
         isLoading={removeMemberMutation.isPending}
       />
+
+      {/* Level Up Modal */}
+      <LevelUpModal level={levelUpLevel} onClose={() => setLevelUpLevel(null)} />
     </div>
   );
 }

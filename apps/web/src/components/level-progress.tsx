@@ -1,6 +1,6 @@
-import { Trophy } from "lucide-react";
-
 import { cn } from "@/lib/utils";
+import { getLevelInfo } from "@/lib/level-utils";
+import { useLocale } from "next-intl";
 
 interface LevelProgressProps {
   current: number;
@@ -11,22 +11,25 @@ interface LevelProgressProps {
 }
 
 export function LevelProgress({ current, next, level, size = "md", className }: LevelProgressProps) {
-  const progress = ((current % 1000) / 1000) * 100;
+  const locale = useLocale();
+  const progress = next > 0 ? (current / next) * 100 : 0;
+  const info = getLevelInfo(level);
+  const levelName = locale === "vi" ? info.nameVi : info.nameEn;
 
   const sizeStyles = {
     sm: {
       container: "h-1.5",
-      icon: "h-3 w-3",
+      icon: "text-sm",
       text: "text-xs",
     },
     md: {
       container: "h-2",
-      icon: "h-4 w-4",
+      icon: "text-base",
       text: "text-sm",
     },
     lg: {
       container: "h-3",
-      icon: "h-5 w-5",
+      icon: "text-lg",
       text: "text-base",
     },
   };
@@ -37,10 +40,8 @@ export function LevelProgress({ current, next, level, size = "md", className }: 
     <div className={cn("space-y-2", className)}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-gradient-to-br from-[#ff6b6b] to-[#ffa06b]">
-            <Trophy className={cn("text-white", styles.icon)} />
-          </div>
-          <span className={cn("font-semibold", styles.text)}>Level {level}</span>
+          <span className={styles.icon}>{info.icon}</span>
+          <span className={cn("font-semibold", styles.text)}>{levelName}</span>
         </div>
         <span className={cn("text-muted-foreground", styles.text)}>
           {current} / {next} XP
@@ -52,7 +53,7 @@ export function LevelProgress({ current, next, level, size = "md", className }: 
             styles.container,
             "rounded-full bg-gradient-to-r from-[#ff6b6b] via-[#ffa06b] to-[#4ecdc4] transition-all duration-500 progress-glow"
           )}
-          style={{ width: `${progress}%` }}
+          style={{ width: `${Math.min(progress, 100)}%` }}
         />
       </div>
     </div>

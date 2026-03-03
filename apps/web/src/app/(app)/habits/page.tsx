@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2, Flame, Target } from "lucide-react";
 import Link from "next/link";
@@ -8,6 +9,7 @@ import { useTranslations } from "next-intl";
 
 import { orpc, client } from "@/utils/orpc";
 import { EmptyState } from "@/components/empty-state";
+import { LevelUpModal } from "@/components/level-up-modal";
 import { toast } from "sonner";
 
 const habitIcons: Record<string, string> = {
@@ -39,6 +41,7 @@ export default function HabitsPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const t = useTranslations("personalHabits");
+  const [levelUpLevel, setLevelUpLevel] = useState<number | null>(null);
 
   const { data: habits, isLoading: habitsLoading } = useQuery({
     ...orpc.habits.todaySummary.queryOptions({ input: {} }),
@@ -68,9 +71,12 @@ export default function HabitsPage() {
       );
       return { prev };
     },
-    onSuccess: (result) => {
+    onSuccess: (result: any) => {
       if (!result.alreadyCompleted) {
         toast.success(t("xpAwarded", { amount: result.xpAwarded ?? 0 }));
+        if (result.leveledUp && result.newLevel) {
+          setLevelUpLevel(result.newLevel);
+        }
       }
       queryClient.invalidateQueries({ queryKey: orpc.gamification.getProfile.queryKey() });
     },
@@ -230,6 +236,9 @@ export default function HabitsPage() {
           })}
         </div>
       )}
+
+      {/* Level Up Modal */}
+      <LevelUpModal level={levelUpLevel} onClose={() => setLevelUpLevel(null)} />
     </div>
   );
 }

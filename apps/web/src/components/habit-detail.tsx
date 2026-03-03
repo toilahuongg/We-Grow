@@ -2,13 +2,14 @@
 
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Calendar as CalendarIcon, Flame, TrendingUp, Edit2, Trash2 } from "lucide-react";
+import { ArrowLeft, Calendar as CalendarIcon, Flame, TrendingUp, Edit2, Trash2, Bell, BellOff } from "lucide-react";
 import Link from "next/link";
 import { useTranslations, useLocale } from "next-intl";
 
 import { orpc, client } from "@/utils/orpc";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/confirm-dialog";
+import { LevelUpModal } from "@/components/level-up-modal";
 import { StreakBadge } from "@/components/streak-badge";
 import { toast } from "sonner";
 import { HabitForm } from "./habit-form";
@@ -51,6 +52,7 @@ export function HabitDetail({ habitId, initialData }: HabitDetailProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [deleteDialog, setDeleteDialog] = useState(false);
+  const [levelUpLevel, setLevelUpLevel] = useState<number | null>(null);
 
   const t = useTranslations("habitDetail");
   const tc = useTranslations("common");
@@ -77,9 +79,12 @@ export function HabitDetail({ habitId, initialData }: HabitDetailProps) {
 
   const completeMutation = useMutation({
     mutationFn: (date: string) => client.habits.complete({ habitId, date }),
-    onSuccess: (result, date) => {
+    onSuccess: (result: any) => {
       if (!result.alreadyCompleted) {
         toast.success(t("xpAwarded", { amount: result.xpAwarded ?? 0 }));
+        if (result.leveledUp && result.newLevel) {
+          setLevelUpLevel(result.newLevel);
+        }
       }
       queryClient.invalidateQueries({ queryKey: orpc.habits.getById.queryKey({ input: { habitId } }) });
       queryClient.invalidateQueries({ queryKey: orpc.habits.getCompletions.queryKey({ input: { habitId } } as any) });
@@ -102,6 +107,19 @@ export function HabitDetail({ habitId, initialData }: HabitDetailProps) {
       queryClient.invalidateQueries({ queryKey: orpc.habits.list.queryKey() });
       toast.success(t("habitDeleted"));
       window.location.href = `/groups/${habit?.groupId ?? ""}`;
+    },
+  });
+
+  const { data: reminder } = useQuery({
+    ...orpc.notifications.getReminderByHabitId.queryOptions({ input: { habitId } }),
+    staleTime: 1000 * 60,
+  });
+
+  const toggleReminderMutation = useMutation({
+    mutationFn: (input: { habitId: string; enabled: boolean; time?: string }) =>
+      client.notifications.toggleHabitReminder(input),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: orpc.notifications.getReminderByHabitId.queryKey({ input: { habitId } }) });
     },
   });
 
@@ -335,6 +353,38 @@ export function HabitDetail({ habitId, initialData }: HabitDetailProps) {
             </div>
           </div>
 
+          {/* Reminder */}
+          <div className="glass-strong rounded-2xl p-6">
+            <h3 className="mb-4 font-semibold">{t("reminder")}</h3>
+            {reminder?.enabled ? (
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-[#4ecdc4]">
+                  <Bell className="h-4 w-4" />
+                  <span className="text-sm font-medium">{reminder.time as string}</span>
+                </div>
+                <button
+                  onClick={() => toggleReminderMutation.mutate({ habitId, enabled: false })}
+                  className="text-xs text-muted-foreground hover:text-foreground"
+                  disabled={toggleReminderMutation.isPending}
+                >
+                  <BellOff className="h-4 w-4" />
+                </button>
+              </div>
+            ) : (
+              <div className="text-center">
+                <p className="text-sm text-muted-foreground mb-3">{t("noReminder")}</p>
+                <button
+                  onClick={() => toggleReminderMutation.mutate({ habitId, enabled: true })}
+                  className="flex items-center gap-2 mx-auto rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm text-muted-foreground transition-all hover:border-[#4ecdc4] hover:text-[#4ecdc4]"
+                  disabled={toggleReminderMutation.isPending}
+                >
+                  <Bell className="h-4 w-4" />
+                  {t("reminder")}
+                </button>
+              </div>
+            )}
+          </div>
+
           {/* Today's Status */}
           <div className="glass-strong rounded-2xl p-6">
             <h3 className="mb-4 font-semibold">{t("todayStatus")}</h3>
@@ -378,6 +428,9 @@ export function HabitDetail({ habitId, initialData }: HabitDetailProps) {
         onConfirm={() => deleteMutation.mutate()}
         isLoading={deleteMutation.isPending}
       />
+
+      {/* Level Up Modal */}
+      <LevelUpModal level={levelUpLevel} onClose={() => setLevelUpLevel(null)} />
     </div>
   );
 }

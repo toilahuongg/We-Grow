@@ -20,6 +20,7 @@
   "nav": {
     "myGroups": "Mis Grupos",
     "myHabits": "Mis Hábitos",
+    "badges": "Insignias",
     "xpHistory": "Historial de XP",
     "reminders": "Recordatorios",
     "settings": "Configuración",
@@ -256,7 +257,9 @@
     "togetherModeDesc": "Este hábito se creará para todos los miembros del grupo. Cada miembro seguirá su propio progreso y podrás ver cómo les va a todos en la clasificación.",
     "createGroupHabitButton": "Crear Hábito Grupal",
     "groupHabitCreated": "¡Hábito grupal creado! Todos los miembros ahora pueden seguir este hábito. 🎉",
-    "failedCreateGroupHabit": "Error al crear el hábito grupal"
+    "failedCreateGroupHabit": "Error al crear el hábito grupal",
+    "reminder": "Recordatorio",
+    "reminderTime": "Hora del recordatorio"
   },
   "habitDetail": {
     "statistics": "Estadísticas",
@@ -285,7 +288,9 @@
     "deleteConfirmDesc": "¿Estás seguro de que quieres eliminar \"{title}\"? Esta acción no se puede deshacer y todo el historial de completado se perderá.",
     "habitDeleted": "Hábito eliminado",
     "xpAwarded": "+{amount} XP! ✨",
-    "dayStreak": "racha de días"
+    "dayStreak": "racha de días",
+    "reminder": "Recordatorio",
+    "noReminder": "Sin recordatorio configurado"
   },
   "reminders": {
     "title": "Recordatorios",
@@ -374,6 +379,17 @@
     "failedComplete": "Error al completar el hábito.",
     "failedUncomplete": "Error al desmarcar el hábito.",
     "xpAwarded": "+{amount} XP!"
+  },
+  "levelUp": {
+    "title": "¡Subiste de nivel!",
+    "description": "¡Felicidades! ¡Has alcanzado un nuevo nivel!",
+    "levelLabel": "Nivel {level}",
+    "awesome": "¡Genial!"
+  },
+  "badges": {
+    "title": "Colección de Insignias",
+    "subtitle": "{earned} / {total} insignias obtenidas",
+    "levelLabel": "Nivel {level}"
   },
   "notFound": {
     "title": "Página No",

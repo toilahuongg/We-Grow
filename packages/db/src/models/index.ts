@@ -9,3 +9,4 @@ export { GroupHabit } from "./group-habit.model";
 export { XpTransaction } from "./xp-transaction.model";
 export { PushSubscription } from "./push-subscription.model";
 export { Reminder } from "./reminder.model";
+export { UserBadge } from "./user-badge.model";

@@ -20,6 +20,7 @@
   "nav": {
     "myGroups": "My Groups",
     "myHabits": "My Habits",
+    "badges": "Badges",
     "xpHistory": "XP History",
     "reminders": "Reminders",
     "settings": "Settings",
@@ -256,7 +257,9 @@
     "togetherModeDesc": "This habit will be created for all group members. Each member will track their own progress, and you'll be able to see how everyone is doing on the leaderboard!",
     "createGroupHabitButton": "Create Group Habit",
     "groupHabitCreated": "Group habit created! All members can now track this habit. 🎉",
-    "failedCreateGroupHabit": "Failed to create group habit"
+    "failedCreateGroupHabit": "Failed to create group habit",
+    "reminder": "Reminder",
+    "reminderTime": "Reminder Time"
   },
   "habitDetail": {
     "statistics": "Statistics",
@@ -285,7 +288,9 @@
     "deleteConfirmDesc": "Are you sure you want to delete \"{title}\"? This action cannot be undone and all completion history will be lost.",
     "habitDeleted": "Habit deleted",
     "xpAwarded": "+{amount} XP! ✨",
-    "dayStreak": "day streak"
+    "dayStreak": "day streak",
+    "reminder": "Reminder",
+    "noReminder": "No reminder set"
   },
   "reminders": {
     "title": "Reminders",
@@ -374,6 +379,17 @@
     "failedComplete": "Failed to complete habit.",
     "failedUncomplete": "Failed to uncomplete habit.",
     "xpAwarded": "+{amount} XP!"
+  },
+  "levelUp": {
+    "title": "Level Up!",
+    "description": "Congratulations! You've reached a new level!",
+    "levelLabel": "Level {level}",
+    "awesome": "Awesome!"
+  },
+  "badges": {
+    "title": "Badge Collection",
+    "subtitle": "{earned} / {total} badges earned",
+    "levelLabel": "Level {level}"
   },
   "notFound": {
     "title": "Page Not",
