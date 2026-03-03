@@ -5,6 +5,7 @@ import {
   GroupHabit,
   Habit,
   HabitCompletion,
+  TelegramLink,
 } from "@we-grow/db/models/index";
 import { generateId } from "@we-grow/db/utils/id";
 
@@ -123,6 +124,7 @@ export const groupsRouter = {
       );
       await GroupMember.deleteMany({ groupId: input.groupId });
       await GroupHabit.deleteMany({ groupId: input.groupId });
+      await (TelegramLink as any).deleteMany({ groupId: input.groupId });
       await Group.deleteOne({ _id: input.groupId });
       return { success: true };
     }),

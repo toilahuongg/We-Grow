@@ -1,6 +1,7 @@
 import { Activity, GroupMember } from "@we-grow/db/models/index";
 import { generateId } from "@we-grow/db/utils/id";
 import { getUserInfoMap } from "./user-lookup";
+import { sendTelegramActivityNotification } from "./telegram-notify";
 
 type ActivityType = "habit_completed" | "streak_milestone" | "level_up" | "all_habits_completed" | "member_joined";
 
@@ -13,6 +14,7 @@ export async function createActivity(
   try {
     const userInfo = await getUserInfoMap([userId]);
     const info = userInfo.get(userId);
+    const userName = info?.name ?? "Unknown";
     const now = new Date();
 
     await (Activity as any).create({
@@ -20,13 +22,16 @@ export async function createActivity(
       groupId,
       userId,
       type,
-      userName: info?.name ?? "Unknown",
+      userName,
       userImage: info?.image ?? null,
       metadata,
       reactionCounts: {},
       createdAt: now,
       updatedAt: now,
     });
+
+    // Fire-and-forget bot notifications
+    sendTelegramActivityNotification(groupId, userName, type, metadata);
   } catch {
     // Silent fail - activity creation should not block main operation
   }

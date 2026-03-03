@@ -32,7 +32,6 @@ import { Label } from "@/components/ui/label";
 import { EmptyState } from "@/components/empty-state";
 import { ActivityFeed } from "@/components/activity-feed";
 import { TelegramSettings } from "@/components/telegram-settings";
-import { ZaloSettings } from "@/components/zalo-settings";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
 
@@ -826,7 +825,6 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
 
               <div className="space-y-3">
                 <TelegramSettings groupId={group._id as string} t={(key) => t(`telegram_${key}`)} />
-                <ZaloSettings groupId={group._id as string} t={(key) => t(`zalo_${key}`)} />
               </div>
             </div>
           )}

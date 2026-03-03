@@ -8,6 +8,7 @@ import { notificationsRouter } from "./notifications";
 import { profileRouter } from "./profile";
 import { analyticsRouter } from "./analytics";
 import { feedRouter } from "./feed";
+import { telegramRouter } from "./telegram";
 
 export const appRouter = {
   healthCheck: publicProcedure.handler(() => {
@@ -26,6 +27,7 @@ export const appRouter = {
   profile: profileRouter,
   analytics: analyticsRouter,
   feed: feedRouter,
+  telegram: telegramRouter,
 };
 export type AppRouter = typeof appRouter;
 export type AppRouterClient = RouterClient<typeof appRouter>;

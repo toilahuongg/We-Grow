@@ -13,6 +13,7 @@ import { protectedProcedure } from "../index";
 import { requireGroupRole } from "../middlewares/group-auth";
 import { XP_REWARDS, getLevelFromXp } from "../lib/xp";
 import { createActivity, createActivityForUserGroups } from "../lib/activity";
+import { completeHabitForUser } from "../lib/habit-completion";
 
 function getDateStr(date: Date): string {
   return date.toISOString().split("T")[0]!;
@@ -476,79 +477,19 @@ export const habitsRouter = {
       }),
     )
     .handler(async ({ context, input }) => {
-      const userId = context.session.user.id;
-      const date = input.date ?? getDateStr(new Date());
-      const now = new Date();
-
-      const habit = await Habit.findOne({ _id: input.habitId, userId });
-      if (!habit) {
-        throw new Error("Habit not found");
-      }
-
-      const existing = await HabitCompletion.findOne({
-        habitId: input.habitId,
-        userId,
-        date,
-      });
-      if (existing) {
-        return { success: true, alreadyCompleted: true, streak: habit.currentStreak };
-      }
-
-      await HabitCompletion.create({
-        _id: generateId(),
-        habitId: input.habitId,
-        userId,
-        date,
-        note: input.note ?? null,
-        createdAt: now,
-        updatedAt: now,
-      });
-
-      const newStreak = await calculateStreak(habit, date);
-      habit.currentStreak = newStreak;
-      habit.longestStreak = Math.max(habit.longestStreak ?? 0, newStreak);
-      habit.lastCompletedDate = date;
-      habit.updatedAt = now;
-      await habit.save();
-
-      const habitId = habit._id as string;
-      await awardXp(userId, XP_REWARDS.HABIT_COMPLETION, "habit_completion", habitId, `Completed habit: ${habit.title} [${date}]`);
-      await checkStreakBonuses(userId, habitId, newStreak, date);
-      await checkAllHabitsBonus(userId, date);
-
-      // Re-read profile to get final level after all XP awards
-      const finalProfile = await UserProfile.findOne({ userId });
-      const finalLevel = finalProfile?.level ?? 1;
-      const xpBeforeAll = (finalProfile?.totalXp ?? 0) - XP_REWARDS.HABIT_COMPLETION;
-      const levelBeforeAll = getLevelFromXp(Math.max(0, xpBeforeAll));
-
-      // Create activity entries (non-blocking)
-      if (habit.groupId) {
-        createActivity(habit.groupId as string, userId, "habit_completed", {
-          habitId: habitId,
-          habitTitle: habit.title,
-          date,
-        });
-        if (newStreak === 7 || newStreak === 30 || newStreak === 100) {
-          createActivity(habit.groupId as string, userId, "streak_milestone", {
-            habitId: habitId,
-            habitTitle: habit.title,
-            streak: newStreak,
-            date,
-          });
-        }
-      }
-      if (finalLevel > levelBeforeAll) {
-        createActivityForUserGroups(userId, "level_up", { level: finalLevel, date });
-      }
-
+      const result = await completeHabitForUser(
+        context.session.user.id,
+        input.habitId,
+        input.date,
+        input.note,
+      );
       return {
-        success: true,
-        alreadyCompleted: false,
-        streak: newStreak,
-        xpAwarded: XP_REWARDS.HABIT_COMPLETION,
-        leveledUp: finalLevel > levelBeforeAll,
-        newLevel: finalLevel,
+        success: result.success,
+        alreadyCompleted: result.alreadyCompleted,
+        streak: result.streak,
+        xpAwarded: result.xpAwarded,
+        leveledUp: result.leveledUp,
+        newLevel: result.newLevel,
       };
     }),
 
