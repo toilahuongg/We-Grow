@@ -106,4 +106,47 @@ export const notificationsRouter = {
       });
       return { success: true };
     }),
+
+  getReminderByHabitId: protectedProcedure
+    .input(z.object({ habitId: z.string() }))
+    .handler(async ({ context, input }) => {
+      return Reminder.findOne({
+        habitId: input.habitId,
+        userId: context.session.user.id,
+      });
+    }),
+
+  toggleHabitReminder: protectedProcedure
+    .input(
+      z.object({
+        habitId: z.string(),
+        enabled: z.boolean(),
+        time: z.string().regex(/^\d{2}:\d{2}$/).optional(),
+      }),
+    )
+    .handler(async ({ context, input }) => {
+      const userId = context.session.user.id;
+      const now = new Date();
+
+      const existing = await Reminder.findOne({ habitId: input.habitId, userId });
+      if (existing) {
+        existing.enabled = input.enabled;
+        if (input.time) {
+          existing.time = input.time;
+        }
+        existing.updatedAt = now;
+        await existing.save();
+        return existing;
+      }
+
+      return Reminder.create({
+        _id: generateId(),
+        userId,
+        habitId: input.habitId,
+        time: input.time ?? "09:00",
+        enabled: input.enabled,
+        createdAt: now,
+        updatedAt: now,
+      });
+    }),
 };
