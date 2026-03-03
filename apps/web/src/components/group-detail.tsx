@@ -47,6 +47,16 @@ const habitIcons: Record<string, string> = {
   default: "🌟",
 };
 
+function getInitials(name: string): string {
+  return name
+    .split(" ")
+    .map((part) => part[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+}
+
 function getHabitIcon(title: string): string {
   const lowerTitle = title.toLowerCase();
   if (lowerTitle.includes("meditation") || lowerTitle.includes("mindful")) return habitIcons.meditation;
@@ -401,7 +411,7 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                       <p className="font-medium text-sm truncate">
                         {leaderboard[1]?.userId === session?.user?.id
                           ? "You"
-                          : `User #${leaderboard[1]?.userId.slice(0, 8)}`}
+                          : leaderboard[1]?.userName}
                       </p>
                       <p className="text-lg font-bold">{leaderboard[1]?.totalXp} XP</p>
                     </div>
@@ -417,7 +427,7 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                       <p className="font-semibold truncate">
                         {leaderboard[0]?.userId === session?.user?.id
                           ? "You"
-                          : `User #${leaderboard[0]?.userId.slice(0, 8)}`}
+                          : leaderboard[0]?.userName}
                       </p>
                       <p className="text-xl font-bold gradient-text">{leaderboard[0]?.totalXp} XP</p>
                       <p className="text-xs text-muted-foreground">Level {leaderboard[0]?.level}</p>
@@ -433,7 +443,7 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                       <p className="font-medium text-sm truncate">
                         {leaderboard[2]?.userId === session?.user?.id
                           ? "You"
-                          : `User #${leaderboard[2]?.userId.slice(0, 8)}`}
+                          : leaderboard[2]?.userName}
                       </p>
                       <p className="text-lg font-bold">{leaderboard[2]?.totalXp} XP</p>
                     </div>
@@ -462,7 +472,7 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                       </div>
                       <div className="flex-1">
                         <p className="font-medium">
-                          {isCurrentUser ? "You" : `User #${entry.userId.slice(0, 8)}`}
+                          {isCurrentUser ? "You" : entry.userName}
                         </p>
                         <p className="text-xs text-muted-foreground">
                           Level {entry.level} · {entry.bestStreak} day streak
@@ -495,7 +505,7 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                         </div>
                         <div className="flex-1">
                           <p className="font-medium">
-                            {isCurrentUser ? "You" : `User #${entry.userId.slice(0, 8)}`}
+                            {isCurrentUser ? "You" : entry.userName}
                           </p>
                           <p className="text-xs text-muted-foreground">
                             Level {entry.level} · {entry.bestStreak} day streak
@@ -541,11 +551,11 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                     }`}
                   >
                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#ffa06b] to-[#f472b6] text-white font-semibold">
-                      {(member.userId === session.user?.id ? "You" : member.userId.slice(0, 2)).toUpperCase()}
+                      {isCurrentUser ? "Y" : getInitials(member.userName)}
                     </div>
                     <div className="flex-1">
                       <p className="font-medium">
-                        {member.userId === session.user?.id ? "You" : `User #${member.userId.slice(0, 8)}`}
+                        {isCurrentUser ? "You" : member.userName}
                       </p>
                       <div className={`flex items-center gap-1 text-xs ${config.color}`}>
                         <RoleIcon className="h-3 w-3" />
@@ -592,10 +602,10 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                     className="flex items-center gap-3 rounded-xl border border-yellow-500/20 bg-yellow-500/5 p-3"
                   >
                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#ffa06b] to-[#f472b6] text-white font-semibold">
-                      {member.userId.slice(0, 2).toUpperCase()}
+                      {getInitials(member.userName)}
                     </div>
                     <div className="flex-1">
-                      <p className="font-medium">User #{member.userId.slice(0, 8)}</p>
+                      <p className="font-medium">{member.userName}</p>
                       <p className="text-xs text-yellow-500">Waiting for approval</p>
                     </div>
                   </div>

@@ -4,6 +4,7 @@ import { UserProfile, XpTransaction, GroupMember, Habit } from "@we-grow/db/mode
 import { protectedProcedure } from "../index";
 import { requireGroupRole } from "../middlewares/group-auth";
 import { getProgressToNextLevel } from "../lib/xp";
+import { getUserInfoMap } from "../lib/user-lookup";
 
 export const gamificationRouter = {
   getProfile: protectedProcedure.handler(async ({ context }) => {
@@ -76,6 +77,8 @@ export const gamificationRouter = {
         status: "active",
       });
 
+      const userInfoMap = await getUserInfoMap(members.map((m) => m.userId as string));
+
       const leaderboard = await Promise.all(
         members.map(async (member) => {
           const [profile, habits] = await Promise.all([
@@ -88,8 +91,11 @@ export const gamificationRouter = {
             0,
           );
 
+          const info = userInfoMap.get(member.userId as string);
           return {
             userId: member.userId,
+            userName: info?.name ?? "Unknown",
+            userImage: info?.image ?? null,
             role: member.role,
             totalXp: profile?.totalXp ?? 0,
             level: profile?.level ?? 1,

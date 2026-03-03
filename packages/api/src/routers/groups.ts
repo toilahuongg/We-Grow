@@ -11,6 +11,7 @@ import { generateId } from "@we-grow/db/utils/id";
 import { protectedProcedure } from "../index";
 import { requireGroupRole } from "../middlewares/group-auth";
 import { generateInviteCode } from "../lib/invite-code";
+import { getUserInfoMap } from "../lib/user-lookup";
 
 function getDateStr(date: Date): string {
   return date.toISOString().split("T")[0]!;
@@ -37,7 +38,17 @@ export const groupsRouter = {
         status: { $in: ["active", "pending"] },
       });
 
-      return { ...group.toObject(), members };
+      const userInfoMap = await getUserInfoMap(members.map((m) => m.userId as string));
+      const enrichedMembers = members.map((m) => {
+        const info = userInfoMap.get(m.userId as string);
+        return {
+          ...m.toObject(),
+          userName: info?.name ?? "Unknown",
+          userImage: info?.image ?? null,
+        };
+      });
+
+      return { ...group.toObject(), members: enrichedMembers };
     }),
 
   create: protectedProcedure
@@ -417,6 +428,8 @@ export const groupsRouter = {
         status: "active",
       });
 
+      const userInfoMap = await getUserInfoMap(members.map((m) => m.userId as string));
+
       const progress = await Promise.all(
         members.map(async (member) => {
           const habits = await Habit.find({ userId: member.userId, groupId: input.groupId, archived: false });
@@ -426,8 +439,11 @@ export const groupsRouter = {
             habitId: { $in: habits.map((h) => h._id) },
           });
 
+          const info = userInfoMap.get(member.userId as string);
           return {
             userId: member.userId,
+            userName: info?.name ?? "Unknown",
+            userImage: info?.image ?? null,
             role: member.role,
             totalHabits: habits.length,
             completedHabits: completions.length,

@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Outfit, DM_Sans } from "next/font/google";
 
 import "../index.css";
-import Header from "@/components/header";
 import Providers from "@/components/providers";
 
 const outfit = Outfit({
@@ -31,10 +30,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${outfit.variable} ${dmSans.variable} antialiased`}>
         <Providers>
-          <div className="grid grid-rows-[auto_1fr] h-svh">
-            <Header />
-            {children}
-          </div>
+          {children}
         </Providers>
       </body>
     </html>
