@@ -17,6 +17,8 @@ import {
   Settings,
   Trash2,
   LogOut,
+  Check,
+  X,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -81,6 +83,7 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
   const [showInviteCode, setShowInviteCode] = useState(false);
   const [leaveDialog, setLeaveDialog] = useState(false);
   const [deleteDialog, setDeleteDialog] = useState(false);
+  const [removeMemberTarget, setRemoveMemberTarget] = useState<{ userId: string; userName: string } | null>(null);
 
   useState(() => {
     authClient.getSession().then(setSession);
@@ -200,6 +203,17 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
     },
     onError: (error: any) => {
       toast.error(error.message || t("failedRemoveMember"));
+    },
+  });
+
+  const approveMemberMutation = useMutation({
+    mutationFn: (userId: string) => client.groups.approveMember({ groupId, userId }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: orpc.groups.getById.queryKey({ input: { groupId } }) });
+      toast.success(t("memberApproved"));
+    },
+    onError: (error: any) => {
+      toast.error(error.message || t("failedApproveMember"));
     },
   });
 
@@ -560,28 +574,32 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                         <span>{t(config.labelKey)}</span>
                       </div>
                     </div>
-                    {canManage && !isCurrentUser && isOwner && (
+                    {!isCurrentUser && (
                       <div className="flex gap-1">
-                        <select
-                          value={member.role}
-                          onChange={(e) => {
-                            const newRole = e.target.value as "moderator" | "member";
-                            changeRoleMutation.mutate({ userId: member.userId, role: newRole });
-                          }}
-                          className="bg-white/5 border border-white/10 rounded px-2 py-1 text-xs"
-                          disabled={changeRoleMutation.isPending}
-                        >
-                          <option value="member">{t("member")}</option>
-                          <option value="moderator">{t("moderator")}</option>
-                        </select>
-                        <button
-                          onClick={() => removeMemberMutation.mutate(member.userId)}
-                          className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 text-muted-foreground transition-all hover:bg-red-500/20 hover:text-red-500"
-                          title={t("removeMember")}
-                          disabled={removeMemberMutation.isPending}
-                        >
-                          <UserX className="h-4 w-4" />
-                        </button>
+                        {isOwner && (
+                          <select
+                            value={member.role}
+                            onChange={(e) => {
+                              const newRole = e.target.value as "moderator" | "member";
+                              changeRoleMutation.mutate({ userId: member.userId, role: newRole });
+                            }}
+                            className="bg-white/5 border border-white/10 rounded px-2 py-1 text-xs"
+                            disabled={changeRoleMutation.isPending}
+                          >
+                            <option value="member">{t("member")}</option>
+                            <option value="moderator">{t("moderator")}</option>
+                          </select>
+                        )}
+                        {canManage && (isOwner || member.role === "member") && (
+                          <button
+                            onClick={() => setRemoveMemberTarget({ userId: member.userId, userName: member.userName })}
+                            className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 text-muted-foreground transition-all hover:bg-red-500/20 hover:text-red-500"
+                            title={t("removeMember")}
+                            disabled={removeMemberMutation.isPending}
+                          >
+                            <UserX className="h-4 w-4" />
+                          </button>
+                        )}
                       </div>
                     )}
                   </div>
@@ -605,6 +623,24 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                     <div className="flex-1">
                       <p className="font-medium">{member.userName}</p>
                       <p className="text-xs text-yellow-500">{t("waitingForApproval")}</p>
+                    </div>
+                    <div className="flex gap-1">
+                      <button
+                        onClick={() => approveMemberMutation.mutate(member.userId)}
+                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 text-muted-foreground transition-all hover:bg-green-500/20 hover:text-green-500"
+                        title={t("approve")}
+                        disabled={approveMemberMutation.isPending}
+                      >
+                        <Check className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => setRemoveMemberTarget({ userId: member.userId, userName: member.userName })}
+                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 text-muted-foreground transition-all hover:bg-red-500/20 hover:text-red-500"
+                        title={t("reject")}
+                        disabled={removeMemberMutation.isPending}
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -737,6 +773,21 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
         variant="danger"
         onConfirm={() => deleteMutation.mutate()}
         isLoading={deleteMutation.isPending}
+      />
+
+      {/* Remove Member Confirmation */}
+      <ConfirmDialog
+        open={!!removeMemberTarget}
+        onOpenChange={(open) => !open && setRemoveMemberTarget(null)}
+        title={t("removeMemberConfirmTitle")}
+        description={t("removeMemberConfirmDesc", { name: removeMemberTarget?.userName ?? "" })}
+        confirmText={t("removeMember")}
+        variant="danger"
+        onConfirm={() => {
+          if (removeMemberTarget) removeMemberMutation.mutate(removeMemberTarget.userId);
+          setRemoveMemberTarget(null);
+        }}
+        isLoading={removeMemberMutation.isPending}
       />
     </div>
   );

@@ -213,6 +213,12 @@
     "roleUpdated": "Đã cập nhật vai trò",
     "failedUpdateRole": "Cập nhật vai trò thất bại",
     "removeMember": "Xóa thành viên",
+    "removeMemberConfirmTitle": "Xóa Thành Viên",
+    "removeMemberConfirmDesc": "Bạn có chắc muốn xóa \"{name}\" khỏi nhóm?",
+    "memberApproved": "Đã duyệt thành viên",
+    "failedApproveMember": "Duyệt thành viên thất bại",
+    "approve": "Duyệt",
+    "reject": "Từ chối",
     "levelLabel": "Cấp {level}",
     "dayStreakLabel": "chuỗi {count} ngày"
   },

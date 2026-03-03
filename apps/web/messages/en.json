@@ -213,6 +213,12 @@
     "roleUpdated": "Role updated",
     "failedUpdateRole": "Failed to update role",
     "removeMember": "Remove member",
+    "removeMemberConfirmTitle": "Remove Member",
+    "removeMemberConfirmDesc": "Are you sure you want to remove \"{name}\" from this group?",
+    "memberApproved": "Member approved",
+    "failedApproveMember": "Failed to approve member",
+    "approve": "Approve",
+    "reject": "Reject",
     "levelLabel": "Level {level}",
     "dayStreakLabel": "{count} day streak"
   },

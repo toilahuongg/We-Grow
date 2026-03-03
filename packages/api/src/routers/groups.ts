@@ -8,6 +8,8 @@ import {
 } from "@we-grow/db/models/index";
 import { generateId } from "@we-grow/db/utils/id";
 
+import { ORPCError } from "@orpc/server";
+
 import { protectedProcedure } from "../index";
 import { requireGroupRole } from "../middlewares/group-auth";
 import { generateInviteCode } from "../lib/invite-code";
@@ -278,10 +280,23 @@ export const groupsRouter = {
   removeMember: protectedProcedure
     .input(z.object({ groupId: z.string(), userId: z.string() }))
     .handler(async ({ context, input }) => {
-      await requireGroupRole(context.session.user.id, input.groupId, ["owner", "moderator"]);
+      const caller = await requireGroupRole(context.session.user.id, input.groupId, ["owner", "moderator"]);
       if (input.userId === context.session.user.id) {
         throw new Error("Cannot remove yourself");
       }
+
+      // Prevent moderator from removing owner or other moderators
+      const target = await GroupMember.findOne({
+        groupId: input.groupId,
+        userId: input.userId,
+        status: "active",
+      });
+      if (target && caller.role === "moderator" && target.role !== "member") {
+        throw new ORPCError("FORBIDDEN", {
+          message: "Moderators can only remove members",
+        });
+      }
+
       const member = await GroupMember.findOneAndUpdate(
         { groupId: input.groupId, userId: input.userId },
         { status: "removed", updatedAt: new Date() },
@@ -300,6 +315,12 @@ export const groupsRouter = {
     )
     .handler(async ({ context, input }) => {
       await requireGroupRole(context.session.user.id, input.groupId, ["owner"]);
+
+      // Prevent owner from changing their own role
+      if (input.userId === context.session.user.id) {
+        throw new Error("Cannot change your own role");
+      }
+
       const member = await GroupMember.findOneAndUpdate(
         { groupId: input.groupId, userId: input.userId, status: "active" },
         { role: input.role, updatedAt: new Date() },

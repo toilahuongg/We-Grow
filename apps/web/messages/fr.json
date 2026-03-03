@@ -213,6 +213,12 @@
     "roleUpdated": "Rôle mis à jour",
     "failedUpdateRole": "Échec de la mise à jour du rôle",
     "removeMember": "Retirer le membre",
+    "removeMemberConfirmTitle": "Retirer le membre",
+    "removeMemberConfirmDesc": "Êtes-vous sûr de vouloir retirer « {name} » de ce groupe ?",
+    "memberApproved": "Membre approuvé",
+    "failedApproveMember": "Échec de l'approbation du membre",
+    "approve": "Approuver",
+    "reject": "Rejeter",
     "levelLabel": "Niveau {level}",
     "dayStreakLabel": "Série de {count} jours"
   },

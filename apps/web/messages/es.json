@@ -213,6 +213,12 @@
     "roleUpdated": "Rol actualizado",
     "failedUpdateRole": "Error al actualizar el rol",
     "removeMember": "Eliminar miembro",
+    "removeMemberConfirmTitle": "Eliminar Miembro",
+    "removeMemberConfirmDesc": "¿Estás seguro de que quieres eliminar a \"{name}\" de este grupo?",
+    "memberApproved": "Miembro aprobado",
+    "failedApproveMember": "Error al aprobar miembro",
+    "approve": "Aprobar",
+    "reject": "Rechazar",
     "levelLabel": "Nivel {level}",
     "dayStreakLabel": "racha de {count} días"
   },
