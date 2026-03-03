@@ -252,24 +252,29 @@ async function reverseXp(
   sourceId: string | null,
   date: string,
 ) {
-  const query: Record<string, unknown> = {
-    userId,
-    source,
-    description: { $regex: `\\[${date}\\]` },
-  };
+  const query: Record<string, unknown> = { userId, source };
   if (sourceId !== null) {
     query.sourceId = sourceId;
   }
 
-  const transactions = await XpTransaction.find(query);
-  if (transactions.length === 0) return;
+  // Try exact match with date tag first (new format: "... [YYYY-MM-DD]")
+  let transaction = await XpTransaction.findOne({
+    ...query,
+    description: { $regex: `\\[${date}\\]` },
+  });
 
-  const totalReversed = transactions.reduce((sum: number, t: { amount?: number | null }) => sum + (t.amount ?? 0), 0);
-  await XpTransaction.deleteMany({ _id: { $in: transactions.map((t: { _id: unknown }) => t._id) } });
+  // Fall back to most recent matching transaction (old format without date tag)
+  if (!transaction) {
+    transaction = await XpTransaction.findOne(query).sort({ createdAt: -1 });
+  }
+
+  if (!transaction) return;
+
+  await XpTransaction.deleteOne({ _id: transaction._id });
 
   const profile = await UserProfile.findOne({ userId });
   if (profile) {
-    profile.totalXp = Math.max(0, (profile.totalXp ?? 0) - totalReversed);
+    profile.totalXp = Math.max(0, (profile.totalXp ?? 0) - (transaction.amount ?? 0));
     profile.level = getLevelFromXp(profile.totalXp);
     profile.updatedAt = new Date();
     await profile.save();
