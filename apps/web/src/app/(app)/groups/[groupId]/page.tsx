@@ -9,7 +9,7 @@ interface GroupPageProps {
 }
 
 export default async function GroupPage({ params }: GroupPageProps) {
-  const session = await authClient.getSession();
+  const { data: session } = await authClient.getSession();
 
   if (!session) {
     redirect("/login");

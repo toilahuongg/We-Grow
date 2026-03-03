@@ -9,7 +9,7 @@ interface HabitPageProps {
 }
 
 export default async function HabitPage({ params }: HabitPageProps) {
-  const session = await authClient.getSession();
+  const { data: session } = await authClient.getSession();
 
   if (!session) {
     redirect("/login");

@@ -9,7 +9,7 @@ interface PageProps {
 }
 
 export default async function NewGroupHabitPage({ params }: PageProps) {
-  const session = await authClient.getSession();
+  const { data: session } = await authClient.getSession();
 
   if (!session) {
     redirect("/login");
@@ -22,9 +22,8 @@ export default async function NewGroupHabitPage({ params }: PageProps) {
     redirect("/groups");
   }
 
-  const sessionData = session as any;
   const currentMember = group.members?.find(
-    (m: any) => m.userId === sessionData?.data?.user?.id && m.status === "active",
+    (m: any) => m.userId === session.user?.id && m.status === "active",
   );
   const canManage = currentMember?.role === "owner" || currentMember?.role === "moderator";
 
