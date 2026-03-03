@@ -1,10 +1,11 @@
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 
-import { authClient } from "@/lib/auth-client";
+import { auth } from "@we-grow/auth";
 import { RemindersList } from "@/components/reminders-list";
 
 export default async function RemindersPage() {
-  const { data: session } = await authClient.getSession();
+  const session = await auth.api.getSession({ headers: await headers() });
 
   if (!session) {
     redirect("/login");

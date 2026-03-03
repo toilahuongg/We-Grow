@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
+import { headers } from "next/headers";
 
-import { authClient } from "@/lib/auth-client";
+import { auth } from "@we-grow/auth";
 import { client } from "@/utils/orpc";
 import { GroupDetail } from "@/components/group-detail";
 
@@ -9,7 +10,7 @@ interface GroupPageProps {
 }
 
 export default async function GroupPage({ params }: GroupPageProps) {
-  const { data: session } = await authClient.getSession();
+  const session = await auth.api.getSession({ headers: await headers() });
 
   if (!session) {
     redirect("/login");
