@@ -23,4 +23,4 @@ const todoSchema = new Schema(
 
 todoSchema.index({ userId: 1, completed: 1 });
 
-export const Todo = model("Todo", todoSchema);
+export const Todo = mongoose.models.Todo || model("Todo", todoSchema);

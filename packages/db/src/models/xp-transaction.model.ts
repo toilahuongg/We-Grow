@@ -28,4 +28,4 @@ const xpTransactionSchema = new Schema(
 
 xpTransactionSchema.index({ userId: 1, createdAt: -1 });
 
-export const XpTransaction = model("XpTransaction", xpTransactionSchema);
+export const XpTransaction = mongoose.models.XpTransaction || model("XpTransaction", xpTransactionSchema);

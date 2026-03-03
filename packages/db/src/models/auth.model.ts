@@ -60,9 +60,9 @@ const verificationSchema = new Schema(
   { collection: "verification" },
 );
 
-const User = model("User", userSchema);
-const Session = model("Session", sessionSchema);
-const Account = model("Account", accountSchema);
-const Verification = model("Verification", verificationSchema);
+const User = mongoose.models.User || model("User", userSchema);
+const Session = mongoose.models.Session || model("Session", sessionSchema);
+const Account = mongoose.models.Account || model("Account", accountSchema);
+const Verification = mongoose.models.Verification || model("Verification", verificationSchema);
 
 export { User, Session, Account, Verification };

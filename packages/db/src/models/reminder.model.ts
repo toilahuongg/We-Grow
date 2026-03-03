@@ -18,4 +18,4 @@ const reminderSchema = new Schema(
 
 reminderSchema.index({ userId: 1 });
 
-export const Reminder = model("Reminder", reminderSchema);
+export const Reminder = mongoose.models.Reminder || model("Reminder", reminderSchema);

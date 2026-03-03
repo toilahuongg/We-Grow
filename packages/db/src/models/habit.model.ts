@@ -27,4 +27,4 @@ const habitSchema = new Schema(
 
 habitSchema.index({ userId: 1, archived: 1 });
 
-export const Habit = model("Habit", habitSchema);
+export const Habit = mongoose.models.Habit || model("Habit", habitSchema);

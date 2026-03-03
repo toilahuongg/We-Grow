@@ -9,7 +9,11 @@
       "default": "./src/*.ts"
     }
   },
-  "scripts": {},
+  "scripts": {
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage"
+  },
   "dependencies": {
     "@orpc/client": "catalog:",
     "@orpc/openapi": "catalog:",
@@ -25,7 +29,12 @@
   },
   "devDependencies": {
     "@types/web-push": "^3.6.4",
+    "@vitest/coverage-v8": "^2.1.8",
+    "@vitest/ui": "^2.1.8",
     "@we-grow/config": "workspace:*",
-    "typescript": "catalog:"
+    "mongodb-memory-server": "^10.2.0",
+    "typescript": "catalog:",
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^2.1.9"
   }
 }

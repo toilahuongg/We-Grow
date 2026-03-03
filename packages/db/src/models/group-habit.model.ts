@@ -24,4 +24,4 @@ const groupHabitSchema = new Schema(
 
 groupHabitSchema.index({ groupId: 1 });
 
-export const GroupHabit = model("GroupHabit", groupHabitSchema);
+export const GroupHabit = mongoose.models.GroupHabit || model("GroupHabit", groupHabitSchema);

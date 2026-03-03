@@ -23,8 +23,9 @@ export default async function DashboardPage() {
       redirect("/onboarding");
     }
   } catch (error) {
-    // If onboarding check fails, continue to dashboard
-    console.error("Failed to check onboarding status:", error);
+    // If onboarding check fails (e.g., UserProfile doesn't exist), redirect to onboarding
+    console.error("Failed to check onboarding status, redirecting to onboarding:", error);
+    redirect("/onboarding");
   }
 
   return (

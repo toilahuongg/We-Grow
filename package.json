@@ -10,6 +10,12 @@
     "dev": "turbo dev",
     "build": "turbo build",
     "check-types": "turbo check-types",
+    "test": "turbo test",
+    "test:api": "turbo test --filter=@we-grow/api",
+    "test:web": "turbo test --filter=web",
+    "test:watch": "turbo test --watch",
+    "test:ui": "turbo test --ui",
+    "test:coverage": "turbo test --coverage",
     "dev:native": "turbo -F native dev",
     "dev:web": "turbo -F web dev"
   },

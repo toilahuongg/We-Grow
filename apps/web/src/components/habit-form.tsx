@@ -139,14 +139,15 @@ export function HabitForm({ habit, isEditing = false }: HabitFormProps) {
       </div>
 
       {/* Form */}
-      <form.Provider>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            form.handleSubmit();
-          }}
-          className="glass-strong rounded-2xl p-6 space-y-6"
-        >
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          form.handleSubmit();
+        }}
+        className="glass-strong rounded-2xl p-6 space-y-6"
+        id="habit-form"
+      >
           {/* Title */}
           <form.Field name="title">
             {(field) => (
@@ -160,9 +161,11 @@ export function HabitForm({ habit, isEditing = false }: HabitFormProps) {
                   onChange={(e) => field.handleChange(e.target.value)}
                   placeholder="e.g., Morning Meditation"
                 />
-                {field.state.meta.errors.length > 0 && (
-                  <p className="text-sm text-red-500">{field.state.meta.errors[0]}</p>
-                )}
+                {field.state.meta.errors.map((error) => (
+                  <p key={error?.message} className="text-sm text-red-500">
+                    {error?.message}
+                  </p>
+                ))}
               </div>
             )}
           </form.Field>
@@ -300,7 +303,18 @@ export function HabitForm({ habit, isEditing = false }: HabitFormProps) {
               </Button>
             </Link>
             <Button
-              type="submit"
+              type="button"
+              onClick={() => {
+                const values = form.state.values;
+                if (isEditing && habit) {
+                  updateMutation.mutate({
+                    habitId: habit._id,
+                    updates: values,
+                  });
+                } else {
+                  createMutation.mutate(values);
+                }
+              }}
               className="bg-gradient-to-r from-[#ff6b6b] via-[#ffa06b] to-[#4ecdc4] text-white"
               disabled={createMutation.isPending || updateMutation.isPending}
             >
@@ -311,8 +325,7 @@ export function HabitForm({ habit, isEditing = false }: HabitFormProps) {
                 : "Create Habit"}
             </Button>
           </div>
-        </form>
-      </form.Provider>
+      </form>
     </div>
   );
 }

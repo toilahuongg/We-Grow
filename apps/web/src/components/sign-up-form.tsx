@@ -29,8 +29,8 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
         },
         {
           onSuccess: () => {
-            router.push("/dashboard");
-            toast.success("Welcome to We-Grow! 🌱");
+            router.push("/onboarding");
+            toast.success("Welcome to We-Grow! 🌱 Let's set up your profile.");
           },
           onError: (error) => {
             toast.error(error.error.message || error.error.statusText);
@@ -66,11 +66,11 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
         type="button"
         onClick={() => {
           authClient.signIn.social(
-            { provider: "google", callbackURL: "/dashboard" },
+            { provider: "google", callbackURL: "/onboarding" },
             {
               onSuccess: () => {
-                router.push("/dashboard");
-                toast.success("Welcome to We-Grow! 🌱");
+                router.push("/onboarding");
+                toast.success("Welcome to We-Grow! 🌱 Let's set up your profile.");
               },
               onError: (error) => {
                 toast.error(error.error.message || "Failed to sign up with Google");

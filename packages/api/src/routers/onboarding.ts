@@ -10,10 +10,20 @@ export const onboardingRouter = {
     const profile = await UserProfile.findOne({
       userId: context.session.user.id,
     });
+
+    // If profile doesn't exist (shouldn't happen after fix), treat as incomplete
+    if (!profile) {
+      return {
+        completed: false,
+        goals: [],
+        timezone: "UTC",
+      };
+    }
+
     return {
-      completed: profile?.onboardingCompleted ?? false,
-      goals: profile?.goals ?? [],
-      timezone: profile?.timezone ?? "UTC",
+      completed: profile.onboardingCompleted ?? false,
+      goals: profile.goals ?? [],
+      timezone: profile.timezone ?? "UTC",
     };
   }),
 
