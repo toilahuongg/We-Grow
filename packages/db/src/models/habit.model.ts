@@ -6,8 +6,8 @@ const habitSchema = new Schema(
   {
     _id: { type: String },
     userId: { type: String, ref: "User", required: true },
-    groupId: { type: String, ref: "Group", required: true },
-    groupHabitId: { type: String, ref: "GroupHabit", required: true },
+    groupId: { type: String, ref: "Group", default: null },
+    groupHabitId: { type: String, ref: "GroupHabit", default: null },
     title: { type: String, required: true },
     description: { type: String, default: "" },
     frequency: {

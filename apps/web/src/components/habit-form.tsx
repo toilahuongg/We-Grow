@@ -1,4 +1,3 @@
-// @ts-nocheck — Pre-existing issues: habits.create/update don't exist on the API router
 "use client";
 
 import { useState } from "react";

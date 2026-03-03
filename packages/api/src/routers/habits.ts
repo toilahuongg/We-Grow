@@ -167,6 +167,31 @@ async function checkAllHabitsBonus(userId: string, date: string) {
 }
 
 export const habitsRouter = {
+  create: protectedProcedure
+    .input(
+      z.object({
+        title: z.string().min(1),
+        description: z.string().optional(),
+        frequency: z.enum(["daily", "weekly", "specific_days"]),
+        targetDays: z.array(z.number().min(0).max(6)).optional(),
+        weeklyTarget: z.number().min(1).max(7).optional(),
+      }),
+    )
+    .handler(async ({ context, input }) => {
+      const now = new Date();
+      return Habit.create({
+        _id: generateId(),
+        userId: context.session.user.id,
+        title: input.title,
+        description: input.description ?? "",
+        frequency: input.frequency,
+        targetDays: input.targetDays ?? [],
+        weeklyTarget: input.weeklyTarget ?? 1,
+        createdAt: now,
+        updatedAt: now,
+      });
+    }),
+
   list: protectedProcedure
     .input(z.object({
       groupId: z.string().optional(),

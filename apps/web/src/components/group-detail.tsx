@@ -452,42 +452,7 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
               )}
 
               {/* Ranked List */}
-              <div className="space-y-2">
-                {leaderboard.map((entry: any, index: number) => {
-                  // Skip top 3 if podium is shown
-                  if (leaderboard.length >= 3 && index < 3) return null;
-                  const isCurrentUser = entry.userId === session.user?.id;
-
-                  return (
-                    <div
-                      key={entry.userId}
-                      className={`flex items-center gap-4 rounded-xl border p-3 ${
-                        isCurrentUser
-                          ? "border-[#4ecdc4] bg-[#4ecdc4]/10"
-                          : "border-white/10 bg-white/5"
-                      }`}
-                    >
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[#ff6b6b] to-[#ffa06b] text-sm font-bold text-white">
-                        {index + 1}
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-medium">
-                          {isCurrentUser ? "You" : entry.userName}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          Level {entry.level} · {entry.bestStreak} day streak
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-semibold">{entry.totalXp} XP</p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* For leaderboards with fewer than 3, show all as list */}
-              {leaderboard.length < 3 && (
+              {leaderboard.length < 3 ? (
                 <div className="space-y-2">
                   {leaderboard.map((entry: any, index: number) => {
                     const isCurrentUser = entry.userId === session.user?.id;
@@ -502,6 +467,38 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                       >
                         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[#ff6b6b] to-[#ffa06b] text-sm font-bold text-white">
                           {index + 1}
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-medium">
+                            {isCurrentUser ? "You" : entry.userName}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            Level {entry.level} · {entry.bestStreak} day streak
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-semibold">{entry.totalXp} XP</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {leaderboard.slice(3).map((entry: any, index: number) => {
+                    const isCurrentUser = entry.userId === session.user?.id;
+
+                    return (
+                      <div
+                        key={entry.userId}
+                        className={`flex items-center gap-4 rounded-xl border p-3 ${
+                          isCurrentUser
+                            ? "border-[#4ecdc4] bg-[#4ecdc4]/10"
+                            : "border-white/10 bg-white/5"
+                        }`}
+                      >
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[#ff6b6b] to-[#ffa06b] text-sm font-bold text-white">
+                          {index + 4}
                         </div>
                         <div className="flex-1">
                           <p className="font-medium">
