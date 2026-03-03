@@ -573,8 +573,12 @@ describe('XP Utility Functions', () => {
       expect(getLevelFromXp(300)).toBe(3)
     })
 
-    it('should return level 5 for 1500 XP', () => {
-      expect(getLevelFromXp(1500)).toBe(5)
+    it('should return level 5 for 1499 XP', () => {
+      expect(getLevelFromXp(1499)).toBe(5)
+    })
+
+    it('should return level 6 for 1500 XP', () => {
+      expect(getLevelFromXp(1500)).toBe(6)
     })
   })
 })

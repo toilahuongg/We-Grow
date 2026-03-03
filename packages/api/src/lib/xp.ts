@@ -12,7 +12,7 @@ export function xpForLevel(level: number): number {
 
 export function getLevelFromXp(totalXp: number): number {
   let level = 1;
-  while (xpForLevel(level + 1) <= totalXp) {
+  while (xpForLevel(level) <= totalXp) {
     level++;
   }
   return level;
@@ -25,8 +25,8 @@ export function getProgressToNextLevel(totalXp: number): {
   progressXp: number;
 } {
   const currentLevel = getLevelFromXp(totalXp);
-  const currentLevelXp = xpForLevel(currentLevel);
-  const nextLevelXp = xpForLevel(currentLevel + 1);
+  const currentLevelXp = xpForLevel(currentLevel - 1);
+  const nextLevelXp = xpForLevel(currentLevel);
   return {
     currentLevel,
     currentLevelXp,

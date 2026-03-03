@@ -111,6 +111,105 @@ async function calculateStreak(
   return 1;
 }
 
+async function recalculateStreakFromCompletions(
+  habit: InstanceType<typeof Habit>,
+): Promise<{ streak: number; lastDate: string | null }> {
+  const lastCompletion = await HabitCompletion.findOne({
+    habitId: habit._id,
+    userId: habit.userId,
+  }).sort({ date: -1 });
+
+  if (!lastCompletion) {
+    return { streak: 0, lastDate: null };
+  }
+
+  if (habit.frequency === "daily") {
+    let streak = 1;
+    let currentDate = lastCompletion.date as string;
+    // Walk backwards through consecutive days
+    while (true) {
+      const prevDate = addDays(currentDate, -1);
+      const prev = await HabitCompletion.findOne({
+        habitId: habit._id,
+        userId: habit.userId,
+        date: prevDate,
+      });
+      if (!prev) break;
+      streak++;
+      currentDate = prevDate;
+    }
+    return { streak, lastDate: lastCompletion.date as string };
+  }
+
+  if (habit.frequency === "weekly") {
+    const lastDate = lastCompletion.date as string;
+    const thisWeekStart = getWeekStart(lastDate);
+    const thisWeekEnd = addDays(thisWeekStart, 6);
+    const completionsThisWeek = await HabitCompletion.countDocuments({
+      habitId: habit._id,
+      userId: habit.userId,
+      date: { $gte: thisWeekStart, $lte: thisWeekEnd },
+    });
+
+    if (completionsThisWeek >= (habit.weeklyTarget ?? 1)) {
+      const lastWeekStart = addDays(thisWeekStart, -7);
+      const lastWeekEnd = addDays(lastWeekStart, 6);
+      const completionsLastWeek = await HabitCompletion.countDocuments({
+        habitId: habit._id,
+        userId: habit.userId,
+        date: { $gte: lastWeekStart, $lte: lastWeekEnd },
+      });
+
+      if (completionsLastWeek >= (habit.weeklyTarget ?? 1)) {
+        return { streak: (habit.currentStreak ?? 0), lastDate };
+      }
+      return { streak: 1, lastDate };
+    }
+    return { streak: 0, lastDate };
+  }
+
+  if (habit.frequency === "specific_days") {
+    const lastDate = lastCompletion.date as string;
+    const targetDays = habit.targetDays ?? [];
+    const lastDow = getDayOfWeek(lastDate);
+
+    if (!targetDays.includes(lastDow)) {
+      return { streak: 0, lastDate };
+    }
+
+    const sortedDays = [...targetDays].sort((a, b) => a - b);
+    let streak = 1;
+    let currentDate = lastDate;
+
+    while (true) {
+      const currentDow = getDayOfWeek(currentDate);
+      const currentIdx = sortedDays.indexOf(currentDow);
+      let daysBack: number;
+
+      if (currentIdx === 0) {
+        const prevDay = sortedDays[sortedDays.length - 1]!;
+        daysBack = ((currentDow - prevDay + 7) % 7) || 7;
+      } else {
+        const prevDay = sortedDays[currentIdx - 1]!;
+        daysBack = currentDow - prevDay;
+      }
+
+      const prevDate = addDays(currentDate, -daysBack);
+      const prev = await HabitCompletion.findOne({
+        habitId: habit._id,
+        userId: habit.userId,
+        date: prevDate,
+      });
+      if (!prev) break;
+      streak++;
+      currentDate = prevDate;
+    }
+    return { streak, lastDate };
+  }
+
+  return { streak: 0, lastDate: lastCompletion.date as string };
+}
+
 async function awardXp(
   userId: string,
   amount: number,
@@ -129,11 +228,50 @@ async function awardXp(
     createdAt: now,
     updatedAt: now,
   });
+  let profile = await UserProfile.findOne({ userId });
+  if (!profile) {
+    profile = await UserProfile.create({
+      _id: generateId(),
+      userId,
+      totalXp: 0,
+      level: 1,
+      onboardingCompleted: false,
+      createdAt: now,
+      updatedAt: now,
+    });
+  }
+  profile.totalXp = (profile.totalXp ?? 0) + amount;
+  profile.level = getLevelFromXp(profile.totalXp);
+  profile.updatedAt = now;
+  await profile.save();
+}
+
+async function reverseXp(
+  userId: string,
+  source: string,
+  sourceId: string | null,
+  date: string,
+) {
+  const query: Record<string, unknown> = {
+    userId,
+    source,
+    description: { $regex: `\\[${date}\\]` },
+  };
+  if (sourceId !== null) {
+    query.sourceId = sourceId;
+  }
+
+  const transactions = await XpTransaction.find(query);
+  if (transactions.length === 0) return;
+
+  const totalReversed = transactions.reduce((sum: number, t: { amount?: number | null }) => sum + (t.amount ?? 0), 0);
+  await XpTransaction.deleteMany({ _id: { $in: transactions.map((t: { _id: unknown }) => t._id) } });
+
   const profile = await UserProfile.findOne({ userId });
   if (profile) {
-    profile.totalXp = (profile.totalXp ?? 0) + amount;
+    profile.totalXp = Math.max(0, (profile.totalXp ?? 0) - totalReversed);
     profile.level = getLevelFromXp(profile.totalXp);
-    profile.updatedAt = now;
+    profile.updatedAt = new Date();
     await profile.save();
   }
 }
@@ -142,13 +280,14 @@ async function checkStreakBonuses(
   userId: string,
   habitId: string,
   streak: number,
+  date: string,
 ) {
   if (streak === 7) {
-    await awardXp(userId, XP_REWARDS.STREAK_7_DAY, "streak_bonus", habitId, "7-day streak bonus");
+    await awardXp(userId, XP_REWARDS.STREAK_7_DAY, "streak_bonus", habitId, `7-day streak bonus [${date}]`);
   } else if (streak === 30) {
-    await awardXp(userId, XP_REWARDS.STREAK_30_DAY, "streak_bonus", habitId, "30-day streak bonus");
+    await awardXp(userId, XP_REWARDS.STREAK_30_DAY, "streak_bonus", habitId, `30-day streak bonus [${date}]`);
   } else if (streak === 100) {
-    await awardXp(userId, XP_REWARDS.STREAK_100_DAY, "streak_bonus", habitId, "100-day streak bonus");
+    await awardXp(userId, XP_REWARDS.STREAK_100_DAY, "streak_bonus", habitId, `100-day streak bonus [${date}]`);
   }
 }
 
@@ -159,11 +298,18 @@ async function checkAllHabitsBonus(userId: string, date: string) {
   const completedCount = await HabitCompletion.countDocuments({
     userId,
     date,
-    habitId: { $in: activeHabits.map((h) => h._id) },
+    habitId: { $in: activeHabits.map((h: { _id: unknown }) => h._id) },
   });
 
   if (completedCount === activeHabits.length) {
-    await awardXp(userId, XP_REWARDS.ALL_DAILY_HABITS, "all_habits_bonus", null, "All daily habits completed");
+    const alreadyAwarded = await XpTransaction.findOne({
+      userId,
+      source: "all_habits_bonus",
+      description: `All daily habits completed [${date}]`,
+    });
+    if (!alreadyAwarded) {
+      await awardXp(userId, XP_REWARDS.ALL_DAILY_HABITS, "all_habits_bonus", null, `All daily habits completed [${date}]`);
+    }
   }
 }
 
@@ -318,8 +464,8 @@ export const habitsRouter = {
       await habit.save();
 
       const habitId = habit._id as string;
-      await awardXp(userId, XP_REWARDS.HABIT_COMPLETION, "habit_completion", habitId, `Completed habit: ${habit.title}`);
-      await checkStreakBonuses(userId, habitId, newStreak);
+      await awardXp(userId, XP_REWARDS.HABIT_COMPLETION, "habit_completion", habitId, `Completed habit: ${habit.title} [${date}]`);
+      await checkStreakBonuses(userId, habitId, newStreak, date);
       await checkAllHabitsBonus(userId, date);
 
       return {
@@ -350,20 +496,18 @@ export const habitsRouter = {
         return { success: true, wasCompleted: false };
       }
 
+      // Reverse XP: remove base completion XP
+      await reverseXp(userId, "habit_completion", input.habitId, date);
+      // Reverse any streak bonus for this habit on this date
+      await reverseXp(userId, "streak_bonus", input.habitId, date);
+      // Reverse all-habits bonus for this date
+      await reverseXp(userId, "all_habits_bonus", null, date);
+
       const habit = await Habit.findOne({ _id: input.habitId, userId });
       if (habit) {
-        const lastCompletion = await HabitCompletion.findOne({
-          habitId: input.habitId,
-          userId,
-        }).sort({ date: -1 });
-
-        if (lastCompletion) {
-          habit.lastCompletedDate = lastCompletion.date;
-          habit.currentStreak = await calculateStreak(habit, lastCompletion.date);
-        } else {
-          habit.lastCompletedDate = null;
-          habit.currentStreak = 0;
-        }
+        const { streak, lastDate } = await recalculateStreakFromCompletions(habit);
+        habit.lastCompletedDate = lastDate;
+        habit.currentStreak = streak;
         habit.updatedAt = new Date();
         await habit.save();
       }
