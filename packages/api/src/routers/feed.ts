@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { ORPCError } from "@orpc/server";
 import { Activity, Reaction } from "@we-grow/db/models/index";
 import { generateId } from "@we-grow/db/utils/id";
 
@@ -69,6 +70,13 @@ export const feedRouter = {
     .handler(async ({ context, input }) => {
       const userId = context.session.user.id;
       const now = new Date();
+
+      // Verify activity exists and user has access to its group
+      const activity = await (Activity as any).findById(input.activityId);
+      if (!activity) {
+        throw new ORPCError("NOT_FOUND", { message: "Activity not found" });
+      }
+      await requireGroupRole(userId, activity.groupId as string, ["owner", "moderator", "member"]);
 
       const existing = await (Reaction as any).findOne({
         activityId: input.activityId,
