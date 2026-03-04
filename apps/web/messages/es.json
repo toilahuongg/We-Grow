@@ -461,6 +461,14 @@
     "failedComplete": "Error al completar el hábito",
     "failedUncomplete": "Error al desmarcar el hábito"
   },
+  "pushBanner": {
+    "title": "Activar notificaciones",
+    "description": "Recibe recordatorios para completar tus hábitos diarios",
+    "enable": "Activar",
+    "enabling": "Activando...",
+    "enabled": "¡Notificaciones activadas!",
+    "configError": "Notificaciones push no configuradas en el servidor"
+  },
   "analytics": {
     "title": "Análisis",
     "subtitle": "Sigue tu progreso y estadísticas",

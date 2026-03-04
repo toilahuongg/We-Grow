@@ -461,6 +461,14 @@
     "failedComplete": "Failed to complete habit",
     "failedUncomplete": "Failed to uncomplete habit"
   },
+  "pushBanner": {
+    "title": "Enable notifications",
+    "description": "Get reminders to complete your daily habits",
+    "enable": "Enable",
+    "enabling": "Enabling...",
+    "enabled": "Notifications enabled!",
+    "configError": "Push notifications not configured on server"
+  },
   "analytics": {
     "title": "Analytics",
     "subtitle": "Track your progress and insights",

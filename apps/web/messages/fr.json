@@ -461,6 +461,14 @@
     "failedComplete": "Échec de la complétion",
     "failedUncomplete": "Échec de l'annulation"
   },
+  "pushBanner": {
+    "title": "Activer les notifications",
+    "description": "Recevez des rappels pour compléter vos habitudes quotidiennes",
+    "enable": "Activer",
+    "enabling": "Activation...",
+    "enabled": "Notifications activées !",
+    "configError": "Notifications push non configurées sur le serveur"
+  },
   "analytics": {
     "title": "Analytique",
     "subtitle": "Suivez votre progression et vos statistiques",

@@ -461,6 +461,14 @@
     "failedComplete": "Hoàn thành thói quen thất bại",
     "failedUncomplete": "Hủy hoàn thành thói quen thất bại"
   },
+  "pushBanner": {
+    "title": "Bật thông báo",
+    "description": "Nhận nhắc nhở hoàn thành thói quen hàng ngày",
+    "enable": "Bật",
+    "enabling": "Đang bật...",
+    "enabled": "Đã bật thông báo!",
+    "configError": "Thông báo đẩy chưa được cấu hình trên server"
+  },
   "analytics": {
     "title": "Phân Tích",
     "subtitle": "Theo dõi tiến trình và thông tin chi tiết",
