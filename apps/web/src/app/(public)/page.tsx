@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 
 import { orpc } from "@/utils/orpc";
+import { LanguageSwitcher } from "@/components/language-switcher";
 
 export default function Home() {
   const healthCheck = useQuery(orpc.healthCheck.queryOptions());
@@ -13,6 +14,11 @@ export default function Home() {
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-mesh bg-grid-pattern">
+      {/* Language Switcher - Top Right */}
+      <div className="absolute top-4 right-4 z-50">
+        <LanguageSwitcher />
+      </div>
+
       {/* Floating Orbs */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div
@@ -33,7 +39,7 @@ export default function Home() {
       <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-4">
         <div className="mx-auto max-w-5xl text-center">
           {/* Badge */}
-          <div className="mb-8 inline-flex animate-scale-in">
+          <div className="mb-8 flex justify-center animate-scale-in">
             <div className="glass-strong rounded-full px-5 py-2 text-sm">
               <span className="gradient-text font-semibold">✨ {t("badge")}</span>
             </div>
@@ -49,7 +55,7 @@ export default function Home() {
           </h1>
 
           {/* Subheading */}
-          <p className="mb-10 max-w-2xl text-lg text-muted-foreground sm:text-xl animate-slide-up" style={{ animationDelay: "150ms" }}>
+          <p className="mb-10 max-w-2xl mx-auto text-lg text-muted-foreground sm:text-xl animate-slide-up text-center" style={{ animationDelay: "150ms" }}>
             {t("subheading")}
           </p>
 

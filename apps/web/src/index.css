@@ -189,6 +189,18 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
+  /* Better text alignment for multi-language support */
+  h1, h2, h3, h4, h5, h6, p, span, div, button, a {
+    word-break: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+  }
+
+  /* Ensure text-center works properly with flex items */
+  .text-center * {
+    text-align: center;
+  }
+
   /* Smooth scrolling */
   html {
     scroll-behavior: smooth;

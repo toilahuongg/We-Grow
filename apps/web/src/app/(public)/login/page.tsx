@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 
 import SignInForm from "@/components/sign-in-form";
 import SignUpForm from "@/components/sign-up-form";
+import { LanguageSwitcher } from "@/components/language-switcher";
 
 export default function LoginPage() {
   const [showSignIn, setShowSignIn] = useState(false);
@@ -13,6 +14,11 @@ export default function LoginPage() {
 
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-gradient-mesh bg-grid-pattern">
+      {/* Language Switcher - Top Right */}
+      <div className="absolute top-4 right-4 z-50">
+        <LanguageSwitcher />
+      </div>
+
       {/* Floating Orbs */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div
@@ -26,7 +32,7 @@ export default function LoginPage() {
       </div>
 
       {/* Card Container */}
-      <div className="relative z-10 w-full max-w-md px-4">
+      <div className="relative z-10 w-full max-w-md mx-auto px-4">
         {/* Logo */}
         <Link href="/" className="mb-8 flex items-center justify-center gap-3 transition-opacity hover:opacity-80">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[#ff6b6b] via-[#ffa06b] to-[#4ecdc4] text-white shadow-xl shadow-[#ff6b6b]/30">

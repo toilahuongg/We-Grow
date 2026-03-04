@@ -74,7 +74,7 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
   }
 
   return (
-    <div className="w-full max-w-md animate-scale-in">
+    <div className="w-full max-w-md mx-auto animate-scale-in">
       {/* Header */}
       <div className="mb-8 text-center">
         <h1 className="mb-2 font-display text-3xl font-bold">
@@ -102,7 +102,7 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
             }
           );
         }}
-        className="group relative mb-6 flex w-full items-center justify-center gap-3 overflow-hidden rounded-2xl bg-overlay-subtle border border-overlay-medium py-3.5 font-medium text-white transition-all hover:bg-overlay-medium hover:scale-[1.02] hover:border-overlay-strong"
+        className="group relative mb-6 flex w-full items-center justify-center gap-3 overflow-hidden rounded-2xl bg-overlay-subtle border border-overlay-medium py-3.5 px-4 font-medium text-white text-center transition-all hover:bg-overlay-medium hover:scale-[1.02] hover:border-overlay-strong"
       >
         <svg className="h-5 w-5" viewBox="0 0 24 24">
           <path
