@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Menu, Settings, LogOut } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 
 import { cn } from "@/lib/utils";
@@ -19,9 +19,11 @@ import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
 function Logo() {
   return (
     <Link href="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
-      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#ff6b6b] via-[#ffa06b] to-[#4ecdc4] text-white shadow-lg shadow-[#ff6b6b]/25">
-        <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#34d399] to-[#059669] text-white shadow-lg shadow-emerald-500/25">
+        <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 512 512">
+          <path d="M246 400 C246 340 250 280 256 240 C262 280 266 340 266 400Z" />
+          <path d="M260 268 C290 230 345 185 395 155 C380 215 315 268 262 275Z" />
+          <path d="M252 228 C222 190 167 145 117 115 C132 175 197 228 250 235Z" />
         </svg>
       </div>
       <span className="font-display text-lg font-bold">we-grow</span>
@@ -69,8 +71,13 @@ function UserSection() {
   const router = useRouter();
   const t = useTranslations("nav");
   const { data: session, isPending } = authClient.useSession();
+  const [mounted, setMounted] = useState(false);
 
-  if (isPending) {
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted || isPending) {
     return (
       <div className="flex items-center gap-3 px-3 py-3">
         <Skeleton className="h-9 w-9 rounded-full" />

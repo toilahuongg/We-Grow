@@ -71,6 +71,32 @@ export default function PlaygroundRemindersPage() {
     onError: (err) => toast.error(err.message),
   });
 
+  const [testingId, setTestingId] = useState<string | null>(null);
+  async function handleTestOne(reminderId: string) {
+    setTestingId(reminderId);
+    try {
+      const res = await fetch("/api/test/reminders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reminderId }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error ?? "Failed");
+        return;
+      }
+      if (data.sent) {
+        toast.success(`Email sent to ${data.email} (${data.habitsCount} habit(s))`);
+      } else {
+        toast.error(`Not sent: ${data.reason}`);
+      }
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setTestingId(null);
+    }
+  }
+
   const [triggering, setTriggering] = useState(false);
   async function handleTrigger() {
     setTriggering(true);
@@ -305,13 +331,27 @@ export default function PlaygroundRemindersPage() {
                   </p>
                 </div>
 
-                {/* Delete */}
-                <button
-                  onClick={() => deleteMutation.mutate(r._id)}
-                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-overlay-medium text-muted-foreground transition-all hover:bg-red-500/20 hover:text-red-500"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
+                {/* Actions */}
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => handleTestOne(r._id)}
+                    disabled={testingId === r._id}
+                    className="flex h-8 shrink-0 items-center gap-1.5 rounded-full bg-[#a78bfa]/10 px-3 text-xs font-medium text-[#a78bfa] transition-all hover:bg-[#a78bfa]/20 disabled:opacity-50"
+                  >
+                    {testingId === r._id ? (
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                    ) : (
+                      <Play className="h-3 w-3" />
+                    )}
+                    Test Now
+                  </button>
+                  <button
+                    onClick={() => deleteMutation.mutate(r._id)}
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-overlay-medium text-muted-foreground transition-all hover:bg-red-500/20 hover:text-red-500"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
             ))}
           </div>

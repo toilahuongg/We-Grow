@@ -101,6 +101,91 @@ Keep your streak going!`;
   return { time: currentTime, emailsSent };
 }
 
+export async function processOneReminder(reminderId: string): Promise<{
+  sent: boolean;
+  reason?: string;
+  email?: string;
+  habitsCount?: number;
+}> {
+  const mailClient = getMailClient();
+  if (!mailClient) {
+    return { sent: false, reason: "Mail client not configured" };
+  }
+
+  const reminder = await Reminder.findById(reminderId);
+  if (!reminder) {
+    return { sent: false, reason: "Reminder not found" };
+  }
+
+  const userId = reminder.userId as string;
+  const today = getToday();
+
+  // Get habits
+  let habits;
+  if (reminder.habitId) {
+    habits = await Habit.find({ _id: reminder.habitId, userId, archived: false });
+  } else {
+    habits = await Habit.find({ userId, archived: false });
+  }
+
+  if (habits.length === 0) {
+    return { sent: false, reason: "No active habits found" };
+  }
+
+  // Check completions
+  const habitIds = habits.map((h) => h._id as string);
+  const completions = await HabitCompletion.find({
+    userId,
+    habitId: { $in: habitIds },
+    date: today,
+  });
+  const completedIds = new Set(completions.map((c) => c.habitId as string));
+  const incompleteHabits = habits.filter((h) => !completedIds.has(h._id as string));
+
+  if (incompleteHabits.length === 0) {
+    return { sent: false, reason: "All habits already completed today" };
+  }
+
+  const user = await User.findById(userId);
+  if (!user?.email) {
+    return { sent: false, reason: "User has no email" };
+  }
+
+  const habitListHtml = incompleteHabits
+    .map((h) => `<li>${escapeHtml(h.title as string)}</li>`)
+    .join("\n");
+  const habitListText = incompleteHabits
+    .map((h) => `- ${h.title as string}`)
+    .join("\n");
+
+  const subject = `[TEST] You have ${incompleteHabits.length} habit${incompleteHabits.length > 1 ? "s" : ""} to complete today`;
+
+  const html = `<h2>Daily Habit Reminder</h2>
+<p>You still have ${incompleteHabits.length} habit${incompleteHabits.length > 1 ? "s" : ""} to complete today:</p>
+<ul>
+${habitListHtml}
+</ul>
+<p>Keep your streak going!</p>`;
+
+  const text = `Daily Habit Reminder
+
+You still have ${incompleteHabits.length} habit${incompleteHabits.length > 1 ? "s" : ""} to complete today:
+
+${habitListText}
+
+Keep your streak going!`;
+
+  await mailClient.sendSystemEmail({
+    to: user.email as string,
+    fromName: "We Grow",
+    subject,
+    html,
+    text,
+  });
+
+  return { sent: true, email: user.email as string, habitsCount: incompleteHabits.length };
+}
+
 function escapeHtml(str: string): string {
   return str
     .replace(/&/g, "&amp;")
