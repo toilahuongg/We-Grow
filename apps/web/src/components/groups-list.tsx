@@ -289,7 +289,7 @@ export function GroupsList() {
             className="fixed inset-0 bg-black/50 backdrop-blur-sm animate-in fade-in"
             onClick={() => setCreateDialogOpen(false)}
           />
-          <div className="relative z-50 glass-strong rounded-2xl p-6 shadow-xl w-full max-w-md mx-4 animate-in zoom-in-95 max-h-[90vh] overflow-y-auto">
+          <div className="relative z-50 rounded-2xl p-6 shadow-xl w-full max-w-md mx-4 animate-in zoom-in-95 max-h-[90vh] overflow-y-auto border border-border bg-background dark:glass-strong dark:bg-transparent dark:border-overlay-strong">
             <h2 className="text-lg font-bold mb-4">{t("createGroup")}</h2>
             <GroupForm
               onSuccess={() => {
@@ -313,7 +313,7 @@ export function GroupsList() {
               setLookupResult(null);
             }}
           />
-          <div className="relative z-50 glass-strong rounded-2xl p-6 shadow-xl w-full max-w-md mx-4 animate-in zoom-in-95">
+          <div className="relative z-50 rounded-2xl p-6 shadow-xl w-full max-w-md mx-4 animate-in zoom-in-95 border border-border bg-background dark:glass-strong dark:bg-transparent dark:border-overlay-strong">
             <h2 className="text-lg font-bold mb-4">{t("joinGroup")}</h2>
 
             <div className="space-y-4">

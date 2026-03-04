@@ -196,7 +196,7 @@ export function RemindersList() {
               setEditingReminder(null);
             }}
           />
-          <div className="relative z-50 glass-strong rounded-2xl p-6 shadow-xl w-full max-w-md mx-4 animate-in zoom-in-95">
+          <div className="relative z-50 rounded-2xl p-6 shadow-xl w-full max-w-md mx-4 animate-in zoom-in-95 border border-border bg-background dark:glass-strong dark:bg-transparent dark:border-overlay-strong">
             <h2 className="text-lg font-bold mb-4">
               {editingReminder ? t("editReminder") : t("createReminder")}
             </h2>
