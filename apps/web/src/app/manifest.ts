@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "We Grow",
     short_name: "We Grow",
     description: "my pwa app",
-    start_url: "/new",
+    start_url: "/",
     display: "standalone",
     background_color: "#ffffff",
     theme_color: "#059669",
