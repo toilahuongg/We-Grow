@@ -37,9 +37,11 @@ export default function LoginPage() {
       <div className="relative z-10 w-full max-w-md mx-auto px-4">
         {/* Logo */}
         <Link href="/" className="mb-8 flex items-center justify-center gap-3 transition-opacity hover:opacity-80">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[#ff6b6b] via-[#ffa06b] to-[#4ecdc4] text-white shadow-xl shadow-[#ff6b6b]/30">
-            <svg className="h-7 w-7" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[#34d399] to-[#059669] text-white shadow-xl shadow-emerald-500/30">
+            <svg className="h-7 w-7" fill="currentColor" viewBox="0 0 512 512">
+              <path d="M246 400 C246 340 250 280 256 240 C262 280 266 340 266 400Z" />
+              <path d="M260 268 C290 230 345 185 395 155 C380 215 315 268 262 275Z" />
+              <path d="M252 228 C222 190 167 145 117 115 C132 175 197 228 250 235Z" />
             </svg>
           </div>
           <span className="font-display text-2xl font-bold">We Grow</span>
