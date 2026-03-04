@@ -467,6 +467,7 @@
     "enable": "Enable",
     "enabling": "Enabling...",
     "enabled": "Notifications enabled!",
+    "notNow": "Not now",
     "configError": "Push notifications not configured on server"
   },
   "analytics": {

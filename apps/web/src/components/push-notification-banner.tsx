@@ -1,11 +1,18 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Bell, X } from "lucide-react";
+import { Bell } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { orpc, client } from "@/utils/orpc";
 import { toast } from "sonner";
+import {
+  Dialog,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 function urlBase64ToUint8Array(base64String: string) {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
@@ -20,9 +27,9 @@ function urlBase64ToUint8Array(base64String: string) {
 
 type PushStatus = "loading" | "unsupported" | "denied" | "subscribed" | "not-subscribed" | "dismissed";
 
-const DISMISS_KEY = "push-banner-dismissed";
+const DISMISS_KEY = "push-popup-dismissed";
 
-export function PushNotificationBanner() {
+export function PushNotificationPopup() {
   const t = useTranslations("pushBanner");
   const [status, setStatus] = useState<PushStatus>("loading");
   const [subscribing, setSubscribing] = useState(false);
@@ -101,30 +108,32 @@ export function PushNotificationBanner() {
     setStatus("dismissed");
   }
 
-  if (status !== "not-subscribed") return null;
-
   return (
-    <div className="glass-strong rounded-2xl p-4 mb-6 flex items-center gap-4 border border-[#4ecdc4]/20 bg-[#4ecdc4]/5">
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#4ecdc4]/20">
-        <Bell className="h-5 w-5 text-[#4ecdc4]" />
+    <Dialog open={status === "not-subscribed"} onOpenChange={(open) => !open && handleDismiss()}>
+      <div className="flex flex-col items-center text-center">
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#4ecdc4]/20 mb-4">
+          <Bell className="h-8 w-8 text-[#4ecdc4]" />
+        </div>
+        <DialogHeader>
+          <DialogTitle>{t("title")}</DialogTitle>
+          <DialogDescription>{t("description")}</DialogDescription>
+        </DialogHeader>
       </div>
-      <div className="flex-1 min-w-0">
-        <p className="font-semibold text-sm">{t("title")}</p>
-        <p className="text-xs text-muted-foreground">{t("description")}</p>
-      </div>
-      <button
-        onClick={handleEnable}
-        disabled={subscribing}
-        className="shrink-0 rounded-xl bg-[#4ecdc4] px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-[#4ecdc4]/80 disabled:opacity-50"
-      >
-        {subscribing ? t("enabling") : t("enable")}
-      </button>
-      <button
-        onClick={handleDismiss}
-        className="shrink-0 rounded-lg p-1 text-muted-foreground hover:text-foreground transition-colors"
-      >
-        <X className="h-4 w-4" />
-      </button>
-    </div>
+      <DialogFooter className="sm:justify-center">
+        <button
+          onClick={handleDismiss}
+          className="rounded-xl px-4 py-2 text-sm font-semibold text-muted-foreground transition-all hover:text-foreground"
+        >
+          {t("notNow")}
+        </button>
+        <button
+          onClick={handleEnable}
+          disabled={subscribing}
+          className="rounded-xl bg-[#4ecdc4] px-6 py-2 text-sm font-semibold text-white transition-all hover:bg-[#4ecdc4]/80 disabled:opacity-50"
+        >
+          {subscribing ? t("enabling") : t("enable")}
+        </button>
+      </DialogFooter>
+    </Dialog>
   );
 }

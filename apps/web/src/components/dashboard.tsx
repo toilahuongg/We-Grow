@@ -16,7 +16,7 @@ import { orpc, client } from "@/utils/orpc";
 import { LevelProgress } from "@/components/level-progress";
 import { LevelUpModal } from "@/components/level-up-modal";
 import { NoteDialog } from "@/components/note-dialog";
-import { PushNotificationBanner } from "@/components/push-notification-banner";
+import { PushNotificationPopup } from "@/components/push-notification-banner";
 import { getLevelInfo } from "@/lib/level-utils";
 import { toast } from "sonner";
 import { getHabitIcon } from "@/lib/habit-utils";
@@ -122,7 +122,7 @@ export function Dashboard() {
         <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
       </div>
 
-      <PushNotificationBanner />
+      <PushNotificationPopup />
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Today's Progress */}

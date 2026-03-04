@@ -467,6 +467,7 @@
     "enable": "Bật",
     "enabling": "Đang bật...",
     "enabled": "Đã bật thông báo!",
+    "notNow": "Để sau",
     "configError": "Thông báo đẩy chưa được cấu hình trên server"
   },
   "analytics": {

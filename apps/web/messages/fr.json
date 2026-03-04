@@ -467,6 +467,7 @@
     "enable": "Activer",
     "enabling": "Activation...",
     "enabled": "Notifications activées !",
+    "notNow": "Pas maintenant",
     "configError": "Notifications push non configurées sur le serveur"
   },
   "analytics": {
