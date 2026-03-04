@@ -26,12 +26,54 @@ function timeAgo(date: Date, t: (key: string, values?: Record<string, any>) => s
   return t("daysAgo", { count: diffDays });
 }
 
-const typeEmoji: Record<string, string> = {
-  habit_completed: "\u2705",
-  streak_milestone: "\uD83D\uDD25",
-  level_up: "\u2B50",
-  all_habits_completed: "\uD83C\uDF89",
-  member_joined: "\uD83D\uDC4B",
+function CheckIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+  );
+}
+
+function FireIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+      <path d="M12 2c0 0-4 5-4 9 0 2.5 1.5 4 4 4s4-1.5 4-4c0-4-4-9-4-9z" />
+      <path d="M12 16c-1.5 0-2.5-.8-3-2 0 2.5 1.5 4 3 4s3-1.5 3-4c-.5 1.2-1.5 2-3 2z" opacity="0.5" />
+    </svg>
+  );
+}
+
+function StarIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+      <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+    </svg>
+  );
+}
+
+function CelebrationIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+      <path d="M2 22l5-5 2 2-5 5zm14-16l-2 2 3 3 2-2-3-3zm-3 3l-2 2 3 3 2-2-3-3zM5.5 11l-3 3 2 2 3-3-2-2zm13 6l-2 2 3 3 2-2-3-3zM12 2L9 5l2 2 3-3-2-2zm7.5 10l-3-3-2 2 3 3 2-2z" />
+      <path d="M12 15c1.7 0 3-1.3 3-3s-1.3-3-3-3-3 1.3-3 3 1.3 3 3 3z" />
+    </svg>
+  );
+}
+
+function WaveIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+      <path d="M12 18c-3.3 0-6-2.7-6-6 0-1.8.8-3.4 2-4.5M12 18c3.3 0 6-2.7 6-6 0-1.8-.8-3.4-2-4.5M12 2v20M2 12h4M18 12h4" />
+    </svg>
+  );
+}
+
+const typeIcons: Record<string, React.ReactNode> = {
+  habit_completed: <CheckIcon />,
+  streak_milestone: <FireIcon />,
+  level_up: <StarIcon />,
+  all_habits_completed: <CelebrationIcon />,
+  member_joined: <WaveIcon />,
 };
 
 const milestoneTypes = new Set(["streak_milestone", "level_up", "all_habits_completed"]);
@@ -53,7 +95,24 @@ interface ActivityItemProps {
 export function ActivityItem({ activity, groupId }: ActivityItemProps) {
   const t = useTranslations("feed");
   const isMilestone = milestoneTypes.has(activity.type);
-  const emoji = typeEmoji[activity.type] ?? "";
+  const icon = typeIcons[activity.type];
+
+  const getIconColor = () => {
+    switch (activity.type) {
+      case "habit_completed":
+        return "text-green-500";
+      case "streak_milestone":
+        return "text-orange-500";
+      case "level_up":
+        return "text-yellow-500";
+      case "all_habits_completed":
+        return "text-purple-500";
+      case "member_joined":
+        return "text-blue-500";
+      default:
+        return "text-muted-foreground";
+    }
+  };
 
   const getMessage = () => {
     const { type, metadata } = activity;
@@ -98,7 +157,7 @@ export function ActivityItem({ activity, groupId }: ActivityItemProps) {
             : "bg-overlay-subtle"
         }`}>
           <div className="flex items-start gap-2">
-            <span className="text-base leading-none mt-0.5 shrink-0">{emoji}</span>
+            <span className={`leading-none mt-0.5 shrink-0 ${getIconColor()}`}>{icon}</span>
             <p className="text-[13px] leading-relaxed text-muted-foreground">
               {getMessage()}
             </p>
@@ -110,12 +169,12 @@ export function ActivityItem({ activity, groupId }: ActivityItemProps) {
           <span className="text-[11px] text-muted-foreground/60 shrink-0">
             {timeAgo(new Date(activity.createdAt), t)}
           </span>
-          <ReactionBar
+          {/* <ReactionBar
             activityId={activity._id}
             groupId={groupId}
             reactionCounts={activity.reactionCounts}
             myReactions={activity.myReactions}
-          />
+          /> */}
         </div>
       </div>
     </div>
