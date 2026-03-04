@@ -1,6 +1,6 @@
 {
   "meta": {
-    "title": "We-Grow | Xây Dựng Thói Quen Tốt Cùng Nhau",
+    "title": "We Grow | Xây Dựng Thói Quen Tốt Cùng Nhau",
     "description": "Thay đổi thói quen của bạn với sức mạnh của cộng đồng, trò chơi hóa và theo dõi thông minh. Tham gia cùng hàng nghìn người xây dựng thói quen tốt mỗi ngày."
   },
   "common": {
@@ -83,7 +83,7 @@
     "featureCtaTitle": "Sẵn Sàng Phát Triển?",
     "featureCtaDesc": "Tham gia cùng hàng nghìn người dùng xây dựng thói quen tốt mỗi ngày.",
     "featureCtaButton": "Bắt Đầu Miễn Phí",
-    "footer": "© 2026 We-Grow. Xây dựng với 💜 cho sự phát triển cá nhân."
+    "footer": "© 2026 We Grow. Xây dựng với 💜 cho sự phát triển cá nhân."
   },
   "auth": {
     "welcomeBack": "Chào Mừng",
@@ -112,7 +112,7 @@
     "alreadyHaveAccount": "Đã có tài khoản?",
     "termsNotice": "Bằng việc đăng ký, bạn đồng ý với Điều khoản Dịch vụ và Chính sách Bảo mật của chúng tôi",
     "accountCreated": "Tài khoản đã được tạo! Đang đăng nhập cho bạn...",
-    "welcomeToWeGrow": "Chào mừng đến với We-Grow! 🌱",
+    "welcomeToWeGrow": "Chào mừng đến với We Grow! 🌱",
     "signInFailed": "Tài khoản đã được tạo nhưng đăng nhập thất bại. Vui lòng thử đăng nhập thủ công.",
     "failedGoogleSignUp": "Đăng ký bằng Google thất bại",
     "backToHome": "Quay lại Trang chủ"

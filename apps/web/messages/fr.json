@@ -1,6 +1,6 @@
 {
   "meta": {
-    "title": "We-Grow | Construisez de meilleures habitudes ensemble",
+    "title": "We Grow | Construisez de meilleures habitudes ensemble",
     "description": "Transformez vos habitudes grâce à la puissance de la communauté, de la gamification et du suivi intelligent. Rejoignez des milliers de personnes qui construisent de meilleures habitudes chaque jour."
   },
   "common": {
@@ -83,7 +83,7 @@
     "featureCtaTitle": "Prêt à grandir ?",
     "featureCtaDesc": "Rejoignez des milliers d'utilisateurs qui construisent de meilleures habitudes chaque jour.",
     "featureCtaButton": "Commencer gratuitement",
-    "footer": "© 2026 We-Grow. Construit avec 💜 pour la croissance personnelle."
+    "footer": "© 2026 We Grow. Construit avec 💜 pour la croissance personnelle."
   },
   "auth": {
     "welcomeBack": "Bon retour",
@@ -112,7 +112,7 @@
     "alreadyHaveAccount": "Vous avez déjà un compte ?",
     "termsNotice": "En vous inscrivant, vous acceptez nos Conditions d'utilisation et notre Politique de confidentialité",
     "accountCreated": "Compte créé ! Connexion en cours...",
-    "welcomeToWeGrow": "Bienvenue sur We-Grow ! 🌱",
+    "welcomeToWeGrow": "Bienvenue sur We Grow ! 🌱",
     "signInFailed": "Compte créé mais la connexion a échoué. Veuillez essayer de vous connecter manuellement.",
     "failedGoogleSignUp": "Échec de l'inscription avec Google",
     "backToHome": "Retour à l'accueil"
