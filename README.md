@@ -134,7 +134,25 @@ CORS_ORIGIN=http://localhost:3000
 # Optional - cho Web Push notifications
 VAPID_PUBLIC_KEY=
 VAPID_PRIVATE_KEY=
+
+# Optional - cho Google OAuth
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
 ```
+
+### Cấu hình Google OAuth (Optional)
+
+Nếu muốn sử dụng đăng nhập bằng Google:
+
+1. Tạo **OAuth 2.0 Client ID** tại [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
+2. Thêm các **Authorized redirect URIs**:
+
+   | Môi trường | Redirect URI |
+   |------------|--------------|
+   | Development | `http://localhost:3000/api/auth/callback/google` |
+   | Production | `https://your-domain.com/api/auth/callback/google` |
+
+3. Thêm `GOOGLE_CLIENT_ID` và `GOOGLE_CLIENT_SECRET` vào file `.env`
 
 ```bash
 # 4. Chạy dev server
@@ -152,6 +170,219 @@ Truy cập [http://localhost:3000](http://localhost:3000)
 | `pnpm run build` | Build production |
 | `pnpm run check-types` | Kiểm tra TypeScript types |
 | `cd apps/web && pnpm run generate-pwa-assets` | Tạo PWA assets |
+
+## Deploy lên VPS với PM2
+
+### Yêu cầu
+- VPS với Ubuntu/Debian
+- Node.js 20+
+- pnpm 10.16+
+- MongoDB (Atlas hoặc tự cài trên VPS)
+
+### Các bước deploy
+
+#### 1. Chuẩn bị VPS
+
+```bash
+# Cập nhật hệ thống
+sudo apt update && sudo apt upgrade -y
+
+# Cài Node.js 20.x
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt install -y nodejs
+
+# Cài pnpm
+npm install -g pnpm
+
+# Cài PM2
+npm install -g pm2
+```
+
+#### 2. Clone và cài đặt
+
+```bash
+# Clone repo
+cd /var/www
+sudo git clone <repo-url> we-grow
+sudo chown -R $USER:$USER we-grow
+cd we-grow
+
+# Cài dependencies
+pnpm install
+```
+
+#### 3. Cấu hình Environment
+
+```bash
+# Tạo file production environment
+cd apps/web
+nano .env
+```
+
+Nội dung `.env` cho production:
+
+```env
+DATABASE_URL=mongodb+srv://username:password@cluster.mongodb.net/we-grow
+BETTER_AUTH_SECRET=your-production-secret-key-at-least-32-characters-long
+BETTER_AUTH_URL=https://your-domain.com
+CORS_ORIGIN=https://your-domain.com
+
+# Optional - cho Web Push notifications
+VAPID_PUBLIC_KEY=
+VAPID_PRIVATE_KEY=
+
+# Optional - cho Google OAuth
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+```
+
+#### 4. Build ứng dụng
+
+```bash
+# Quay lại root directory
+cd /var/www/we-grow
+
+# Build production
+pnpm run build
+```
+
+#### 5. Tạo PM2 ecosystem file
+
+Tạo file `ecosystem.config.js` ở root của project:
+
+```javascript
+module.exports = {
+  apps: [
+    {
+      name: 'we-grow',
+      script: 'node',
+      args: 'apps/web/.next/standalone/server.js',
+      cwd: '/var/www/we-grow',
+      instances: 1,
+      exec_mode: 'cluster',
+      env: {
+        NODE_ENV: 'production',
+        PORT: 3000,
+      },
+      error_file: '/var/log/pm2/we-grow-error.log',
+      out_file: '/var/log/pm2/we-grow-out.log',
+      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+      merge_logs: true,
+      max_memory_restart: '1G',
+    },
+  ],
+};
+```
+
+#### 6. Cấu hình Next.js standalone output
+
+Thêm script `start` vào `apps/web/package.json`:
+
+```json
+{
+  "scripts": {
+    "start": "next start"
+  }
+}
+```
+
+Cấu hình `apps/web/next.config.ts` để sử dụng standalone output:
+
+```typescript
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+  output: 'standalone',
+};
+
+export default nextConfig;
+```
+
+Rebuild sau khi thay đổi config:
+
+```bash
+pnpm run build
+```
+
+#### 7. Khởi động với PM2
+
+```bash
+# Tạo log directory
+sudo mkdir -p /var/log/pm2
+sudo chown -R $USER:$USER /var/log/pm2
+
+# Khởi động app với PM2
+cd /var/www/we-grow
+pm2 start ecosystem.config.js
+
+# Lưu PM2 config (tự động khởi động khi reboot)
+pm2 save
+pm2 startup
+# Chạy lệnh output từ lệnh trên
+
+# Kiểm tra status
+pm2 status
+pm2 logs we-grow
+```
+
+### Quản lý với PM2
+
+```bash
+# Xem status
+pm2 status
+
+# Xem logs
+pm2 logs we-grow
+pm2 logs we-grow --lines 100
+
+# Restart app
+pm2 restart we-grow
+
+# Stop app
+pm2 stop we-grow
+
+# Xóa app
+pm2 delete we-grow
+
+# Monitor
+pm2 monit
+```
+
+### Update ứng dụng
+
+```bash
+cd /var/www/we-grow
+
+# Pull code mới
+git pull
+
+# Cài dependencies mới (nếu có)
+pnpm install
+
+# Build lại
+pnpm run build
+
+# Restart PM2 với ecosystem
+pm2 restart we-grow
+
+# Nếu có thay đổi ecosystem.config.js
+pm2 reload ecosystem.config.js --update-env
+```
+
+### Troubleshooting
+
+**App không chạy:**
+```bash
+# Kiểm tra PM2 logs
+pm2 logs we-grow --err
+
+# Kiểm tra port đang sử dụng
+sudo netstat -tulpn | grep :3000
+```
+
+**Database connection error:**
+- Kiểm tra `DATABASE_URL` trong `.env`
+- Đảm bảo MongoDB Atlas whitelist IP của VPS
 
 ## API
 
