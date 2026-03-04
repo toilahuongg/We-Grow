@@ -3,23 +3,22 @@ export async function onRequestError() {
 }
 
 export async function register() {
-  // TODO: Email reminders disabled — using browser push notifications only
-  // if (process.env.NEXT_RUNTIME === "nodejs") {
-  //   const { schedule } = await import("node-cron");
-  //   const { processEmailReminders } = await import("@we-grow/api/lib/email-reminders");
-  //
-  //   // Run every minute
-  //   schedule("* * * * *", async () => {
-  //     try {
-  //       const result = await processEmailReminders();
-  //       if (result.emailsSent > 0) {
-  //         console.log(`[email-reminders] Sent ${result.emailsSent} email(s) at ${result.time}`);
-  //       }
-  //     } catch (error) {
-  //       console.error("[email-reminders] Error:", error);
-  //     }
-  //   });
-  //
-  //   console.log("[email-reminders] Cron scheduled (every minute)");
-  // }
+  if (process.env.NEXT_RUNTIME === "nodejs") {
+    const { schedule } = await import("node-cron");
+    const { processPushReminders } = await import("@we-grow/api/lib/push-reminders");
+
+    // Run every minute — send push notifications for matching reminders
+    schedule("* * * * *", async () => {
+      try {
+        const result = await processPushReminders();
+        if (result.notificationsSent > 0) {
+          console.log(`[push-reminders] Sent ${result.notificationsSent} notification(s) at ${result.time}`);
+        }
+      } catch (error) {
+        console.error("[push-reminders] Error:", error);
+      }
+    });
+
+    console.log("[push-reminders] Cron scheduled (every minute)");
+  }
 }
