@@ -2,6 +2,7 @@ import { z } from "zod";
 import { PushSubscription, Reminder } from "@we-grow/db/models/index";
 import { generateId } from "@we-grow/db/utils/id";
 import { env } from "@we-grow/env/server";
+import { sendPushNotification } from "../lib/push";
 
 import { protectedProcedure } from "../index";
 
@@ -152,4 +153,20 @@ export const notificationsRouter = {
         updatedAt: now,
       });
     }),
+
+  testPush: protectedProcedure.handler(async ({ context }) => {
+    const userId = context.session.user.id;
+    const subCount = await PushSubscription.countDocuments({ userId });
+    if (subCount === 0) {
+      return { sent: false, reason: "No push subscriptions found" };
+    }
+
+    await sendPushNotification(userId, {
+      title: "We Grow - Test",
+      body: "Browser push notifications are working!",
+      url: "/",
+    });
+
+    return { sent: true, subscriptions: subCount };
+  }),
 };

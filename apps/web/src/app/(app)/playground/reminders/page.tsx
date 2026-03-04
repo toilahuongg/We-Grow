@@ -1,31 +1,45 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Bell,
   BellOff,
   Clock,
-  Mail,
   Play,
   Plus,
   Trash2,
   Loader2,
   CheckCircle2,
-  AlertCircle,
+  Send,
 } from "lucide-react";
 import { orpc, client } from "@/utils/orpc";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
+function urlBase64ToUint8Array(base64String: string) {
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const rawData = atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
+
 export default function PlaygroundRemindersPage() {
   const queryClient = useQueryClient();
   const [newTime, setNewTime] = useState("09:00");
   const [selectedHabitId, setSelectedHabitId] = useState<string>("");
-  const [triggerResult, setTriggerResult] = useState<{
-    time: string;
-    emailsSent: number;
-  } | null>(null);
+  const [pushStatus, setPushStatus] = useState<
+    "loading" | "unsupported" | "denied" | "subscribed" | "not-subscribed"
+  >("loading");
+
+  const { data: vapidData } = useQuery({
+    ...orpc.notifications.getVapidPublicKey.queryOptions(),
+    staleTime: Infinity,
+  });
 
   const { data: reminders, isLoading: loadingReminders } = useQuery({
     ...orpc.notifications.listReminders.queryOptions(),
@@ -35,6 +49,102 @@ export default function PlaygroundRemindersPage() {
   const { data: habits } = useQuery({
     ...orpc.habits.list.queryOptions({ input: { includeArchived: false } }),
     staleTime: 1000 * 60,
+  });
+
+  // Check push notification status
+  useEffect(() => {
+    async function checkPush() {
+      if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
+        setPushStatus("unsupported");
+        return;
+      }
+      const permission = Notification.permission;
+      if (permission === "denied") {
+        setPushStatus("denied");
+        return;
+      }
+      try {
+        const reg = await navigator.serviceWorker.getRegistration("/sw.js");
+        if (reg) {
+          const sub = await reg.pushManager.getSubscription();
+          setPushStatus(sub ? "subscribed" : "not-subscribed");
+        } else {
+          setPushStatus("not-subscribed");
+        }
+      } catch {
+        setPushStatus("not-subscribed");
+      }
+    }
+    checkPush();
+  }, []);
+
+  // Subscribe to push notifications
+  async function handleSubscribe() {
+    if (!vapidData?.vapidPublicKey) {
+      toast.error("VAPID public key not configured on server");
+      return;
+    }
+    try {
+      const permission = await Notification.requestPermission();
+      if (permission !== "granted") {
+        setPushStatus("denied");
+        toast.error("Notification permission denied");
+        return;
+      }
+
+      const reg = await navigator.serviceWorker.register("/sw.js");
+      await navigator.serviceWorker.ready;
+
+      const subscription = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(vapidData.vapidPublicKey),
+      });
+
+      const json = subscription.toJSON();
+      await client.notifications.subscribe({
+        endpoint: json.endpoint!,
+        keys: {
+          p256dh: json.keys!.p256dh!,
+          auth: json.keys!.auth!,
+        },
+      });
+
+      setPushStatus("subscribed");
+      toast.success("Push notifications enabled");
+    } catch (err: any) {
+      toast.error(err.message);
+    }
+  }
+
+  // Unsubscribe
+  async function handleUnsubscribe() {
+    try {
+      const reg = await navigator.serviceWorker.getRegistration("/sw.js");
+      if (reg) {
+        const sub = await reg.pushManager.getSubscription();
+        if (sub) {
+          await client.notifications.unsubscribe({ endpoint: sub.endpoint });
+          await sub.unsubscribe();
+        }
+      }
+      setPushStatus("not-subscribed");
+      toast.success("Push notifications disabled");
+    } catch (err: any) {
+      toast.error(err.message);
+    }
+  }
+
+  // Test push
+  const testPushMutation = useMutation({
+    mutationFn: () => client.notifications.testPush(),
+    onSuccess: (data) => {
+      if (data.sent) {
+        toast.success(`Push sent to ${data.subscriptions} device(s)`);
+      } else {
+        toast.error(data.reason ?? "Failed to send");
+      }
+    },
+    onError: (err) => toast.error(err.message),
   });
 
   const createMutation = useMutation({
@@ -71,52 +181,6 @@ export default function PlaygroundRemindersPage() {
     onError: (err) => toast.error(err.message),
   });
 
-  const [testingId, setTestingId] = useState<string | null>(null);
-  async function handleTestOne(reminderId: string) {
-    setTestingId(reminderId);
-    try {
-      const res = await fetch("/api/test/reminders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ reminderId }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        toast.error(data.error ?? "Failed");
-        return;
-      }
-      if (data.sent) {
-        toast.success(`Email sent to ${data.email} (${data.habitsCount} habit(s))`);
-      } else {
-        toast.error(`Not sent: ${data.reason}`);
-      }
-    } catch (err: any) {
-      toast.error(err.message);
-    } finally {
-      setTestingId(null);
-    }
-  }
-
-  const [triggering, setTriggering] = useState(false);
-  async function handleTrigger() {
-    setTriggering(true);
-    setTriggerResult(null);
-    try {
-      const res = await fetch("/api/test/reminders", { method: "POST" });
-      const data = await res.json();
-      if (!res.ok) {
-        toast.error(data.error ?? "Failed to trigger");
-        return;
-      }
-      setTriggerResult(data);
-      toast.success(`Done! ${data.emailsSent} email(s) sent`);
-    } catch (err: any) {
-      toast.error(err.message);
-    } finally {
-      setTriggering(false);
-    }
-  }
-
   const habitMap = new Map(
     (habits ?? []).map((h: any) => [h._id, h.title]),
   );
@@ -149,59 +213,75 @@ export default function PlaygroundRemindersPage() {
               Reminder Playground
             </h1>
             <p className="text-sm text-muted-foreground">
-              Test email reminders &mdash; dev only
+              Test browser push notifications &mdash; dev only
             </p>
           </div>
         </div>
       </div>
 
-      {/* Trigger Section */}
+      {/* Push Notification Status */}
       <div className="glass-strong mb-6 rounded-2xl border border-overlay-subtle p-6">
         <div className="flex items-center gap-3 mb-4">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#4ecdc4]/20 to-[#a78bfa]/20">
-            <Mail className="h-4 w-4 text-[#4ecdc4]" />
+            <Send className="h-4 w-4 text-[#4ecdc4]" />
           </div>
           <div>
-            <h2 className="font-semibold">Trigger Email Reminders</h2>
+            <h2 className="font-semibold">Push Notifications</h2>
             <p className="text-xs text-muted-foreground">
-              Run processEmailReminders() manually
+              {pushStatus === "loading" && "Checking status..."}
+              {pushStatus === "unsupported" &&
+                "Not supported in this browser"}
+              {pushStatus === "denied" &&
+                "Permission denied — reset in browser settings"}
+              {pushStatus === "subscribed" && "Subscribed and ready"}
+              {pushStatus === "not-subscribed" && "Not subscribed yet"}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <Button
-            onClick={handleTrigger}
-            disabled={triggering}
-            className="bg-gradient-to-r from-[#4ecdc4] to-[#a78bfa] text-white"
-          >
-            {triggering ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <Play className="mr-2 h-4 w-4" />
-            )}
-            {triggering ? "Processing..." : "Run Now"}
-          </Button>
+        <div className="flex flex-wrap items-center gap-3">
+          {pushStatus === "not-subscribed" && (
+            <Button
+              onClick={handleSubscribe}
+              className="bg-gradient-to-r from-[#4ecdc4] to-[#a78bfa] text-white"
+            >
+              <Bell className="mr-2 h-4 w-4" />
+              Enable Push Notifications
+            </Button>
+          )}
 
-          {triggerResult && (
-            <div className="flex items-center gap-2 rounded-xl bg-overlay-subtle px-4 py-2 text-sm">
-              <CheckCircle2 className="h-4 w-4 text-[#4ecdc4]" />
-              <span>
-                Time matched: <strong>{triggerResult.time || "N/A"}</strong>
-              </span>
-              <span className="text-muted-foreground">|</span>
-              <span>
-                Emails sent: <strong>{triggerResult.emailsSent}</strong>
-              </span>
-            </div>
+          {pushStatus === "subscribed" && (
+            <>
+              <Button
+                onClick={() => testPushMutation.mutate()}
+                disabled={testPushMutation.isPending}
+                className="bg-gradient-to-r from-[#4ecdc4] to-[#a78bfa] text-white"
+              >
+                {testPushMutation.isPending ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Play className="mr-2 h-4 w-4" />
+                )}
+                Send Test Notification
+              </Button>
+              <Button
+                onClick={handleUnsubscribe}
+                variant="outline"
+                size="sm"
+              >
+                <BellOff className="mr-2 h-3 w-3" />
+                Unsubscribe
+              </Button>
+            </>
+          )}
+
+          {pushStatus === "subscribed" && (
+            <span className="flex items-center gap-1.5 text-xs text-[#4ecdc4]">
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              Active
+            </span>
           )}
         </div>
-
-        <p className="mt-3 text-xs text-muted-foreground flex items-center gap-1">
-          <AlertCircle className="h-3 w-3" />
-          Only sends to reminders matching the current UTC time (
-          {new Date().toISOString().slice(11, 16)})
-        </p>
       </div>
 
       {/* Create Reminder */}
@@ -331,27 +411,13 @@ export default function PlaygroundRemindersPage() {
                   </p>
                 </div>
 
-                {/* Actions */}
-                <div className="flex items-center gap-1.5">
-                  <button
-                    onClick={() => handleTestOne(r._id)}
-                    disabled={testingId === r._id}
-                    className="flex h-8 shrink-0 items-center gap-1.5 rounded-full bg-[#a78bfa]/10 px-3 text-xs font-medium text-[#a78bfa] transition-all hover:bg-[#a78bfa]/20 disabled:opacity-50"
-                  >
-                    {testingId === r._id ? (
-                      <Loader2 className="h-3 w-3 animate-spin" />
-                    ) : (
-                      <Play className="h-3 w-3" />
-                    )}
-                    Test Now
-                  </button>
-                  <button
-                    onClick={() => deleteMutation.mutate(r._id)}
-                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-overlay-medium text-muted-foreground transition-all hover:bg-red-500/20 hover:text-red-500"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </div>
+                {/* Delete */}
+                <button
+                  onClick={() => deleteMutation.mutate(r._id)}
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-overlay-medium text-muted-foreground transition-all hover:bg-red-500/20 hover:text-red-500"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
               </div>
             ))}
           </div>
