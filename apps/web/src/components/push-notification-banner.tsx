@@ -13,6 +13,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 function urlBase64ToUint8Array(base64String: string) {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
@@ -110,29 +111,26 @@ export function PushNotificationPopup() {
 
   return (
     <Dialog open={status === "not-subscribed"} onOpenChange={(open) => !open && handleDismiss()}>
-      <div className="flex flex-col items-center text-center">
-        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#4ecdc4]/20 mb-4">
-          <Bell className="h-8 w-8 text-[#4ecdc4]" />
+      <DialogHeader className="flex flex-col items-center text-center">
+        <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
+          <Bell className="h-7 w-7 text-primary" />
         </div>
-        <DialogHeader>
-          <DialogTitle>{t("title")}</DialogTitle>
-          <DialogDescription>{t("description")}</DialogDescription>
-        </DialogHeader>
-      </div>
+        <DialogTitle>{t("title")}</DialogTitle>
+        <DialogDescription className="mt-1">{t("description")}</DialogDescription>
+      </DialogHeader>
       <DialogFooter className="sm:justify-center">
-        <button
+        <Button
+          variant="outline"
           onClick={handleDismiss}
-          className="rounded-xl px-4 py-2 text-sm font-semibold text-muted-foreground transition-all hover:text-foreground"
         >
           {t("notNow")}
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={handleEnable}
           disabled={subscribing}
-          className="rounded-xl bg-[#4ecdc4] px-6 py-2 text-sm font-semibold text-white transition-all hover:bg-[#4ecdc4]/80 disabled:opacity-50"
         >
           {subscribing ? t("enabling") : t("enable")}
-        </button>
+        </Button>
       </DialogFooter>
     </Dialog>
   );
