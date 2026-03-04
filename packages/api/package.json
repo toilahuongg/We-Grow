@@ -23,8 +23,8 @@
     "@we-grow/db": "workspace:*",
     "@we-grow/env": "workspace:*",
     "dotenv": "catalog:",
-    "grammy": "^1.41.1",
     "next": "catalog:",
+    "@misoapps/mail-sdk": "latest",
     "web-push": "^3.6.7",
     "zod": "catalog:"
   },

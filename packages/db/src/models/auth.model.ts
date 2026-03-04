@@ -54,15 +54,15 @@ const verificationSchema = new Schema(
     identifier: { type: String, required: true },
     value: { type: String, required: true },
     expiresAt: { type: Date, required: true },
-    createdAt: { type: Date },
-    updatedAt: { type: Date },
+    createdAt: { type: Date, required: true },
+    updatedAt: { type: Date, required: true },
   },
   { collection: "verification" },
 );
 
-const User = mongoose.models.User || model("User", userSchema);
-const Session = mongoose.models.Session || model("Session", sessionSchema);
-const Account = mongoose.models.Account || model("Account", accountSchema);
-const Verification = mongoose.models.Verification || model("Verification", verificationSchema);
+const User = (mongoose.models.User ?? model("User", userSchema)) as mongoose.Model<any>;
+const Session = (mongoose.models.Session ?? model("Session", sessionSchema)) as mongoose.Model<any>;
+const Account = (mongoose.models.Account ?? model("Account", accountSchema)) as mongoose.Model<any>;
+const Verification = (mongoose.models.Verification ?? model("Verification", verificationSchema)) as mongoose.Model<any>;
 
 export { User, Session, Account, Verification };

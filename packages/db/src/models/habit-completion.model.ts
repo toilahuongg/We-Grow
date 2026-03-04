@@ -18,4 +18,4 @@ const habitCompletionSchema = new Schema(
 habitCompletionSchema.index({ habitId: 1, userId: 1, date: 1 }, { unique: true });
 habitCompletionSchema.index({ userId: 1, date: -1 });
 
-export const HabitCompletion = mongoose.models.HabitCompletion || model("HabitCompletion", habitCompletionSchema);
+export const HabitCompletion = (mongoose.models.HabitCompletion ?? model("HabitCompletion", habitCompletionSchema)) as mongoose.Model<any>;

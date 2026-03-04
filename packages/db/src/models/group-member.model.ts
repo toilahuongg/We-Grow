@@ -26,4 +26,4 @@ const groupMemberSchema = new Schema(
 groupMemberSchema.index({ groupId: 1, userId: 1 }, { unique: true });
 groupMemberSchema.index({ userId: 1, status: 1 });
 
-export const GroupMember = mongoose.models.GroupMember || model("GroupMember", groupMemberSchema);
+export const GroupMember = (mongoose.models.GroupMember ?? model("GroupMember", groupMemberSchema)) as mongoose.Model<any>;

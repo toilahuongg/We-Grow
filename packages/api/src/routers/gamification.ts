@@ -89,32 +89,37 @@ export const gamificationRouter = {
 
       const userInfoMap = await getUserInfoMap(members.map((m) => m.userId as string));
 
-      const leaderboard = await Promise.all(
-        members.map(async (member) => {
-          const [profile, habits] = await Promise.all([
-            UserProfile.findOne({ userId: member.userId }),
-            Habit.find({ userId: member.userId, archived: false }),
-          ]);
+      const memberIds = members.map((m) => m.userId as string);
 
-          const maxStreak = habits.reduce(
-            (max, h) => Math.max(max, h.currentStreak ?? 0),
-            0,
-          );
+      // Bulk fetch profiles and habits — avoids N+1 queries
+      const [profiles, habits] = await Promise.all([
+        UserProfile.find({ userId: { $in: memberIds } }),
+        Habit.find({ userId: { $in: memberIds }, archived: false }),
+      ]);
 
-          const info = userInfoMap.get(member.userId as string);
-          const memberLevel = profile?.level ?? 1;
-          return {
-            userId: member.userId,
-            userName: info?.name ?? "Unknown",
-            userImage: info?.image ?? null,
-            role: member.role,
-            totalXp: profile?.totalXp ?? 0,
-            level: memberLevel,
-            levelInfo: getLevelInfo(memberLevel),
-            bestStreak: maxStreak,
-          };
-        }),
-      );
+      const profileMap = new Map(profiles.map((p) => [p.userId as string, p]));
+      const streakMap = new Map<string, number>();
+      for (const h of habits) {
+        const uid = h.userId as string;
+        streakMap.set(uid, Math.max(streakMap.get(uid) ?? 0, h.currentStreak ?? 0));
+      }
+
+      const leaderboard = members.map((member) => {
+        const uid = member.userId as string;
+        const profile = profileMap.get(uid);
+        const info = userInfoMap.get(uid);
+        const memberLevel = profile?.level ?? 1;
+        return {
+          userId: member.userId,
+          userName: info?.name ?? "Unknown",
+          userImage: info?.image ?? null,
+          role: member.role,
+          totalXp: profile?.totalXp ?? 0,
+          level: memberLevel,
+          levelInfo: getLevelInfo(memberLevel),
+          bestStreak: streakMap.get(uid) ?? 0,
+        };
+      });
 
       return leaderboard.sort((a, b) => b.totalXp - a.totalXp);
     }),

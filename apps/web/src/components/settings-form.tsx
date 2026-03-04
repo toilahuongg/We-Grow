@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, User, Clock, Bell, Globe, Camera, Shield, Pencil, Check, X, Link2 } from "lucide-react";
+import { ArrowLeft, User, Clock, Bell, Globe, Camera, Shield, Pencil, Check, X } from "lucide-react";
 import Link from "next/link";
 import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
@@ -12,7 +12,6 @@ import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
-import { BotLinkCard } from "@/components/bot-link-card";
 import { locales, localeNames } from "@/i18n/config";
 import { setLocaleCookie } from "@/i18n/locale-client";
 import type { Locale } from "@/i18n/config";
@@ -599,23 +598,6 @@ export function SettingsForm({ session: _serverSession }: { session: any }) {
           <Link href="/reminders">
             <Button variant="outline">{t("manageReminders")}</Button>
           </Link>
-        </div>
-      </div>
-
-      {/* Connected Accounts */}
-      <div className="glass-strong rounded-2xl p-6 mb-6">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#0088cc]/20 to-[#0068ff]/20">
-            <Link2 className="h-5 w-5 text-[#0088cc]" />
-          </div>
-          <div>
-            <h2 className="font-semibold">{t("connectedAccounts")}</h2>
-            <p className="text-sm text-muted-foreground">{t("connectedAccountsDesc")}</p>
-          </div>
-        </div>
-
-        <div className="space-y-3">
-          <BotLinkCard t={(key) => t(`telegram_${key}`)} />
         </div>
       </div>
 

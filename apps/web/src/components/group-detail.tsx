@@ -31,26 +31,15 @@ import { NoteDialog } from "@/components/note-dialog";
 import { Label } from "@/components/ui/label";
 import { EmptyState } from "@/components/empty-state";
 import { ActivityFeed } from "@/components/activity-feed";
-import { TelegramSettings } from "@/components/telegram-settings";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
+import { getHabitIcon } from "@/lib/habit-utils";
+import { getLocalToday } from "@/lib/date-utils";
 
 const roleConfig = {
   owner: { labelKey: "owner" as const, icon: Crown, color: "text-yellow-500" },
   moderator: { labelKey: "moderator" as const, icon: Shield, color: "text-blue-500" },
   member: { labelKey: "member" as const, icon: Users, color: "text-muted-foreground" },
-};
-
-const habitIcons: Record<string, string> = {
-  meditation: "🧘",
-  exercise: "💪",
-  reading: "📚",
-  water: "💧",
-  "social-media": "📵",
-  journaling: "✍️",
-  sleep: "😴",
-  learning: "🎓",
-  default: "🌟",
 };
 
 function getInitials(name: string): string {
@@ -61,19 +50,6 @@ function getInitials(name: string): string {
     .slice(0, 2)
     .join("")
     .toUpperCase();
-}
-
-function getHabitIcon(title: string): string {
-  const lowerTitle = title.toLowerCase();
-  if (lowerTitle.includes("meditation") || lowerTitle.includes("mindful")) return habitIcons.meditation;
-  if (lowerTitle.includes("exercise") || lowerTitle.includes("workout")) return habitIcons.exercise;
-  if (lowerTitle.includes("read") || lowerTitle.includes("book")) return habitIcons.reading;
-  if (lowerTitle.includes("water") || lowerTitle.includes("hydrate")) return habitIcons.water;
-  if (lowerTitle.includes("social") || lowerTitle.includes("phone")) return habitIcons["social-media"];
-  if (lowerTitle.includes("journal") || lowerTitle.includes("write")) return habitIcons.journaling;
-  if (lowerTitle.includes("sleep") || lowerTitle.includes("bed")) return habitIcons.sleep;
-  if (lowerTitle.includes("learn") || lowerTitle.includes("study")) return habitIcons.learning;
-  return habitIcons.default;
 }
 
 export function GroupDetail({ groupId, initialData }: { groupId: string; initialData: any }) {
@@ -810,25 +786,6 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
             </div>
           </div>
 
-          {/* Bot Integrations */}
-          {canManage && (
-            <div className="glass-strong rounded-2xl p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#0088cc]/20 to-[#0068ff]/20">
-                  <span className="text-lg">🤖</span>
-                </div>
-                <div>
-                  <h3 className="font-semibold">{t("botIntegrations")}</h3>
-                  <p className="text-sm text-muted-foreground">{t("botIntegrationsDesc")}</p>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <TelegramSettings groupId={group._id as string} t={(key) => t(`telegram_${key}`)} />
-              </div>
-            </div>
-          )}
-
           {/* Danger Zone */}
           <div className="glass-strong rounded-2xl p-6 border border-red-500/10">
             <h3 className="font-semibold mb-4 text-red-400">{t("dangerZone")}</h3>
@@ -914,7 +871,7 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
         isLoading={saveNoteMutation.isPending}
         onSave={(note) => {
           if (noteDialogHabitId && note) {
-            const today = new Date().toISOString().split("T")[0]!;
+            const today = getLocalToday();
             saveNoteMutation.mutate({ habitId: noteDialogHabitId, date: today, note });
           } else {
             setNoteDialogHabitId(null);

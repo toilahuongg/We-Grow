@@ -17,31 +17,7 @@ import { HabitForm } from "./habit-form";
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isToday } from "date-fns";
 import { getDateFnsLocale } from "@/i18n/date-locale";
 import type { Locale } from "@/i18n/config";
-
-const habitIcons: Record<string, string> = {
-  meditation: "🧘",
-  exercise: "💪",
-  reading: "📚",
-  water: "💧",
-  "social-media": "📵",
-  journaling: "✍️",
-  sleep: "😴",
-  learning: "🎓",
-  default: "🌟",
-};
-
-function getHabitIcon(title: string): string {
-  const lowerTitle = title.toLowerCase();
-  if (lowerTitle.includes("meditation") || lowerTitle.includes("mindful")) return habitIcons.meditation;
-  if (lowerTitle.includes("exercise") || lowerTitle.includes("workout")) return habitIcons.exercise;
-  if (lowerTitle.includes("read") || lowerTitle.includes("book")) return habitIcons.reading;
-  if (lowerTitle.includes("water") || lowerTitle.includes("hydrate")) return habitIcons.water;
-  if (lowerTitle.includes("social") || lowerTitle.includes("phone")) return habitIcons["social-media"];
-  if (lowerTitle.includes("journal") || lowerTitle.includes("write")) return habitIcons.journaling;
-  if (lowerTitle.includes("sleep") || lowerTitle.includes("bed")) return habitIcons.sleep;
-  if (lowerTitle.includes("learn") || lowerTitle.includes("study")) return habitIcons.learning;
-  return habitIcons.default;
-}
+import { getHabitIcon } from "@/lib/habit-utils";
 
 interface HabitDetailProps {
   habitId: string;

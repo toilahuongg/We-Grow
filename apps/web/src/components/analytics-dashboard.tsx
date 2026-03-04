@@ -16,25 +16,26 @@ import {
 import { orpc } from "@/utils/orpc";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/empty-state";
+import { getLocalToday } from "@/lib/date-utils";
 
 type Period = "week" | "month" | "last30";
 
 function getDateRange(period: Period) {
-  const today = new Date();
-  const todayStr = today.toISOString().split("T")[0]!;
+  const todayStr = getLocalToday();
+  const today = new Date(todayStr + "T00:00:00");
   let startDate: string;
 
   if (period === "week") {
     const d = new Date(today);
     d.setDate(d.getDate() - 6);
-    startDate = d.toISOString().split("T")[0]!;
+    startDate = new Intl.DateTimeFormat("en-CA").format(d);
   } else if (period === "month") {
     const d = new Date(today.getFullYear(), today.getMonth(), 1);
-    startDate = d.toISOString().split("T")[0]!;
+    startDate = new Intl.DateTimeFormat("en-CA").format(d);
   } else {
     const d = new Date(today);
     d.setDate(d.getDate() - 29);
-    startDate = d.toISOString().split("T")[0]!;
+    startDate = new Intl.DateTimeFormat("en-CA").format(d);
   }
 
   return { startDate, endDate: todayStr };

@@ -5,7 +5,7 @@ const { Schema, model } = mongoose;
 const userBadgeSchema = new Schema(
   {
     _id: { type: String },
-    userId: { type: String, required: true },
+    userId: { type: String, ref: "User", required: true },
     badgeType: { type: String, required: true },
     badgeKey: { type: String, required: true },
     level: { type: Number, required: true },
@@ -19,6 +19,6 @@ const userBadgeSchema = new Schema(
 userBadgeSchema.index({ userId: 1, badgeKey: 1 }, { unique: true });
 
 const UserBadge =
-  mongoose.models.UserBadge || model("UserBadge", userBadgeSchema);
+  (mongoose.models.UserBadge ?? model("UserBadge", userBadgeSchema)) as mongoose.Model<any>;
 
 export { UserBadge };

@@ -35,4 +35,4 @@ activitySchema.index(
   { unique: true, sparse: true },
 );
 
-export const Activity = mongoose.models.Activity || model("Activity", activitySchema);
+export const Activity = (mongoose.models.Activity ?? model("Activity", activitySchema)) as mongoose.Model<any>;

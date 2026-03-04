@@ -16,5 +16,6 @@ const reminderSchema = new Schema(
 );
 
 reminderSchema.index({ userId: 1 });
+reminderSchema.index({ enabled: 1, time: 1 });
 
-export const Reminder = mongoose.models.Reminder || model("Reminder", reminderSchema);
+export const Reminder = (mongoose.models.Reminder ?? model("Reminder", reminderSchema)) as mongoose.Model<any>;

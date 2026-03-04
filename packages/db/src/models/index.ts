@@ -12,5 +12,3 @@ export { Reminder } from "./reminder.model";
 export { UserBadge } from "./user-badge.model";
 export { Activity } from "./activity.model";
 export { Reaction } from "./reaction.model";
-export { TelegramLink } from "./telegram-link.model";
-export { TelegramUserLink } from "./telegram-user-link.model";

@@ -20,4 +20,4 @@ const reactionSchema = new Schema(
 
 reactionSchema.index({ activityId: 1, userId: 1, emoji: 1 }, { unique: true });
 
-export const Reaction = mongoose.models.Reaction || model("Reaction", reactionSchema);
+export const Reaction = (mongoose.models.Reaction ?? model("Reaction", reactionSchema)) as mongoose.Model<any>;

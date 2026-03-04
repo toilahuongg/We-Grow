@@ -231,19 +231,7 @@
     "levelLabel": "Nivel {level}",
     "dayStreakLabel": "racha de {count} días",
     "botIntegrations": "Integraciones de Bot",
-    "botIntegrationsDesc": "Conecta bots para recibir notificaciones",
-    "telegram_notConfigured": "El bot de Telegram no está configurado",
-    "telegram_notConnected": "No conectado a ningún chat de Telegram",
-    "telegram_connectInstructions": "Agrega el bot a un grupo de Telegram y usa /connect <invite-code>",
-    "telegram_connectedTo": "Conectado a {chat}",
-    "telegram_disconnect": "Desconectar",
-    "telegram_disconnected": "Telegram desconectado",
-    "telegram_failedDisconnect": "Error al desconectar",
-    "telegram_notifyActivities": "Notificar actividades",
-    "telegram_dailyReminder": "Recordatorio diario",
-    "telegram_reminderTime": "Hora (UTC)",
-    "telegram_settingsUpdated": "Configuración de Telegram actualizada",
-    "telegram_failedUpdateSettings": "Error al actualizar configuración"
+    "botIntegrationsDesc": "Conecta bots para recibir notificaciones"
   },
   "habits": {
     "createHabit": "Crear Hábito",
@@ -386,19 +374,7 @@
     "language": "Idioma",
     "languageDesc": "Elige tu idioma preferido",
     "connectedAccounts": "Cuentas conectadas",
-    "connectedAccountsDesc": "Vincula tus cuentas de mensajería para recibir notificaciones",
-    "telegram_title": "Telegram",
-    "telegram_notConfigured": "El bot de Telegram no está configurado",
-    "telegram_linked": "Vinculado como @{name}",
-    "telegram_notLinked": "No vinculado aún",
-    "telegram_unlink": "Desvincular",
-    "telegram_unlinked": "Telegram desvinculado",
-    "telegram_failedUnlink": "Error al desvincular Telegram",
-    "telegram_generateToken": "Generar token",
-    "telegram_generating": "Generando...",
-    "telegram_failedGenerate": "Error al generar",
-    "telegram_telegramInstructions": "Envía /link TOKEN a @WeGrowBot en Telegram",
-    "telegram_tokenExpiry": "El token expira en 10 minutos"
+    "connectedAccountsDesc": "Vincula tus cuentas de mensajería para recibir notificaciones"
   },
   "leaderboard": {
     "title": "Clasificación",

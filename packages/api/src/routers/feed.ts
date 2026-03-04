@@ -14,7 +14,7 @@ export const feedRouter = {
       z.object({
         groupId: z.string(),
         limit: z.number().min(1).max(50).optional(),
-        before: z.string().optional(),
+        before: z.string().datetime().optional(),
       }),
     )
     .handler(async ({ context, input }) => {
@@ -28,7 +28,7 @@ export const feedRouter = {
         filter.createdAt = { $lt: new Date(input.before) };
       }
 
-      const activities = await (Activity as any).find(filter)
+      const activities = await Activity.find(filter)
         .sort({ createdAt: -1 })
         .limit(limit + 1);
 
@@ -36,8 +36,8 @@ export const feedRouter = {
       const items = activities.slice(0, limit);
 
       // Get user's reactions for these activities
-      const activityIds = items.map((a: any) => a._id as string);
-      const userReactions = await (Reaction as any).find({
+      const activityIds = items.map((a) => a._id as string);
+      const userReactions = await Reaction.find({
         activityId: { $in: activityIds },
         userId,
       });
@@ -52,7 +52,7 @@ export const feedRouter = {
       }
 
       return {
-        activities: items.map((a: any) => ({
+        activities: items.map((a) => ({
           ...a.toObject(),
           myReactions: [...(myReactionsByActivity.get(a._id as string) ?? [])],
         })),
@@ -72,13 +72,13 @@ export const feedRouter = {
       const now = new Date();
 
       // Verify activity exists and user has access to its group
-      const activity = await (Activity as any).findById(input.activityId);
+      const activity = await Activity.findById(input.activityId);
       if (!activity) {
         throw new ORPCError("NOT_FOUND", { message: "Activity not found" });
       }
       await requireGroupRole(userId, activity.groupId as string, ["owner", "moderator", "member"]);
 
-      const existing = await (Reaction as any).findOne({
+      const existing = await Reaction.findOne({
         activityId: input.activityId,
         userId,
         emoji: input.emoji,
@@ -86,15 +86,15 @@ export const feedRouter = {
 
       if (existing) {
         // Remove reaction
-        await (Reaction as any).deleteOne({ _id: existing._id });
-        await (Activity as any).findByIdAndUpdate(input.activityId, {
+        await Reaction.deleteOne({ _id: existing._id });
+        await Activity.findByIdAndUpdate(input.activityId, {
           $inc: { [`reactionCounts.${input.emoji}`]: -1 },
           updatedAt: now,
         });
         return { added: false };
       } else {
         // Add reaction
-        await (Reaction as any).create({
+        await Reaction.create({
           _id: generateId(),
           activityId: input.activityId,
           userId,
@@ -102,7 +102,7 @@ export const feedRouter = {
           createdAt: now,
           updatedAt: now,
         });
-        await (Activity as any).findByIdAndUpdate(input.activityId, {
+        await Activity.findByIdAndUpdate(input.activityId, {
           $inc: { [`reactionCounts.${input.emoji}`]: 1 },
           updatedAt: now,
         });

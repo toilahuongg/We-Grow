@@ -9,28 +9,7 @@ import { generateId } from "@we-grow/db/utils/id";
 
 import { XP_REWARDS, getLevelFromXp } from "./xp";
 import { createActivity, createActivityForUserGroups } from "./activity";
-
-function getDateStr(date: Date): string {
-  return date.toISOString().split("T")[0]!;
-}
-
-function addDays(dateStr: string, days: number): string {
-  const d = new Date(dateStr + "T00:00:00Z");
-  d.setUTCDate(d.getUTCDate() + days);
-  return getDateStr(d);
-}
-
-function getWeekStart(dateStr: string): string {
-  const d = new Date(dateStr + "T00:00:00Z");
-  const day = d.getUTCDay();
-  const diff = day === 0 ? 6 : day - 1;
-  d.setUTCDate(d.getUTCDate() - diff);
-  return getDateStr(d);
-}
-
-function getDayOfWeek(dateStr: string): number {
-  return new Date(dateStr + "T00:00:00Z").getUTCDay();
-}
+import { getToday, addDays, getWeekStart, getDayOfWeek } from "./date-utils";
 
 async function calculateStreak(
   habit: InstanceType<typeof Habit>,
@@ -50,7 +29,7 @@ async function calculateStreak(
   if (habit.frequency === "weekly") {
     const thisWeekStart = getWeekStart(completionDate);
     const thisWeekEnd = addDays(thisWeekStart, 6);
-    const completionsThisWeek = await (HabitCompletion as any).countDocuments({
+    const completionsThisWeek = await HabitCompletion.countDocuments({
       habitId: habit._id,
       userId: habit.userId,
       date: { $gte: thisWeekStart, $lte: thisWeekEnd },
@@ -59,7 +38,7 @@ async function calculateStreak(
     if (completionsThisWeek >= (habit.weeklyTarget ?? 1)) {
       const lastWeekStart = addDays(thisWeekStart, -7);
       const lastWeekEnd = addDays(lastWeekStart, 6);
-      const completionsLastWeek = await (HabitCompletion as any).countDocuments({
+      const completionsLastWeek = await HabitCompletion.countDocuments({
         habitId: habit._id,
         userId: habit.userId,
         date: { $gte: lastWeekStart, $lte: lastWeekEnd },
@@ -95,7 +74,7 @@ async function calculateStreak(
     }
 
     const prevDate = addDays(completionDate, -daysBack);
-    const prevCompletion = await (HabitCompletion as any).findOne({
+    const prevCompletion = await HabitCompletion.findOne({
       habitId: habit._id,
       userId: habit.userId,
       date: prevDate,
@@ -110,6 +89,7 @@ async function calculateStreak(
   return 1;
 }
 
+/** Atomic XP award using $inc to prevent race conditions */
 async function awardXp(
   userId: string,
   amount: number,
@@ -118,7 +98,7 @@ async function awardXp(
   description: string,
 ): Promise<{ previousLevel: number; newLevel: number; leveledUp: boolean }> {
   const now = new Date();
-  await (XpTransaction as any).create({
+  await XpTransaction.create({
     _id: generateId(),
     userId,
     amount,
@@ -128,44 +108,37 @@ async function awardXp(
     createdAt: now,
     updatedAt: now,
   });
-  let profile = await (UserProfile as any).findOne({ userId });
-  let isNewProfile = false;
-  if (!profile) {
-    isNewProfile = true;
-    profile = await (UserProfile as any).create({
-      _id: generateId(),
-      userId,
-      totalXp: 0,
-      level: 1,
-      onboardingCompleted: false,
-      createdAt: now,
-      updatedAt: now,
-    });
-  }
-  const previousLevel = profile.level ?? 1;
-  profile.totalXp = (profile.totalXp ?? 0) + amount;
-  profile.level = getLevelFromXp(profile.totalXp);
-  profile.updatedAt = now;
-  await profile.save();
 
-  const newLevel = profile.level ?? 1;
+  // Use $inc for atomic increment — prevents race condition where concurrent
+  // calls both read the same totalXp and overwrite each other
+  const profile = await UserProfile.findOneAndUpdate(
+    { userId },
+    {
+      $inc: { totalXp: amount },
+      $set: { updatedAt: now },
+      $setOnInsert: {
+        _id: generateId(),
+        userId,
+        level: 1,
+        createdAt: now,
+      },
+    },
+    { upsert: true, new: true },
+  );
 
-  if (isNewProfile) {
-    await (UserBadge as any).create({
-      _id: generateId(),
-      userId,
-      badgeType: "level",
-      badgeKey: "level_1",
-      level: 1,
-      awardedAt: now,
-      createdAt: now,
-      updatedAt: now,
-    }).catch(() => {/* ignore duplicate */});
+  const newTotalXp = profile.totalXp ?? amount;
+  const newLevel = getLevelFromXp(newTotalXp);
+  const previousLevel = getLevelFromXp(Math.max(0, newTotalXp - amount));
+
+  // Update level if changed
+  if (newLevel !== (profile.level ?? 1)) {
+    await UserProfile.updateOne({ userId }, { $set: { level: newLevel } });
   }
 
+  // Award badges for each level gained
   if (newLevel > previousLevel) {
     for (let lvl = previousLevel + 1; lvl <= newLevel; lvl++) {
-      await (UserBadge as any).create({
+      await UserBadge.create({
         _id: generateId(),
         userId,
         badgeType: "level",
@@ -197,17 +170,17 @@ async function checkStreakBonuses(
 }
 
 async function checkAllHabitsBonus(userId: string, date: string) {
-  const activeHabits = await (Habit as any).find({ userId, archived: false, frequency: "daily" });
+  const activeHabits = await Habit.find({ userId, archived: false, frequency: "daily" });
   if (activeHabits.length === 0) return;
 
-  const completedCount = await (HabitCompletion as any).countDocuments({
+  const completedCount = await HabitCompletion.countDocuments({
     userId,
     date,
-    habitId: { $in: activeHabits.map((h: { _id: unknown }) => h._id) },
+    habitId: { $in: activeHabits.map((h) => h._id) },
   });
 
   if (completedCount === activeHabits.length) {
-    const alreadyAwarded = await (XpTransaction as any).findOne({
+    const alreadyAwarded = await XpTransaction.findOne({
       userId,
       source: "all_habits_bonus",
       description: `All daily habits completed [${date}]`,
@@ -233,38 +206,40 @@ export async function completeHabitForUser(
   habitId: string,
   date?: string,
   note?: string,
+  timezone?: string,
 ): Promise<HabitCompletionResult> {
-  const completionDate = date ?? getDateStr(new Date());
+  const completionDate = date ?? getToday(timezone);
   const now = new Date();
 
-  const habit = await (Habit as any).findOne({ _id: habitId, userId });
+  const habit = await Habit.findOne({ _id: habitId, userId });
   if (!habit) {
     throw new Error("Habit not found");
   }
 
-  const existing = await (HabitCompletion as any).findOne({
-    habitId,
-    userId,
-    date: completionDate,
-  });
-  if (existing) {
-    return {
-      success: true,
-      alreadyCompleted: true,
-      streak: habit.currentStreak ?? 0,
-      habitTitle: habit.title as string,
-    };
+  // Use try/catch on create to handle duplicate key error (race condition)
+  // instead of check-then-act pattern which is not atomic
+  try {
+    await HabitCompletion.create({
+      _id: generateId(),
+      habitId,
+      userId,
+      date: completionDate,
+      note: note ?? null,
+      createdAt: now,
+      updatedAt: now,
+    });
+  } catch (err: unknown) {
+    // Duplicate key error (code 11000) means already completed
+    if (err && typeof err === "object" && "code" in err && (err as { code: number }).code === 11000) {
+      return {
+        success: true,
+        alreadyCompleted: true,
+        streak: habit.currentStreak ?? 0,
+        habitTitle: habit.title as string,
+      };
+    }
+    throw err;
   }
-
-  await (HabitCompletion as any).create({
-    _id: generateId(),
-    habitId,
-    userId,
-    date: completionDate,
-    note: note ?? null,
-    createdAt: now,
-    updatedAt: now,
-  });
 
   const newStreak = await calculateStreak(habit, completionDate);
   habit.currentStreak = newStreak;
@@ -278,7 +253,7 @@ export async function completeHabitForUser(
   await checkStreakBonuses(userId, habitIdStr, newStreak, completionDate);
   await checkAllHabitsBonus(userId, completionDate);
 
-  const finalProfile = await (UserProfile as any).findOne({ userId });
+  const finalProfile = await UserProfile.findOne({ userId });
   const finalLevel = finalProfile?.level ?? 1;
   const xpBeforeAll = (finalProfile?.totalXp ?? 0) - XP_REWARDS.HABIT_COMPLETION;
   const levelBeforeAll = getLevelFromXp(Math.max(0, xpBeforeAll));
@@ -312,4 +287,133 @@ export async function completeHabitForUser(
     newLevel: finalLevel,
     habitTitle: habit.title as string,
   };
+}
+
+/** Reverse XP for uncomplete — uses $inc for atomic decrement */
+export async function reverseXp(
+  userId: string,
+  source: string,
+  sourceId: string | null,
+  date: string,
+) {
+  const query: Record<string, unknown> = { userId, source };
+  if (sourceId !== null) {
+    query.sourceId = sourceId;
+  }
+
+  // Match by date tag exclusively
+  const transaction = await XpTransaction.findOne({
+    ...query,
+    description: { $regex: `\\[${date}\\]` },
+  });
+
+  if (!transaction) return;
+
+  await XpTransaction.deleteOne({ _id: transaction._id });
+
+  const amount = transaction.amount ?? 0;
+  const profile = await UserProfile.findOneAndUpdate(
+    { userId },
+    {
+      $inc: { totalXp: -amount },
+      $set: { updatedAt: new Date() },
+    },
+    { new: true },
+  );
+
+  if (profile) {
+    const newLevel = getLevelFromXp(Math.max(0, profile.totalXp ?? 0));
+    if (newLevel !== (profile.level ?? 1)) {
+      await UserProfile.updateOne({ userId }, { $set: { level: newLevel } });
+    }
+  }
+}
+
+/** Recalculate streak by fetching all completions at once instead of N sequential queries */
+export async function recalculateStreakFromCompletions(
+  habit: InstanceType<typeof Habit>,
+): Promise<{ streak: number; lastDate: string | null }> {
+  // Fetch all completions at once — fixes unbounded while(true) N+1 query issue
+  const completions = await HabitCompletion.find({
+    habitId: habit._id,
+    userId: habit.userId,
+  }).sort({ date: -1 }).lean();
+
+  if (completions.length === 0) {
+    return { streak: 0, lastDate: null };
+  }
+
+  const lastDate = completions[0]!.date as string;
+  const completionDates = new Set(completions.map((c) => c.date as string));
+
+  if (habit.frequency === "daily") {
+    let streak = 1;
+    let currentDate = lastDate;
+    while (true) {
+      const prevDate = addDays(currentDate, -1);
+      if (!completionDates.has(prevDate)) break;
+      streak++;
+      currentDate = prevDate;
+    }
+    return { streak, lastDate };
+  }
+
+  if (habit.frequency === "weekly") {
+    const thisWeekStart = getWeekStart(lastDate);
+    const thisWeekEnd = addDays(thisWeekStart, 6);
+    let completionsThisWeek = 0;
+    for (const d of completionDates) {
+      if (d >= thisWeekStart && d <= thisWeekEnd) completionsThisWeek++;
+    }
+
+    if (completionsThisWeek >= (habit.weeklyTarget ?? 1)) {
+      const lastWeekStart = addDays(thisWeekStart, -7);
+      const lastWeekEnd = addDays(lastWeekStart, 6);
+      let completionsLastWeek = 0;
+      for (const d of completionDates) {
+        if (d >= lastWeekStart && d <= lastWeekEnd) completionsLastWeek++;
+      }
+
+      if (completionsLastWeek >= (habit.weeklyTarget ?? 1)) {
+        return { streak: (habit.currentStreak ?? 0), lastDate };
+      }
+      return { streak: 1, lastDate };
+    }
+    return { streak: 0, lastDate };
+  }
+
+  if (habit.frequency === "specific_days") {
+    const targetDays = habit.targetDays ?? [];
+    const lastDow = getDayOfWeek(lastDate);
+
+    if (!targetDays.includes(lastDow)) {
+      return { streak: 0, lastDate };
+    }
+
+    const sortedDays = [...targetDays].sort((a, b) => a - b);
+    let streak = 1;
+    let currentDate = lastDate;
+
+    while (true) {
+      const currentDow = getDayOfWeek(currentDate);
+      const currentIdx = sortedDays.indexOf(currentDow);
+      let daysBack: number;
+
+      if (currentIdx === 0) {
+        const prevDay = sortedDays[sortedDays.length - 1]!;
+        daysBack = ((currentDow - prevDay + 7) % 7) || 7;
+      } else {
+        const prevDay = sortedDays[currentIdx - 1]!;
+        daysBack = currentDow - prevDay;
+      }
+
+      const prevDate = addDays(currentDate, -daysBack);
+      if (!completionDates.has(prevDate)) break;
+      streak++;
+      currentDate = prevDate;
+    }
+    return { streak, lastDate };
+  }
+
+  return { streak: 0, lastDate };
 }

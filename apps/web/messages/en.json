@@ -231,19 +231,7 @@
     "levelLabel": "Level {level}",
     "dayStreakLabel": "{count} day streak",
     "botIntegrations": "Bot Integrations",
-    "botIntegrationsDesc": "Connect bots to receive notifications and manage habits",
-    "telegram_notConfigured": "Telegram bot is not configured by admin",
-    "telegram_notConnected": "Not connected to any Telegram chat",
-    "telegram_connectInstructions": "Add the bot to a Telegram group and use /connect <invite-code>",
-    "telegram_connectedTo": "Connected to {chat}",
-    "telegram_disconnect": "Disconnect",
-    "telegram_disconnected": "Telegram disconnected",
-    "telegram_failedDisconnect": "Failed to disconnect",
-    "telegram_notifyActivities": "Notify activities",
-    "telegram_dailyReminder": "Daily reminder",
-    "telegram_reminderTime": "Time (UTC)",
-    "telegram_settingsUpdated": "Telegram settings updated",
-    "telegram_failedUpdateSettings": "Failed to update settings"
+    "botIntegrationsDesc": "Connect bots to receive notifications and manage habits"
   },
   "habits": {
     "createHabit": "Create Habit",
@@ -386,19 +374,7 @@
     "language": "Language",
     "languageDesc": "Choose your preferred language",
     "connectedAccounts": "Connected Accounts",
-    "connectedAccountsDesc": "Link your messaging accounts to receive notifications",
-    "telegram_title": "Telegram",
-    "telegram_notConfigured": "Telegram bot is not configured",
-    "telegram_linked": "Linked as @{name}",
-    "telegram_notLinked": "Not linked yet",
-    "telegram_unlink": "Unlink",
-    "telegram_unlinked": "Telegram unlinked",
-    "telegram_failedUnlink": "Failed to unlink Telegram",
-    "telegram_generateToken": "Generate Link Token",
-    "telegram_generating": "Generating...",
-    "telegram_failedGenerate": "Failed to generate token",
-    "telegram_telegramInstructions": "Send /link TOKEN to @WeGrowBot on Telegram",
-    "telegram_tokenExpiry": "Token expires in 10 minutes"
+    "connectedAccountsDesc": "Link your messaging accounts to receive notifications"
   },
   "leaderboard": {
     "title": "Leaderboard",

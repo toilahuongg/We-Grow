@@ -30,4 +30,4 @@ const habitSchema = new Schema(
 habitSchema.index({ userId: 1, groupId: 1, archived: 1 });
 habitSchema.index({ groupHabitId: 1 });
 
-export const Habit = mongoose.models.Habit || model("Habit", habitSchema);
+export const Habit = (mongoose.models.Habit ?? model("Habit", habitSchema)) as mongoose.Model<any>;

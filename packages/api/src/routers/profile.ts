@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { UserProfile } from "@we-grow/db/models/index";
+import { generateId } from "@we-grow/db/utils/id";
 
 import { protectedProcedure } from "../index";
 
@@ -18,9 +19,14 @@ export const profileRouter = {
     .input(z.object({ bio: z.string().max(500) }))
     .handler(async ({ context, input }) => {
       const userId = context.session.user.id;
-      await UserProfile.updateOne(
+      const now = new Date();
+      await UserProfile.findOneAndUpdate(
         { userId },
-        { $set: { bio: input.bio, updatedAt: new Date() } },
+        {
+          $set: { bio: input.bio, updatedAt: now },
+          $setOnInsert: { _id: generateId(), userId, totalXp: 0, level: 1, createdAt: now },
+        },
+        { upsert: true },
       );
       return { success: true };
     }),
@@ -29,9 +35,14 @@ export const profileRouter = {
     .input(z.object({ timezone: z.string().min(1).max(100) }))
     .handler(async ({ context, input }) => {
       const userId = context.session.user.id;
-      await UserProfile.updateOne(
+      const now = new Date();
+      await UserProfile.findOneAndUpdate(
         { userId },
-        { $set: { timezone: input.timezone, updatedAt: new Date() } },
+        {
+          $set: { timezone: input.timezone, updatedAt: now },
+          $setOnInsert: { _id: generateId(), userId, totalXp: 0, level: 1, createdAt: now },
+        },
+        { upsert: true },
       );
       return { success: true };
     }),

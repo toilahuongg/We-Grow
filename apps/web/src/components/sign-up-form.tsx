@@ -5,6 +5,7 @@ import z from "zod";
 import { useTranslations } from "next-intl";
 
 import { authClient } from "@/lib/auth-client";
+import { client } from "@/utils/orpc";
 
 import Loader from "./loader";
 import { Button } from "./ui/button";
@@ -49,6 +50,8 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
             onSuccess: () => {
               router.push("/groups");
               toast.success(t("welcomeToWeGrow"));
+              const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+              if (tz) client.profile.updateTimezone({ timezone: tz }).catch(() => {});
             },
             onError: () => {
               toast.error(t("signInFailed"));
@@ -90,6 +93,8 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
               onSuccess: () => {
                 router.push("/groups");
                 toast.success(t("welcomeToWeGrow"));
+                const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                if (tz) client.profile.updateTimezone({ timezone: tz }).catch(() => {});
               },
               onError: (error) => {
                 toast.error(error.error.message || t("failedGoogleSignUp"));

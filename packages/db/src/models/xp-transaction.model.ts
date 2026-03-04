@@ -11,10 +11,8 @@ const xpTransactionSchema = new Schema(
       type: String,
       enum: [
         "habit_completion",
-        "todo_completion",
         "streak_bonus",
         "all_habits_bonus",
-        "onboarding",
       ],
       required: true,
     },
@@ -27,5 +25,6 @@ const xpTransactionSchema = new Schema(
 );
 
 xpTransactionSchema.index({ userId: 1, createdAt: -1 });
+xpTransactionSchema.index({ userId: 1, source: 1, description: 1 });
 
-export const XpTransaction = mongoose.models.XpTransaction || model("XpTransaction", xpTransactionSchema);
+export const XpTransaction = (mongoose.models.XpTransaction ?? model("XpTransaction", xpTransactionSchema)) as mongoose.Model<any>;

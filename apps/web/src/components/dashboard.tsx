@@ -18,31 +18,8 @@ import { LevelUpModal } from "@/components/level-up-modal";
 import { NoteDialog } from "@/components/note-dialog";
 import { getLevelInfo } from "@/lib/level-utils";
 import { toast } from "sonner";
-
-const habitIcons: Record<string, string> = {
-  meditation: "🧘",
-  exercise: "💪",
-  reading: "📚",
-  water: "💧",
-  "social-media": "📵",
-  journaling: "✍️",
-  sleep: "😴",
-  learning: "🎓",
-  default: "🌟",
-};
-
-function getHabitIcon(title: string): string {
-  const lowerTitle = title.toLowerCase();
-  if (lowerTitle.includes("meditation") || lowerTitle.includes("mindful")) return habitIcons.meditation;
-  if (lowerTitle.includes("exercise") || lowerTitle.includes("workout")) return habitIcons.exercise;
-  if (lowerTitle.includes("read") || lowerTitle.includes("book")) return habitIcons.reading;
-  if (lowerTitle.includes("water") || lowerTitle.includes("hydrate")) return habitIcons.water;
-  if (lowerTitle.includes("social") || lowerTitle.includes("phone")) return habitIcons["social-media"];
-  if (lowerTitle.includes("journal") || lowerTitle.includes("write")) return habitIcons.journaling;
-  if (lowerTitle.includes("sleep") || lowerTitle.includes("bed")) return habitIcons.sleep;
-  if (lowerTitle.includes("learn") || lowerTitle.includes("study")) return habitIcons.learning;
-  return habitIcons.default;
-}
+import { getHabitIcon } from "@/lib/habit-utils";
+import { getLocalToday } from "@/lib/date-utils";
 
 export function Dashboard() {
   const router = useRouter();
@@ -335,7 +312,7 @@ export function Dashboard() {
         isLoading={saveNoteMutation.isPending}
         onSave={(note) => {
           if (noteDialogHabitId && note) {
-            const today = new Date().toISOString().split("T")[0]!;
+            const today = getLocalToday();
             saveNoteMutation.mutate({ habitId: noteDialogHabitId, date: today, note });
           } else {
             setNoteDialogHabitId(null);

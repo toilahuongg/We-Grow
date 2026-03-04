@@ -22,7 +22,10 @@ export const notificationsRouter = {
 
       const existing = await PushSubscription.findOne({ endpoint: input.endpoint });
       if (existing) {
-        existing.userId = userId;
+        // Reject if subscription belongs to a different user
+        if (existing.userId !== userId) {
+          throw new Error("This push subscription is already registered to another user");
+        }
         existing.keys = input.keys;
         existing.updatedAt = now;
         await existing.save();

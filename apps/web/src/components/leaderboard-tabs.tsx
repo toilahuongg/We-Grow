@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Crown, Trophy, Users } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
@@ -33,9 +33,9 @@ export function LeaderboardTabs() {
 
   const [session, setSession] = useState<any>(null);
 
-  useState(() => {
-      authClient.getSession().then((res) => setSession(res.data ? res.data : null));
-  });
+  useEffect(() => {
+    authClient.getSession().then((res) => setSession(res.data ? res.data : null));
+  }, []);
 
   // Find user's rank on global leaderboard
   const userRank = session?.user?.id

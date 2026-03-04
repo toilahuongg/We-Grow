@@ -231,19 +231,7 @@
     "levelLabel": "Niveau {level}",
     "dayStreakLabel": "Série de {count} jours",
     "botIntegrations": "Intégrations Bot",
-    "botIntegrationsDesc": "Connectez des bots pour recevoir des notifications",
-    "telegram_notConfigured": "Le bot Telegram n'est pas configuré",
-    "telegram_notConnected": "Non connecté à un chat Telegram",
-    "telegram_connectInstructions": "Ajoutez le bot à un groupe Telegram et utilisez /connect <invite-code>",
-    "telegram_connectedTo": "Connecté à {chat}",
-    "telegram_disconnect": "Déconnecter",
-    "telegram_disconnected": "Telegram déconnecté",
-    "telegram_failedDisconnect": "Échec de la déconnexion",
-    "telegram_notifyActivities": "Notifier les activités",
-    "telegram_dailyReminder": "Rappel quotidien",
-    "telegram_reminderTime": "Heure (UTC)",
-    "telegram_settingsUpdated": "Paramètres Telegram mis à jour",
-    "telegram_failedUpdateSettings": "Échec de la mise à jour"
+    "botIntegrationsDesc": "Connectez des bots pour recevoir des notifications"
   },
   "habits": {
     "createHabit": "Créer une habitude",
@@ -386,19 +374,7 @@
     "language": "Langue",
     "languageDesc": "Choisissez votre langue préférée",
     "connectedAccounts": "Comptes connectés",
-    "connectedAccountsDesc": "Liez vos comptes de messagerie pour recevoir des notifications",
-    "telegram_title": "Telegram",
-    "telegram_notConfigured": "Le bot Telegram n'est pas configuré",
-    "telegram_linked": "Lié en tant que @{name}",
-    "telegram_notLinked": "Pas encore lié",
-    "telegram_unlink": "Délier",
-    "telegram_unlinked": "Telegram délié",
-    "telegram_failedUnlink": "Échec de la déconnexion Telegram",
-    "telegram_generateToken": "Générer un jeton",
-    "telegram_generating": "Génération...",
-    "telegram_failedGenerate": "Échec de la génération",
-    "telegram_telegramInstructions": "Envoyez /link JETON à @WeGrowBot sur Telegram",
-    "telegram_tokenExpiry": "Le jeton expire dans 10 minutes"
+    "connectedAccountsDesc": "Liez vos comptes de messagerie pour recevoir des notifications"
   },
   "leaderboard": {
     "title": "Classement",

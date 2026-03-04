@@ -19,4 +19,4 @@ const pushSubscriptionSchema = new Schema(
 
 pushSubscriptionSchema.index({ userId: 1 });
 
-export const PushSubscription = mongoose.models.PushSubscription || model("PushSubscription", pushSubscriptionSchema);
+export const PushSubscription = (mongoose.models.PushSubscription ?? model("PushSubscription", pushSubscriptionSchema)) as mongoose.Model<any>;

@@ -11,31 +11,7 @@ import { orpc, client } from "@/utils/orpc";
 import { EmptyState } from "@/components/empty-state";
 import { LevelUpModal } from "@/components/level-up-modal";
 import { toast } from "sonner";
-
-const habitIcons: Record<string, string> = {
-  meditation: "🧘",
-  exercise: "💪",
-  reading: "📚",
-  water: "💧",
-  "social-media": "📵",
-  journaling: "✍️",
-  sleep: "😴",
-  learning: "🎓",
-  default: "🌟",
-};
-
-function getHabitIcon(title: string): string {
-  const lower = title.toLowerCase();
-  if (lower.includes("meditation") || lower.includes("mindful")) return habitIcons.meditation;
-  if (lower.includes("exercise") || lower.includes("workout")) return habitIcons.exercise;
-  if (lower.includes("read") || lower.includes("book")) return habitIcons.reading;
-  if (lower.includes("water") || lower.includes("hydrate")) return habitIcons.water;
-  if (lower.includes("social") || lower.includes("phone")) return habitIcons["social-media"];
-  if (lower.includes("journal") || lower.includes("write")) return habitIcons.journaling;
-  if (lower.includes("sleep") || lower.includes("bed")) return habitIcons.sleep;
-  if (lower.includes("learn") || lower.includes("study")) return habitIcons.learning;
-  return habitIcons.default;
-}
+import { getHabitIcon } from "@/lib/habit-utils";
 
 export default function HabitsPage() {
   const router = useRouter();

@@ -5,7 +5,6 @@ import {
   GroupHabit,
   Habit,
   HabitCompletion,
-  TelegramLink,
 } from "@we-grow/db/models/index";
 import { generateId } from "@we-grow/db/utils/id";
 
@@ -16,10 +15,7 @@ import { requireGroupRole } from "../middlewares/group-auth";
 import { generateInviteCode } from "../lib/invite-code";
 import { getUserInfoMap } from "../lib/user-lookup";
 import { createActivity } from "../lib/activity";
-
-function getDateStr(date: Date): string {
-  return date.toISOString().split("T")[0]!;
-}
+import { getToday } from "../lib/date-utils";
 
 export const groupsRouter = {
   listMy: protectedProcedure.handler(async ({ context }) => {
@@ -58,8 +54,8 @@ export const groupsRouter = {
   create: protectedProcedure
     .input(
       z.object({
-        name: z.string().min(1),
-        description: z.string().optional(),
+        name: z.string().min(1).max(50),
+        description: z.string().max(500).optional(),
         mode: z.enum(["together", "share"]),
       }),
     )
@@ -100,8 +96,8 @@ export const groupsRouter = {
     .input(
       z.object({
         groupId: z.string(),
-        name: z.string().min(1).optional(),
-        description: z.string().optional(),
+        name: z.string().min(1).max(50).optional(),
+        description: z.string().max(500).optional(),
       }),
     )
     .handler(async ({ context, input }) => {
@@ -124,7 +120,6 @@ export const groupsRouter = {
       );
       await GroupMember.deleteMany({ groupId: input.groupId });
       await GroupHabit.deleteMany({ groupId: input.groupId });
-      await (TelegramLink as any).deleteMany({ groupId: input.groupId });
       await Group.deleteOne({ _id: input.groupId });
       return { success: true };
     }),
@@ -148,7 +143,7 @@ export const groupsRouter = {
   lookupByInviteCode: protectedProcedure
     .input(z.object({ inviteCode: z.string() }))
     .handler(async ({ input }) => {
-      const group = await Group.findOne({ inviteCode: input.inviteCode });
+      const group = await Group.findOne({ inviteCode: input.inviteCode.toUpperCase() });
       if (!group) return null;
 
       const memberCount = await GroupMember.countDocuments({
@@ -171,7 +166,7 @@ export const groupsRouter = {
       const userId = context.session.user.id;
       const now = new Date();
 
-      const group = await Group.findOne({ inviteCode: input.inviteCode });
+      const group = await Group.findOne({ inviteCode: input.inviteCode.toUpperCase() });
       if (!group) {
         throw new Error("Invalid invite code");
       }
@@ -263,9 +258,16 @@ export const groupsRouter = {
         throw new Error("Owner cannot leave the group. Transfer ownership or delete the group.");
       }
 
+      const now = new Date();
       await GroupMember.findOneAndUpdate(
         { groupId: input.groupId, userId },
-        { status: "removed", updatedAt: new Date() },
+        { status: "removed", updatedAt: now },
+      );
+
+      // Archive the member's group habits
+      await Habit.updateMany(
+        { userId, groupId: input.groupId },
+        { archived: true, updatedAt: now },
       );
 
       return { success: true };
@@ -342,8 +344,8 @@ export const groupsRouter = {
     .input(
       z.object({
         groupId: z.string(),
-        title: z.string().min(1),
-        description: z.string().optional(),
+        title: z.string().min(1).max(100),
+        description: z.string().max(500).optional(),
         frequency: z.enum(["daily", "weekly", "specific_days"]),
         targetDays: z.array(z.number().min(0).max(6)).optional(),
         weeklyTarget: z.number().min(1).max(7).optional(),
@@ -401,8 +403,8 @@ export const groupsRouter = {
     .input(
       z.object({
         groupHabitId: z.string(),
-        title: z.string().min(1).optional(),
-        description: z.string().optional(),
+        title: z.string().min(1).max(100).optional(),
+        description: z.string().max(500).optional(),
       }),
     )
     .handler(async ({ context, input }) => {
@@ -451,7 +453,7 @@ export const groupsRouter = {
     .input(z.object({ groupId: z.string(), date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional() }))
     .handler(async ({ context, input }) => {
       await requireGroupRole(context.session.user.id, input.groupId, ["owner", "moderator", "member"]);
-      const date = input.date ?? getDateStr(new Date());
+      const date = input.date ?? getToday(context.timezone);
 
       const members = await GroupMember.find({
         groupId: input.groupId,
@@ -460,26 +462,46 @@ export const groupsRouter = {
 
       const userInfoMap = await getUserInfoMap(members.map((m) => m.userId as string));
 
-      const progress = await Promise.all(
-        members.map(async (member) => {
-          const habits = await Habit.find({ userId: member.userId, groupId: input.groupId, archived: false });
-          const completions = await HabitCompletion.find({
-            userId: member.userId,
-            date,
-            habitId: { $in: habits.map((h) => h._id) },
-          });
+      const memberIds = members.map((m) => m.userId as string);
 
-          const info = userInfoMap.get(member.userId as string);
-          return {
-            userId: member.userId,
-            userName: info?.name ?? "Unknown",
-            userImage: info?.image ?? null,
-            role: member.role,
-            totalHabits: habits.length,
-            completedHabits: completions.length,
-          };
-        }),
-      );
+      // Bulk fetch habits and completions — avoids N+1 queries
+      const [allHabits, allCompletions] = await Promise.all([
+        Habit.find({ userId: { $in: memberIds }, groupId: input.groupId, archived: false }),
+        HabitCompletion.find({ userId: { $in: memberIds }, date }),
+      ]);
+
+      const habitsByUser = new Map<string, typeof allHabits>();
+      for (const h of allHabits) {
+        const uid = h.userId as string;
+        const list = habitsByUser.get(uid) ?? [];
+        list.push(h);
+        habitsByUser.set(uid, list);
+      }
+
+      const completionsByUser = new Map<string, Set<string>>();
+      for (const c of allCompletions) {
+        const uid = c.userId as string;
+        const set = completionsByUser.get(uid) ?? new Set();
+        set.add(c.habitId as string);
+        completionsByUser.set(uid, set);
+      }
+
+      const progress = members.map((member) => {
+        const uid = member.userId as string;
+        const habits = habitsByUser.get(uid) ?? [];
+        const completedSet = completionsByUser.get(uid) ?? new Set();
+        const completedCount = habits.filter((h) => completedSet.has(h._id as string)).length;
+
+        const info = userInfoMap.get(uid);
+        return {
+          userId: member.userId,
+          userName: info?.name ?? "Unknown",
+          userImage: info?.image ?? null,
+          role: member.role,
+          totalHabits: habits.length,
+          completedHabits: completedCount,
+        };
+      });
 
       return progress;
     }),

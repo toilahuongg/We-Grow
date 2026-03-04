@@ -2,28 +2,7 @@ import { z } from "zod";
 import { Habit, HabitCompletion, XpTransaction } from "@we-grow/db/models/index";
 
 import { protectedProcedure } from "../index";
-
-function getDateStr(date: Date): string {
-  return date.toISOString().split("T")[0]!;
-}
-
-function addDays(dateStr: string, days: number): string {
-  const d = new Date(dateStr + "T00:00:00Z");
-  d.setUTCDate(d.getUTCDate() + days);
-  return getDateStr(d);
-}
-
-function getDayOfWeek(dateStr: string): number {
-  return new Date(dateStr + "T00:00:00Z").getUTCDay();
-}
-
-function getWeekStart(dateStr: string): string {
-  const d = new Date(dateStr + "T00:00:00Z");
-  const day = d.getUTCDay();
-  const diff = day === 0 ? 6 : day - 1;
-  d.setUTCDate(d.getUTCDate() - diff);
-  return getDateStr(d);
-}
+import { getDateStr, getToday, addDays, getDayOfWeek, getWeekStart } from "../lib/date-utils";
 
 const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -43,9 +22,9 @@ export const analyticsRouter = {
       if (input.habitId) {
         habitFilter._id = input.habitId;
       }
-      const habits = await (Habit as any).find(habitFilter);
+      const habits = await Habit.find(habitFilter);
 
-      const completions = await (HabitCompletion as any).find({
+      const completions = await HabitCompletion.find({
         userId,
         date: { $gte: input.startDate, $lte: input.endDate },
         ...(input.habitId ? { habitId: input.habitId } : {}),
@@ -97,7 +76,7 @@ export const analyticsRouter = {
     )
     .handler(async ({ context, input }) => {
       const userId = context.session.user.id;
-      const today = getDateStr(new Date());
+      const today = getToday(context.timezone);
 
       let startDate: string;
       if (input.period === "week") {
@@ -108,8 +87,8 @@ export const analyticsRouter = {
         startDate = "2020-01-01";
       }
 
-      const habits = await (Habit as any).find({ userId, archived: false });
-      const completions = await (HabitCompletion as any).find({
+      const habits = await Habit.find({ userId, archived: false });
+      const completions = await HabitCompletion.find({
         userId,
         date: { $gte: startDate, $lte: today },
       });
@@ -120,26 +99,40 @@ export const analyticsRouter = {
         completionCounts.set(id, (completionCounts.get(id) ?? 0) + 1);
       }
 
-      // Calculate total possible days for each habit
-      const results = habits.map((habit: any) => {
+      // Calculate total possible days for each habit using arithmetic
+      const results = habits.map((habit) => {
         const totalCompletions = completionCounts.get(habit._id as string) ?? 0;
         const createdDate = getDateStr(new Date(habit.createdAt as unknown as string));
         const effectiveStart = createdDate > startDate ? createdDate : startDate;
 
-        let possibleDays = 0;
-        let d = effectiveStart;
-        while (d <= today) {
-          const dow = getDayOfWeek(d);
-          if (habit.frequency === "daily") {
-            possibleDays++;
-          } else if (habit.frequency === "weekly") {
-            possibleDays++;
-          } else if (habit.frequency === "specific_days") {
-            if ((habit.targetDays ?? []).includes(dow)) {
-              possibleDays++;
+        let possibleDays: number;
+
+        if (habit.frequency === "daily" || habit.frequency === "weekly") {
+          // Count calendar days between effectiveStart and today
+          const startMs = new Date(effectiveStart + "T00:00:00Z").getTime();
+          const endMs = new Date(today + "T00:00:00Z").getTime();
+          possibleDays = Math.max(0, Math.floor((endMs - startMs) / 86400000) + 1);
+        } else if (habit.frequency === "specific_days") {
+          const targetDays = habit.targetDays ?? [];
+          if (targetDays.length === 0) {
+            possibleDays = 0;
+          } else {
+            // Count specific days using arithmetic: full weeks * days_per_week + remaining
+            const startMs = new Date(effectiveStart + "T00:00:00Z").getTime();
+            const endMs = new Date(today + "T00:00:00Z").getTime();
+            const totalDays = Math.max(0, Math.floor((endMs - startMs) / 86400000) + 1);
+            const fullWeeks = Math.floor(totalDays / 7);
+            possibleDays = fullWeeks * targetDays.length;
+            // Count remaining days
+            const startDow = getDayOfWeek(effectiveStart);
+            for (let i = 0; i < totalDays % 7; i++) {
+              if (targetDays.includes((startDow + fullWeeks * 7 + i) % 7)) {
+                possibleDays++;
+              }
             }
           }
-          d = addDays(d, 1);
+        } else {
+          possibleDays = 0;
         }
 
         const rate = possibleDays > 0 ? Math.round((totalCompletions / possibleDays) * 100) : 0;
@@ -156,7 +149,7 @@ export const analyticsRouter = {
         };
       });
 
-      return results.sort((a: any, b: any) => b.completionRate - a.completionRate);
+      return results.sort((a, b) => b.completionRate - a.completionRate);
     }),
 
   weeklyReport: protectedProcedure
@@ -167,18 +160,18 @@ export const analyticsRouter = {
     )
     .handler(async ({ context, input }) => {
       const userId = context.session.user.id;
-      const today = getDateStr(new Date());
+      const today = getToday(context.timezone);
       const thisWeekStart = input?.weekStartDate ?? getWeekStart(today);
       const thisWeekEnd = addDays(thisWeekStart, 6);
       const lastWeekStart = addDays(thisWeekStart, -7);
       const lastWeekEnd = addDays(lastWeekStart, 6);
 
-      const habits = await (Habit as any).find({ userId, archived: false });
+      const habits = await Habit.find({ userId, archived: false });
 
       const [thisWeekCompletions, lastWeekCompletions, xpTransactions] = await Promise.all([
-        (HabitCompletion as any).find({ userId, date: { $gte: thisWeekStart, $lte: thisWeekEnd } }),
-        (HabitCompletion as any).find({ userId, date: { $gte: lastWeekStart, $lte: lastWeekEnd } }),
-        (XpTransaction as any).find({ userId, createdAt: { $gte: new Date(thisWeekStart + "T00:00:00Z"), $lte: new Date(thisWeekEnd + "T23:59:59Z") } }),
+        HabitCompletion.find({ userId, date: { $gte: thisWeekStart, $lte: thisWeekEnd } }),
+        HabitCompletion.find({ userId, date: { $gte: lastWeekStart, $lte: lastWeekEnd } }),
+        XpTransaction.find({ userId, createdAt: { $gte: new Date(thisWeekStart + "T00:00:00Z"), $lte: new Date(thisWeekEnd + "T23:59:59Z") } }),
       ]);
 
       const totalCompletions = thisWeekCompletions.length;
@@ -187,7 +180,7 @@ export const analyticsRouter = {
       // Calculate total possible
       let totalPossible = 0;
       const dailyCompletions = new Map<string, number>();
-      let totalDailyPossible = new Map<string, number>();
+      const totalDailyPossible = new Map<string, number>();
 
       for (let i = 0; i <= 6; i++) {
         const d = addDays(thisWeekStart, i);
@@ -229,7 +222,7 @@ export const analyticsRouter = {
       }
 
       const overallRate = totalPossible > 0 ? Math.round((totalCompletions / totalPossible) * 100) : 0;
-      const xpEarned = xpTransactions.reduce((sum: number, tx: any) => sum + ((tx.amount as number) ?? 0), 0);
+      const xpEarned = xpTransactions.reduce((sum: number, tx) => sum + ((tx.amount as number) ?? 0), 0);
       const changePercent = lastWeekTotal > 0
         ? Math.round(((totalCompletions - lastWeekTotal) / lastWeekTotal) * 100)
         : totalCompletions > 0 ? 100 : 0;
@@ -247,10 +240,10 @@ export const analyticsRouter = {
 
   streakOverview: protectedProcedure.handler(async ({ context }) => {
     const userId = context.session.user.id;
-    const today = getDateStr(new Date());
+    const today = getToday(context.timezone);
     const yesterday = addDays(today, -1);
 
-    const habits = await (Habit as any).find({ userId, archived: false });
+    const habits = await Habit.find({ userId, archived: false });
 
     let totalActiveStreaks = 0;
     let longestEver = 0;
