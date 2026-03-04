@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 
 import { orpc } from "@/utils/orpc";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { PWAInstallButton } from "@/components/pwa-install-button";
 
 export default function Home() {
   const healthCheck = useQuery(orpc.healthCheck.queryOptions());
@@ -14,9 +15,10 @@ export default function Home() {
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-mesh bg-grid-pattern">
-      {/* Language Switcher - Top Right */}
-      <div className="absolute top-4 right-4 z-50">
+      {/* Top Right Controls */}
+      <div className="absolute top-4 right-4 z-50 flex items-center gap-2">
         <LanguageSwitcher />
+        <PWAInstallButton />
       </div>
 
       {/* Floating Orbs */}

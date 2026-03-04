@@ -26,7 +26,7 @@ function Logo() {
           <path d="M252 228 C222 190 167 145 117 115 C132 175 197 228 250 235Z" />
         </svg>
       </div>
-      <span className="font-display text-lg font-bold">we-grow</span>
+      <span className="font-display text-lg font-bold">We Grow</span>
     </Link>
   );
 }

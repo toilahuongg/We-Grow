@@ -470,6 +470,13 @@
     "notNow": "Not now",
     "configError": "Push notifications not configured on server"
   },
+  "pwa": {
+    "installTitle": "Install App",
+    "installDescription": "Install We Grow on your device for faster access and a better experience.",
+    "installButton": "Install Now",
+    "notNow": "Not Now",
+    "installApp": "Install app"
+  },
   "analytics": {
     "title": "Analytics",
     "subtitle": "Track your progress and insights",

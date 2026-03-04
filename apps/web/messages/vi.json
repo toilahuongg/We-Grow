@@ -470,6 +470,13 @@
     "notNow": "Để sau",
     "configError": "Thông báo đẩy chưa được cấu hình trên server"
   },
+  "pwa": {
+    "installTitle": "Cài Đặt Ứng Dụng",
+    "installDescription": "Cài đặt We Grow lên thiết bị của bạn để truy cập nhanh hơn và trải nghiệm tốt hơn.",
+    "installButton": "Cài Đặt Ngay",
+    "notNow": "Để Sau",
+    "installApp": "Cài đặt ứng dụng"
+  },
   "analytics": {
     "title": "Phân Tích",
     "subtitle": "Theo dõi tiến trình và thông tin chi tiết",

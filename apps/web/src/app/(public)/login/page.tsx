@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import SignInForm from "@/components/sign-in-form";
 import SignUpForm from "@/components/sign-up-form";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { PWAInstallButton } from "@/components/pwa-install-button";
 
 export default function LoginPage() {
   const [showSignIn, setShowSignIn] = useState(false);
@@ -14,9 +15,10 @@ export default function LoginPage() {
 
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-gradient-mesh bg-grid-pattern">
-      {/* Language Switcher - Top Right */}
-      <div className="absolute top-4 right-4 z-50">
+      {/* Top Right Controls */}
+      <div className="absolute top-4 right-4 z-50 flex items-center gap-2">
         <LanguageSwitcher />
+        <PWAInstallButton />
       </div>
 
       {/* Floating Orbs */}
