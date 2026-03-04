@@ -27,7 +27,7 @@ const Dialog = React.forwardRef<
       <div
         ref={ref}
         className={cn(
-          "relative z-50 glass-strong rounded-2xl p-6 shadow-xl animate-in zoom-in-95 slide-in-from-left-1/2 slide-in-from-top-[48%] sm:max-w-lg w-full",
+          "relative z-50 rounded-2xl p-6 shadow-xl animate-in zoom-in-95 slide-in-from-left-1/2 slide-in-from-top-[48%] sm:max-w-lg w-full border border-border bg-background dark:glass-strong dark:bg-transparent dark:border-overlay-strong",
           className
         )}
         {...props}
