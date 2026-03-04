@@ -239,7 +239,7 @@
     "createSubtitle": "Construisez une nouvelle routine quotidienne",
     "editSubtitle": "Mettez à jour les paramètres de votre habitude",
     "title": "Titre *",
-    "titlePlaceholder": "ex. : Méditation matinale",
+    "titlePlaceholder": "ex. : Lecture matinale",
     "titleRequired": "Le titre est requis",
     "descriptionLabel": "Description",
     "descriptionPlaceholder": "Notes ou motivation (facultatif)",

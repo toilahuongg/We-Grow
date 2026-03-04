@@ -27,7 +27,6 @@ import { orpc, client } from "@/utils/orpc";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { LevelUpModal } from "@/components/level-up-modal";
-import { NoteDialog } from "@/components/note-dialog";
 import { Label } from "@/components/ui/label";
 import { EmptyState } from "@/components/empty-state";
 import { ActivityFeed } from "@/components/activity-feed";
@@ -67,7 +66,6 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
   const [editName, setEditName] = useState("");
   const [editDescription, setEditDescription] = useState("");
   const [levelUpLevel, setLevelUpLevel] = useState<number | null>(null);
-  const [noteDialogHabitId, setNoteDialogHabitId] = useState<string | null>(null);
 
   useState(() => {
     authClient.getSession().then((res) => setSession(res.data ? res.data : null));
@@ -110,7 +108,6 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
         if (result.leveledUp && result.newLevel) {
           setLevelUpLevel(result.newLevel);
         }
-        setNoteDialogHabitId(habitId);
       }
       queryClient.invalidateQueries({ queryKey: orpc.gamification.getProfile.queryKey() });
     },
@@ -120,14 +117,6 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
         context?.previousHabits
       );
       toast.error(t("failedComplete"));
-    },
-  });
-
-  const saveNoteMutation = useMutation({
-    mutationFn: (input: { habitId: string; date: string; note: string | null }) =>
-      client.habits.updateNote(input),
-    onSuccess: () => {
-      setNoteDialogHabitId(null);
     },
   });
 
@@ -862,21 +851,6 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
           setRemoveMemberTarget(null);
         }}
         isLoading={removeMemberMutation.isPending}
-      />
-
-      {/* Note Dialog */}
-      <NoteDialog
-        open={!!noteDialogHabitId}
-        onOpenChange={(open) => !open && setNoteDialogHabitId(null)}
-        isLoading={saveNoteMutation.isPending}
-        onSave={(note) => {
-          if (noteDialogHabitId && note) {
-            const today = getLocalToday();
-            saveNoteMutation.mutate({ habitId: noteDialogHabitId, date: today, note });
-          } else {
-            setNoteDialogHabitId(null);
-          }
-        }}
       />
 
       {/* Level Up Modal */}

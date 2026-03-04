@@ -239,7 +239,7 @@
     "createSubtitle": "Construye una nueva rutina diaria",
     "editSubtitle": "Actualiza la configuración de tu hábito",
     "title": "Título *",
-    "titlePlaceholder": "ej., Meditación Matutina",
+    "titlePlaceholder": "ej., Lectura matutina",
     "titleRequired": "El título es obligatorio",
     "descriptionLabel": "Descripción",
     "descriptionPlaceholder": "Notas opcionales o motivación",

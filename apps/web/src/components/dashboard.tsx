@@ -15,7 +15,6 @@ import { useTranslations, useLocale } from "next-intl";
 import { orpc, client } from "@/utils/orpc";
 import { LevelProgress } from "@/components/level-progress";
 import { LevelUpModal } from "@/components/level-up-modal";
-import { NoteDialog } from "@/components/note-dialog";
 import { PushNotificationPopup } from "@/components/push-notification-banner";
 import { getLevelInfo } from "@/lib/level-utils";
 import { toast } from "sonner";
@@ -28,7 +27,6 @@ export function Dashboard() {
   const t = useTranslations("dashboard");
   const locale = useLocale();
   const [levelUpLevel, setLevelUpLevel] = useState<number | null>(null);
-  const [noteDialogHabitId, setNoteDialogHabitId] = useState<string | null>(null);
 
   const { data: todayHabits, isLoading: habitsLoading } = useQuery({
     ...orpc.habits.todaySummary.queryOptions(),
@@ -62,7 +60,6 @@ export function Dashboard() {
         if (result.leveledUp && result.newLevel) {
           setLevelUpLevel(result.newLevel);
         }
-        setNoteDialogHabitId(habitId);
       }
       queryClient.invalidateQueries({ queryKey: orpc.gamification.getProfile.queryKey() });
     },
@@ -89,14 +86,6 @@ export function Dashboard() {
     onError: (_error, _variables, context) => {
       queryClient.setQueryData(orpc.habits.todaySummary.queryOptions().queryKey, context?.previous);
       toast.error(t("failedUncomplete"));
-    },
-  });
-
-  const saveNoteMutation = useMutation({
-    mutationFn: (input: { habitId: string; date: string; note: string | null }) =>
-      client.habits.updateNote(input),
-    onSuccess: () => {
-      setNoteDialogHabitId(null);
     },
   });
 
@@ -307,21 +296,6 @@ export function Dashboard() {
           </div>
         )}
       </div>
-
-      {/* Note Dialog */}
-      <NoteDialog
-        open={!!noteDialogHabitId}
-        onOpenChange={(open) => !open && setNoteDialogHabitId(null)}
-        isLoading={saveNoteMutation.isPending}
-        onSave={(note) => {
-          if (noteDialogHabitId && note) {
-            const today = getLocalToday();
-            saveNoteMutation.mutate({ habitId: noteDialogHabitId, date: today, note });
-          } else {
-            setNoteDialogHabitId(null);
-          }
-        }}
-      />
 
       {/* Level Up Modal */}
       <LevelUpModal level={levelUpLevel} onClose={() => setLevelUpLevel(null)} />
