@@ -6,7 +6,7 @@ export async function createContext(req: Request) {
     headers: req.headers,
   });
 
-  let timezone = "UTC";
+  let timezone = "Asia/Ho_Chi_Minh";
   if (session?.user?.id) {
     const profile = await UserProfile.findOne(
       { userId: session.user.id },

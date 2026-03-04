@@ -7,7 +7,7 @@ const userProfileSchema = new Schema(
     _id: { type: String },
     userId: { type: String, ref: "User", required: true, unique: true },
     bio: { type: String, default: "" },
-    timezone: { type: String, default: "UTC" },
+    timezone: { type: String, default: "Asia/Ho_Chi_Minh" },
     totalXp: { type: Number, default: 0 },
     level: { type: Number, default: 1 },
     createdAt: { type: Date, required: true },
