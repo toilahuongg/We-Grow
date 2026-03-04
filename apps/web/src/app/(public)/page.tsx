@@ -1,16 +1,13 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, Sparkles, TrendingUp, Users, Zap } from "lucide-react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 
-import { orpc } from "@/utils/orpc";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { PWAInstallButton } from "@/components/pwa-install-button";
 
 export default function Home() {
-  const healthCheck = useQuery(orpc.healthCheck.queryOptions());
   const t = useTranslations("landing");
 
   return (
@@ -84,33 +81,6 @@ export default function Home() {
             </Link>
           </div>
 
-          {/* API Status */}
-          <div className="glass mx-auto max-w-md rounded-2xl p-4 animate-slide-up" style={{ animationDelay: "450ms" }}>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div
-                  className={`h-3 w-3 rounded-full ${
-                    healthCheck.data
-                      ? "bg-[#4ecdc4] shadow-[0_0_12px_#4ecdc4]"
-                      : "bg-red-500 shadow-[0_0_12px_#ef4444]"
-                  } transition-all`}
-                />
-                <div className="text-left">
-                  <p className="text-sm font-semibold">{t("systemStatus")}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {healthCheck.isLoading
-                      ? t("connecting")
-                      : healthCheck.data
-                        ? t("allSystemsOperational")
-                        : t("connectionFailed")}
-                  </p>
-                </div>
-              </div>
-              <div className="text-right">
-                <p className="text-2xl font-bold gradient-text">v1.0</p>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
 

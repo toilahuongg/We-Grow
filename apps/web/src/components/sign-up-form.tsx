@@ -102,7 +102,7 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
             }
           );
         }}
-        className="group relative mb-6 flex w-full items-center justify-center gap-3 overflow-hidden rounded-2xl bg-overlay-subtle border border-overlay-medium py-3.5 px-4 font-medium text-white text-center transition-all hover:bg-overlay-medium hover:scale-[1.02] hover:border-overlay-strong"
+        className="group relative mb-6 flex w-full items-center justify-center gap-3 overflow-hidden rounded-2xl bg-overlay-subtle border border-overlay-medium py-3.5 px-4 font-medium text-foreground text-center transition-all hover:bg-overlay-medium hover:scale-[1.02] hover:border-overlay-strong"
       >
         <svg className="h-5 w-5" viewBox="0 0 24 24">
           <path
@@ -126,13 +126,10 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
       </button>
 
       {/* Divider */}
-      <div className="relative mb-6">
-        <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t border-overlay-medium" />
-        </div>
-        <div className="relative flex justify-center text-sm">
-          <span className="bg-background px-3 text-muted-foreground">{t("orContinueWithEmail")}</span>
-        </div>
+      <div className="mb-6 flex items-center gap-3">
+        <span className="h-px flex-1 bg-overlay-medium" />
+        <span className="text-sm text-muted-foreground">{t("orContinueWithEmail")}</span>
+        <span className="h-px flex-1 bg-overlay-medium" />
       </div>
 
       {/* Form */}
@@ -153,7 +150,7 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
                   id={field.name}
                   name={field.name}
                   placeholder="John Doe"
-                  className="h-12 rounded-xl border-overlay-medium bg-overlay-subtle focus:border-[#ff6b6b] focus:ring-[#ff6b6b]/20"
+                  className="h-12 rounded-xl border-border bg-background focus:border-[#ff6b6b] focus:ring-[#ff6b6b]/20"
                   value={field.state.value}
                   onBlur={field.handleBlur}
                   onChange={(e) => field.handleChange(e.target.value)}
@@ -178,7 +175,7 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
                   name={field.name}
                   type="email"
                   placeholder="you@example.com"
-                  className="h-12 rounded-xl border-overlay-medium bg-overlay-subtle focus:border-[#ff6b6b] focus:ring-[#ff6b6b]/20"
+                  className="h-12 rounded-xl border-border bg-background focus:border-[#ff6b6b] focus:ring-[#ff6b6b]/20"
                   value={field.state.value}
                   onBlur={field.handleBlur}
                   onChange={(e) => field.handleChange(e.target.value)}
@@ -203,7 +200,7 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
                   name={field.name}
                   type="password"
                   placeholder="••••••••"
-                  className="h-12 rounded-xl border-overlay-medium bg-overlay-subtle focus:border-[#ff6b6b] focus:ring-[#ff6b6b]/20"
+                  className="h-12 rounded-xl border-border bg-background focus:border-[#ff6b6b] focus:ring-[#ff6b6b]/20"
                   value={field.state.value}
                   onBlur={field.handleBlur}
                   onChange={(e) => field.handleChange(e.target.value)}
