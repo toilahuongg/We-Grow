@@ -17,7 +17,6 @@ import { LevelProgress } from "@/components/level-progress";
 import { LevelUpModal } from "@/components/level-up-modal";
 import { NoteDialog } from "@/components/note-dialog";
 import { PushNotificationPopup } from "@/components/push-notification-banner";
-import { PWAInstallButton } from "@/components/pwa-install-button";
 import { getLevelInfo } from "@/lib/level-utils";
 import { toast } from "sonner";
 import { getHabitIcon } from "@/lib/habit-utils";
@@ -124,7 +123,6 @@ export function Dashboard() {
       </div>
 
       <PushNotificationPopup />
-      <PWAInstallButton />
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Today's Progress */}

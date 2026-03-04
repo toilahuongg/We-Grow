@@ -12,6 +12,7 @@ import { authClient } from "@/lib/auth-client";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { ModeToggle } from "@/components/mode-toggle";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { PWAInstallButton } from "@/components/pwa-install-button";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
@@ -181,6 +182,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
           <div className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground">
             <ModeToggle />
             <LanguageSwitcher />
+            <PWAInstallButton />
             <span>{t("theme")}</span>
           </div>
         </div>
