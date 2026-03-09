@@ -43,6 +43,7 @@ export function GroupHabitForm({ groupId }: GroupHabitFormProps) {
     frequency: z.enum(["daily", "weekly", "specific_days"]),
     targetDays: z.array(z.number()).optional(),
     weeklyTarget: z.number().min(1).max(7).optional(),
+    targetPerDay: z.number().min(1).max(100),
   }).refine(
     (data) => {
       if (data.frequency === "specific_days") {
@@ -91,6 +92,7 @@ export function GroupHabitForm({ groupId }: GroupHabitFormProps) {
       frequency: "daily" as "daily" | "weekly" | "specific_days",
       targetDays: [] as number[],
       weeklyTarget: 1,
+      targetPerDay: 1,
     },
     onSubmit: async ({ value }) => {
       createMutation.mutate({
@@ -100,6 +102,7 @@ export function GroupHabitForm({ groupId }: GroupHabitFormProps) {
         frequency: value.frequency,
         targetDays: value.targetDays,
         weeklyTarget: value.weeklyTarget,
+        targetPerDay: value.targetPerDay,
       });
     },
     validators: {
@@ -290,6 +293,32 @@ export function GroupHabitForm({ groupId }: GroupHabitFormProps) {
                 </form.Field>
               )
             }
+          </form.Field>
+
+          {/* Target Per Day (Always visible) */}
+          <form.Field name="targetPerDay">
+            {(field) => (
+              <div className="space-y-2">
+                <Label htmlFor={field.name}>{t("targetPerDay")}</Label>
+                <div className="flex items-center gap-4">
+                  <Input
+                    id={field.name}
+                    name={field.name}
+                    type="number"
+                    min="1"
+                    max="100"
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    onChange={(e) => field.handleChange(Number(e.target.value))}
+                    className="w-20"
+                  />
+                  <span className="text-sm text-muted-foreground">{t("timesPerDay")}</span>
+                </div>
+                {field.state.meta.errors.length > 0 && (
+                  <p className="text-sm text-red-500">{field.state.meta.errors[0]}</p>
+                )}
+              </div>
+            )}
           </form.Field>
 
           {/* Reminder */}

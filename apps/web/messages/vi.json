@@ -250,6 +250,8 @@
     "selectDays": "Chọn Ngày *",
     "weeklyTarget": "Mục Tiêu Hàng Tuần *",
     "timesPerWeek": "lần mỗi tuần",
+    "targetPerDay": "Số lần mỗi ngày",
+    "timesPerDay": "lần/ngày",
     "fillRequired": "Vui lòng điền tất cả các trường bắt buộc",
     "createButton": "Tạo Thói Quen",
     "updateButton": "Cập Nhật Thói Quen",

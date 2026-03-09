@@ -33,7 +33,7 @@ export const analyticsRouter = {
       const completionsByDate = new Map<string, number>();
       for (const c of completions) {
         const d = c.date as string;
-        completionsByDate.set(d, (completionsByDate.get(d) ?? 0) + 1);
+        completionsByDate.set(d, (completionsByDate.get(d) ?? 0) + (c.completedCount ?? 1));
       }
 
       const results: Array<{ date: string; dueCount: number; completedCount: number; rate: number }> = [];
@@ -42,14 +42,18 @@ export const analyticsRouter = {
       while (currentDate <= input.endDate) {
         const dow = getDayOfWeek(currentDate);
         let dueCount = 0;
+        let targetCount = 0;
         for (const habit of habits) {
           if (habit.frequency === "daily") {
             dueCount++;
+            targetCount += habit.targetPerDay ?? 1;
           } else if (habit.frequency === "weekly") {
             dueCount++;
+            targetCount += habit.targetPerDay ?? 1;
           } else if (habit.frequency === "specific_days") {
             if ((habit.targetDays ?? []).includes(dow)) {
               dueCount++;
+              targetCount += habit.targetPerDay ?? 1;
             }
           }
         }
@@ -58,8 +62,8 @@ export const analyticsRouter = {
         results.push({
           date: currentDate,
           dueCount,
-          completedCount: Math.min(completedCount, dueCount),
-          rate: dueCount > 0 ? Math.round((Math.min(completedCount, dueCount) / dueCount) * 100) : 0,
+          completedCount,
+          rate: targetCount > 0 ? Math.round((completedCount / targetCount) * 100) : 0,
         });
 
         currentDate = addDays(currentDate, 1);
@@ -96,7 +100,7 @@ export const analyticsRouter = {
       const completionCounts = new Map<string, number>();
       for (const c of completions) {
         const id = c.habitId as string;
-        completionCounts.set(id, (completionCounts.get(id) ?? 0) + 1);
+        completionCounts.set(id, (completionCounts.get(id) ?? 0) + (c.completedCount ?? 1));
       }
 
       // Calculate total possible days for each habit using arithmetic
@@ -104,6 +108,7 @@ export const analyticsRouter = {
         const totalCompletions = completionCounts.get(habit._id as string) ?? 0;
         const createdDate = getDateStr(new Date(habit.createdAt as unknown as string));
         const effectiveStart = createdDate > startDate ? createdDate : startDate;
+        const targetPerDay = habit.targetPerDay ?? 1;
 
         let possibleDays: number;
 
@@ -135,7 +140,8 @@ export const analyticsRouter = {
           possibleDays = 0;
         }
 
-        const rate = possibleDays > 0 ? Math.round((totalCompletions / possibleDays) * 100) : 0;
+        const possibleTargets = possibleDays * targetPerDay;
+        const rate = possibleTargets > 0 ? Math.round((totalCompletions / possibleTargets) * 100) : 0;
 
         return {
           habitId: habit._id as string,
@@ -174,34 +180,34 @@ export const analyticsRouter = {
         XpTransaction.find({ userId, createdAt: { $gte: new Date(thisWeekStart + "T00:00:00Z"), $lte: new Date(thisWeekEnd + "T23:59:59Z") } }),
       ]);
 
-      const totalCompletions = thisWeekCompletions.length;
-      const lastWeekTotal = lastWeekCompletions.length;
+      const totalCompletions = thisWeekCompletions.reduce((sum, c) => sum + (c.completedCount ?? 1), 0);
+      const lastWeekTotal = lastWeekCompletions.reduce((sum, c) => sum + (c.completedCount ?? 1), 0);
 
       // Calculate total possible
-      let totalPossible = 0;
+      let totalPossibleTargets = 0;
       const dailyCompletions = new Map<string, number>();
-      const totalDailyPossible = new Map<string, number>();
+      const totalDailyTargets = new Map<string, number>();
 
       for (let i = 0; i <= 6; i++) {
         const d = addDays(thisWeekStart, i);
         if (d > today) break;
         const dow = getDayOfWeek(d);
-        let dueCount = 0;
+        let targetCount = 0;
         for (const habit of habits) {
-          if (habit.frequency === "daily") dueCount++;
-          else if (habit.frequency === "weekly") dueCount++;
+          if (habit.frequency === "daily") targetCount += habit.targetPerDay ?? 1;
+          else if (habit.frequency === "weekly") targetCount += habit.targetPerDay ?? 1;
           else if (habit.frequency === "specific_days") {
-            if ((habit.targetDays ?? []).includes(dow)) dueCount++;
+            if ((habit.targetDays ?? []).includes(dow)) targetCount += habit.targetPerDay ?? 1;
           }
         }
-        totalPossible += dueCount;
-        totalDailyPossible.set(d, dueCount);
+        totalPossibleTargets += targetCount;
+        totalDailyTargets.set(d, targetCount);
       }
 
       // Count completions per day
       for (const c of thisWeekCompletions) {
         const d = c.date as string;
-        dailyCompletions.set(d, (dailyCompletions.get(d) ?? 0) + 1);
+        dailyCompletions.set(d, (dailyCompletions.get(d) ?? 0) + (c.completedCount ?? 1));
       }
 
       // Find best and worst days
@@ -211,17 +217,19 @@ export const analyticsRouter = {
         const d = addDays(thisWeekStart, i);
         if (d > today) break;
         const count = dailyCompletions.get(d) ?? 0;
-        const possible = totalDailyPossible.get(d) ?? 0;
-        const rate = possible > 0 ? count / possible : 0;
-        if (rate > bestDay.count / Math.max(1, totalDailyPossible.get(bestDay.date) ?? 1) || bestDay.date === "") {
+        const target = totalDailyTargets.get(d) ?? 1;
+        const rate = count / target;
+        const bestRate = bestDay.date !== "" ? (dailyCompletions.get(bestDay.date) ?? 0) / Math.max(1, totalDailyTargets.get(bestDay.date) ?? 1) : -1;
+        const worstRate = worstDay.date !== "" ? (dailyCompletions.get(worstDay.date) ?? 0) / Math.max(1, totalDailyTargets.get(worstDay.date) ?? 1) : Infinity;
+        if (rate > bestRate || bestDay.date === "") {
           bestDay = { date: d, count };
         }
-        if (rate < worstDay.count / Math.max(1, totalDailyPossible.get(worstDay.date) ?? 1) || worstDay.date === "") {
+        if (rate < worstRate || worstDay.date === "") {
           worstDay = { date: d, count };
         }
       }
 
-      const overallRate = totalPossible > 0 ? Math.round((totalCompletions / totalPossible) * 100) : 0;
+      const overallRate = totalPossibleTargets > 0 ? Math.round((totalCompletions / totalPossibleTargets) * 100) : 0;
       const xpEarned = xpTransactions.reduce((sum: number, tx) => sum + ((tx.amount as number) ?? 0), 0);
       const changePercent = lastWeekTotal > 0
         ? Math.round(((totalCompletions - lastWeekTotal) / lastWeekTotal) * 100)
@@ -229,7 +237,7 @@ export const analyticsRouter = {
 
       return {
         totalCompletions,
-        totalPossible,
+        totalPossible: totalPossibleTargets,
         overallRate,
         xpEarned,
         bestDay: bestDay.date ? DAY_NAMES[getDayOfWeek(bestDay.date)] : null,

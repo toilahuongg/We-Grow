@@ -250,6 +250,8 @@
     "selectDays": "Sélectionner les jours *",
     "weeklyTarget": "Objectif hebdomadaire *",
     "timesPerWeek": "fois par semaine",
+    "targetPerDay": "Objectif par jour",
+    "timesPerDay": "fois/jour",
     "fillRequired": "Veuillez remplir tous les champs obligatoires",
     "createButton": "Créer l'habitude",
     "updateButton": "Mettre à jour l'habitude",

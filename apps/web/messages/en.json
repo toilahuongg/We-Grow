@@ -250,6 +250,8 @@
     "selectDays": "Select Days *",
     "weeklyTarget": "Weekly Target *",
     "timesPerWeek": "times per week",
+    "targetPerDay": "Target Per Day",
+    "timesPerDay": "times/day",
     "fillRequired": "Please fill all required fields",
     "createButton": "Create Habit",
     "updateButton": "Update Habit",
@@ -295,6 +297,9 @@
     "habitDeleted": "Habit deleted",
     "xpAwarded": "+{amount} XP! ✨",
     "dayStreak": "day streak",
+    "todayProgress": "Today's Progress",
+    "markCompleteWithCount": "Mark Complete ({current}/{target})",
+    "targetPerDayLabel": "Target per day",
     "reminder": "Reminder",
     "noReminder": "No reminder set"
   },

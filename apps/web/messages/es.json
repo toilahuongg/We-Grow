@@ -250,6 +250,8 @@
     "selectDays": "Seleccionar Días *",
     "weeklyTarget": "Meta Semanal *",
     "timesPerWeek": "veces por semana",
+    "targetPerDay": "Veces por día",
+    "timesPerDay": "veces/día",
     "fillRequired": "Por favor completa todos los campos obligatorios",
     "createButton": "Crear Hábito",
     "updateButton": "Actualizar Hábito",

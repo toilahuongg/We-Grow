@@ -68,7 +68,7 @@ export function HabitForm({ habit, isEditing = false, groupId }: HabitFormProps)
     frequency: z.enum(["daily", "weekly", "specific_days"]),
     targetDays: z.array(z.number()).optional(),
     weeklyTarget: z.number().min(1).max(7).optional(),
-    targetPerDay: z.number().min(1).max(100).optional(),
+    targetPerDay: z.number().min(1).max(100),
   }).refine(
     (data) => {
       if (data.frequency === "specific_days") {
@@ -202,252 +202,248 @@ export function HabitForm({ habit, isEditing = false, groupId }: HabitFormProps)
         className="glass-strong rounded-2xl p-6 space-y-6"
         id="habit-form"
       >
-          {/* Title */}
-          <form.Field name="title">
-            {(field) => (
-              <div className="space-y-2">
-                <Label htmlFor={field.name}>{t("title")}</Label>
-                <Input
-                  id={field.name}
-                  name={field.name}
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  placeholder={t("titlePlaceholder")}
-                />
-                {field.state.meta.errors.map((error) => (
-                  <p key={error?.message} className="text-sm text-red-500">
-                    {error?.message}
-                  </p>
+        {/* Title */}
+        <form.Field name="title">
+          {(field) => (
+            <div className="space-y-2">
+              <Label htmlFor={field.name}>{t("title")}</Label>
+              <Input
+                id={field.name}
+                name={field.name}
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={(e) => field.handleChange(e.target.value)}
+                placeholder={t("titlePlaceholder")}
+              />
+              {field.state.meta.errors.map((error) => (
+                <p key={error?.message} className="text-sm text-red-500">
+                  {error?.message}
+                </p>
+              ))}
+            </div>
+          )}
+        </form.Field>
+
+        {/* Description */}
+        <form.Field name="description">
+          {(field) => (
+            <div className="space-y-2">
+              <Label htmlFor={field.name}>{t("descriptionLabel")}</Label>
+              <Input
+                id={field.name}
+                name={field.name}
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={(e) => field.handleChange(e.target.value)}
+                placeholder={t("descriptionPlaceholder")}
+              />
+            </div>
+          )}
+        </form.Field>
+
+        {/* Frequency */}
+        <form.Field name="frequency">
+          {(field) => (
+            <div className="space-y-2">
+              <Label htmlFor={field.name}>{t("frequency")}</Label>
+              <div className="grid grid-cols-3 gap-2">
+                {(["daily", "weekly", "specific_days"] as const).map((freq) => (
+                  <label
+                    key={freq}
+                    className={`cursor-pointer rounded-lg border p-3 text-center transition-all ${field.state.value === freq
+                      ? "border-[#4ecdc4] bg-[#4ecdc4]/10"
+                      : "border-overlay-medium bg-overlay-subtle hover:border-overlay-strong"
+                      }`}
+                  >
+                    <input
+                      type="radio"
+                      name={field.name}
+                      value={freq}
+                      checked={field.state.value === freq}
+                      onChange={(e) => field.handleChange(e.target.value as any)}
+                      className="sr-only"
+                    />
+                    <span className="block text-sm font-medium">{frequencyLabels[freq]}</span>
+                  </label>
                 ))}
               </div>
-            )}
-          </form.Field>
+            </div>
+          )}
+        </form.Field>
 
-          {/* Description */}
-          <form.Field name="description">
-            {(field) => (
-              <div className="space-y-2">
-                <Label htmlFor={field.name}>{t("descriptionLabel")}</Label>
+        {/* Target Days (for specific_days frequency) */}
+        <form.Field name="frequency" mode="value">
+          {(field) =>
+            field.state.value === "specific_days" && (
+              <form.Field name="targetDays">
+                {(targetDaysField) => (
+                  <div className="space-y-2">
+                    <Label>{t("selectDays")}</Label>
+                    <div className="grid grid-cols-7 gap-2">
+                      {DAYS.map((day, index) => (
+                        <label
+                          key={day}
+                          className={`cursor-pointer rounded-lg border p-2 text-center transition-all ${(targetDaysField.state.value as number[])?.includes(index)
+                            ? "border-[#4ecdc4] bg-[#4ecdc4]/10"
+                            : "border-overlay-medium bg-overlay-subtle hover:border-overlay-strong"
+                            }`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={(targetDaysField.state.value as number[])?.includes(index)}
+                            onChange={(e) => {
+                              const current = targetDaysField.state.value as number[];
+                              if (e.target.checked) {
+                                targetDaysField.handleChange([...current, index]);
+                              } else {
+                                targetDaysField.handleChange(current.filter((d) => d !== index));
+                              }
+                            }}
+                            className="sr-only"
+                          />
+                          <span className="block text-xs font-medium">{day}</span>
+                        </label>
+                      ))}
+                    </div>
+                    {targetDaysField.state.meta.errors.length > 0 && (
+                      <p className="text-sm text-red-500">{targetDaysField.state.meta.errors[0]}</p>
+                    )}
+                  </div>
+                )}
+              </form.Field>
+            )
+          }
+        </form.Field>
+
+        {/* Weekly Target (for weekly frequency) */}
+        <form.Field name="frequency" mode="value">
+          {(field) =>
+            field.state.value === "weekly" && (
+              <form.Field name="weeklyTarget">
+                {(weeklyTargetField) => (
+                  <div className="space-y-2">
+                    <Label htmlFor={weeklyTargetField.name}>{t("weeklyTarget")}</Label>
+                    <div className="flex items-center gap-4">
+                      <Input
+                        id={weeklyTargetField.name}
+                        name={weeklyTargetField.name}
+                        type="number"
+                        min="1"
+                        max="7"
+                        value={weeklyTargetField.state.value}
+                        onBlur={weeklyTargetField.handleBlur}
+                        onChange={(e) => weeklyTargetField.handleChange(Number(e.target.value))}
+                        className="w-20"
+                      />
+                      <span className="text-sm text-muted-foreground">{t("timesPerWeek")}</span>
+                    </div>
+                    {weeklyTargetField.state.meta.errors.length > 0 && (
+                      <p className="text-sm text-red-500">{weeklyTargetField.state.meta.errors[0]}</p>
+                    )}
+                  </div>
+                )}
+              </form.Field>
+            )
+          }
+        </form.Field>
+        {/* Target Per Day (Always visible) */}
+        <form.Field name="targetPerDay">
+          {(field) => (
+            <div className="space-y-2">
+              <Label htmlFor={field.name}>{t("targetPerDay")}</Label>
+              <div className="flex items-center gap-4">
                 <Input
                   id={field.name}
                   name={field.name}
+                  type="number"
+                  min="1"
+                  max="100"
                   value={field.state.value}
                   onBlur={field.handleBlur}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  placeholder={t("descriptionPlaceholder")}
+                  onChange={(e) => field.handleChange(Number(e.target.value))}
+                  className="w-20"
                 />
+                <span className="text-sm text-muted-foreground">{t("timesPerDay")}</span>
               </div>
-            )}
-          </form.Field>
-
-          {/* Frequency */}
-          <form.Field name="frequency">
-            {(field) => (
-              <div className="space-y-2">
-                <Label htmlFor={field.name}>{t("frequency")}</Label>
-                <div className="grid grid-cols-3 gap-2">
-                  {(["daily", "weekly", "specific_days"] as const).map((freq) => (
-                    <label
-                      key={freq}
-                      className={`cursor-pointer rounded-lg border p-3 text-center transition-all ${
-                        field.state.value === freq
-                          ? "border-[#4ecdc4] bg-[#4ecdc4]/10"
-                          : "border-overlay-medium bg-overlay-subtle hover:border-overlay-strong"
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name={field.name}
-                        value={freq}
-                        checked={field.state.value === freq}
-                        onChange={(e) => field.handleChange(e.target.value as any)}
-                        className="sr-only"
-                      />
-                      <span className="block text-sm font-medium">{frequencyLabels[freq]}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            )}
-          </form.Field>
-
-          {/* Target Days (for specific_days frequency) */}
-          <form.Field name="frequency" mode="value">
-            {(field) =>
-              field.state.value === "specific_days" && (
-                <form.Field name="targetDays">
-                  {(targetDaysField) => (
-                    <div className="space-y-2">
-                      <Label>{t("selectDays")}</Label>
-                      <div className="grid grid-cols-7 gap-2">
-                        {DAYS.map((day, index) => (
-                          <label
-                            key={day}
-                            className={`cursor-pointer rounded-lg border p-2 text-center transition-all ${
-                              (targetDaysField.state.value as number[])?.includes(index)
-                                ? "border-[#4ecdc4] bg-[#4ecdc4]/10"
-                                : "border-overlay-medium bg-overlay-subtle hover:border-overlay-strong"
-                            }`}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={(targetDaysField.state.value as number[])?.includes(index)}
-                              onChange={(e) => {
-                                const current = targetDaysField.state.value as number[];
-                                if (e.target.checked) {
-                                  targetDaysField.handleChange([...current, index]);
-                                } else {
-                                  targetDaysField.handleChange(current.filter((d) => d !== index));
-                                }
-                              }}
-                              className="sr-only"
-                            />
-                            <span className="block text-xs font-medium">{day}</span>
-                          </label>
-                        ))}
-                      </div>
-                      {targetDaysField.state.meta.errors.length > 0 && (
-                        <p className="text-sm text-red-500">{targetDaysField.state.meta.errors[0]}</p>
-                      )}
-                    </div>
-                  )}
-                </form.Field>
-              )
-            }
-          </form.Field>
-
-          {/* Weekly Target (for weekly frequency) */}
-          <form.Field name="frequency" mode="value">
-            {(field) =>
-              field.state.value === "weekly" && (
-                <form.Field name="weeklyTarget">
-                  {(weeklyTargetField) => (
-                    <div className="space-y-2">
-                      <Label htmlFor={weeklyTargetField.name}>{t("weeklyTarget")}</Label>
-                      <div className="flex items-center gap-4">
-                        <Input
-                          id={weeklyTargetField.name}
-                          name={weeklyTargetField.name}
-                          type="number"
-                          min="1"
-                          max="7"
-                          value={weeklyTargetField.state.value}
-                          onBlur={weeklyTargetField.handleBlur}
-                          onChange={(e) => weeklyTargetField.handleChange(Number(e.target.value))}
-                          className="w-20"
-                        />
-                        <span className="text-sm text-muted-foreground">{t("timesPerWeek")}</span>
-                      </div>
-                      {weeklyTargetField.state.meta.errors.length > 0 && (
-                        <p className="text-sm text-red-500">{weeklyTargetField.state.meta.errors[0]}</p>
-                      )}
-                    </div>
-                  )}
-                </form.Field>
-              )
-            }
-          </form.Field>
-
-          {/* Target Per Day (Always visible) */}
-          <form.Field name="targetPerDay">
-            {(field) => (
-              <div className="space-y-2">
-                <Label htmlFor={field.name}>Số lần mỗi ngày (Target per day)</Label>
-                <div className="flex items-center gap-4">
-                  <Input
-                    id={field.name}
-                    name={field.name}
-                    type="number"
-                    min="1"
-                    max="100"
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(Number(e.target.value))}
-                    className="w-20"
-                  />
-                  <span className="text-sm text-muted-foreground">lần/ngày</span>
-                </div>
-                {field.state.meta.errors.length > 0 && (
-                  <p className="text-sm text-red-500">{field.state.meta.errors[0]}</p>
-                )}
-              </div>
-            )}
-          </form.Field>
-
-          {/* Reminder */}
-          <div className="space-y-2">
-            <Label>{t("reminder")}</Label>
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={() => setReminderEnabled(!reminderEnabled)}
-                className={`flex h-10 items-center gap-2 rounded-lg border px-4 transition-all ${
-                  reminderEnabled
-                    ? "border-[#4ecdc4] bg-[#4ecdc4]/10 text-[#4ecdc4]"
-                    : "border-overlay-medium bg-overlay-subtle text-muted-foreground hover:border-overlay-strong"
-                }`}
-              >
-                {reminderEnabled ? <Bell className="h-4 w-4" /> : <BellOff className="h-4 w-4" />}
-                <span className="text-sm font-medium">
-                  {reminderEnabled ? t("reminder") : t("reminder")}
-                </span>
-              </button>
-              {reminderEnabled && (
-                <div className="flex items-center gap-1">
-                  <select
-                    value={reminderTime.split(":")[0]}
-                    onChange={(e) => {
-                      const mins = reminderTime.split(":")[1] ?? "00";
-                      setReminderTime(`${e.target.value}:${mins}`);
-                    }}
-                    className="h-10 rounded-lg border border-overlay-medium bg-overlay-subtle px-2 text-sm text-foreground"
-                  >
-                    {Array.from({ length: 24 }, (_, i) => (
-                      <option key={i} value={String(i).padStart(2, "0")}>
-                        {String(i).padStart(2, "0")}
-                      </option>
-                    ))}
-                  </select>
-                  <span className="text-muted-foreground">:</span>
-                  <select
-                    value={reminderTime.split(":")[1] ?? "00"}
-                    onChange={(e) => {
-                      const hrs = reminderTime.split(":")[0] ?? "09";
-                      setReminderTime(`${hrs}:${e.target.value}`);
-                    }}
-                    className="h-10 rounded-lg border border-overlay-medium bg-overlay-subtle px-2 text-sm text-foreground"
-                  >
-                    {Array.from({ length: 60 }, (_, i) => (
-                      <option key={i} value={String(i).padStart(2, "0")}>
-                        {String(i).padStart(2, "0")}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+              {field.state.meta.errors.length > 0 && (
+                <p className="text-sm text-red-500">{field.state.meta.errors[0]}</p>
               )}
             </div>
-          </div>
+          )}
+        </form.Field>
 
-          {/* Submit Button */}
-          <div className="flex justify-end gap-2 pt-4">
-            <Link href={groupId ? `/groups/${groupId}` : "/habits"}>
-              <Button type="button" variant="outline">
-                {tc("cancel")}
-              </Button>
-            </Link>
-            <Button
-              type="submit"
-              className="bg-gradient-to-r from-[#ff6b6b] via-[#ffa06b] to-[#4ecdc4] text-white"
-              disabled={createMutation.isPending || updateMutation.isPending}
+        {/* Reminder */}
+        <div className="space-y-2">
+          <Label>{t("reminder")}</Label>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setReminderEnabled(!reminderEnabled)}
+              className={`flex h-10 items-center gap-2 rounded-lg border px-4 transition-all ${reminderEnabled
+                ? "border-[#4ecdc4] bg-[#4ecdc4]/10 text-[#4ecdc4]"
+                : "border-overlay-medium bg-overlay-subtle text-muted-foreground hover:border-overlay-strong"
+                }`}
             >
-              {createMutation.isPending || updateMutation.isPending
-                ? tc("saving")
-                : isEditing
+              {reminderEnabled ? <Bell className="h-4 w-4" /> : <BellOff className="h-4 w-4" />}
+              <span className="text-sm font-medium">
+                {reminderEnabled ? t("reminder") : t("reminder")}
+              </span>
+            </button>
+            {reminderEnabled && (
+              <div className="flex items-center gap-1">
+                <select
+                  value={reminderTime.split(":")[0]}
+                  onChange={(e) => {
+                    const mins = reminderTime.split(":")[1] ?? "00";
+                    setReminderTime(`${e.target.value}:${mins}`);
+                  }}
+                  className="h-10 rounded-lg border border-overlay-medium bg-overlay-subtle px-2 text-sm text-foreground"
+                >
+                  {Array.from({ length: 24 }, (_, i) => (
+                    <option key={i} value={String(i).padStart(2, "0")}>
+                      {String(i).padStart(2, "0")}
+                    </option>
+                  ))}
+                </select>
+                <span className="text-muted-foreground">:</span>
+                <select
+                  value={reminderTime.split(":")[1] ?? "00"}
+                  onChange={(e) => {
+                    const hrs = reminderTime.split(":")[0] ?? "09";
+                    setReminderTime(`${hrs}:${e.target.value}`);
+                  }}
+                  className="h-10 rounded-lg border border-overlay-medium bg-overlay-subtle px-2 text-sm text-foreground"
+                >
+                  {Array.from({ length: 60 }, (_, i) => (
+                    <option key={i} value={String(i).padStart(2, "0")}>
+                      {String(i).padStart(2, "0")}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Submit Button */}
+        <div className="flex justify-end gap-2 pt-4">
+          <Link href={groupId ? `/groups/${groupId}` : "/habits"}>
+            <Button type="button" variant="outline">
+              {tc("cancel")}
+            </Button>
+          </Link>
+          <Button
+            type="submit"
+            className="bg-gradient-to-r from-[#ff6b6b] via-[#ffa06b] to-[#4ecdc4] text-white"
+            disabled={createMutation.isPending || updateMutation.isPending}
+          >
+            {createMutation.isPending || updateMutation.isPending
+              ? tc("saving")
+              : isEditing
                 ? t("updateButton")
                 : t("createButton")}
-            </Button>
-          </div>
+          </Button>
+        </div>
       </form>
     </div>
   );

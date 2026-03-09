@@ -173,13 +173,22 @@ async function checkAllHabitsBonus(userId: string, date: string) {
   const activeHabits = await Habit.find({ userId, archived: false, frequency: "daily" });
   if (activeHabits.length === 0) return;
 
-  const completedCount = await HabitCompletion.countDocuments({
+  const completions = await HabitCompletion.find({
     userId,
     date,
     habitId: { $in: activeHabits.map((h) => h._id) },
   });
 
-  if (completedCount === activeHabits.length) {
+  const completionMap = new Map(completions.map((c) => [c.habitId as string, c]));
+
+  const allCompleted = activeHabits.every((habit) => {
+    const completion = completionMap.get(habit._id as string);
+    const targetPerDay = habit.targetPerDay ?? 1;
+    const completedCount = completion?.completedCount ?? 0;
+    return completedCount >= targetPerDay;
+  });
+
+  if (allCompleted) {
     const alreadyAwarded = await XpTransaction.findOne({
       userId,
       source: "all_habits_bonus",
@@ -266,13 +275,14 @@ export async function completeHabitForUser(
   await habit.save();
 
   const habitIdStr = habit._id as string;
-  await awardXp(userId, XP_REWARDS.HABIT_COMPLETION, "habit_completion", habitIdStr, `Completed habit: ${habit.title} [${completionDate}]`);
+  const xpReward = XP_REWARDS.HABIT_COMPLETION * targetPerDay;
+  await awardXp(userId, xpReward, "habit_completion", habitIdStr, `Completed habit: ${habit.title} [${completionDate}]`);
   await checkStreakBonuses(userId, habitIdStr, newStreak, completionDate);
   await checkAllHabitsBonus(userId, completionDate);
 
   const finalProfile = await UserProfile.findOne({ userId });
   const finalLevel = finalProfile?.level ?? 1;
-  const xpBeforeAll = (finalProfile?.totalXp ?? 0) - XP_REWARDS.HABIT_COMPLETION;
+  const xpBeforeAll = (finalProfile?.totalXp ?? 0) - xpReward;
   const levelBeforeAll = getLevelFromXp(Math.max(0, xpBeforeAll));
 
   // Create activity entries (non-blocking)
@@ -299,7 +309,7 @@ export async function completeHabitForUser(
     success: true,
     alreadyCompleted: false,
     streak: newStreak,
-    xpAwarded: XP_REWARDS.HABIT_COMPLETION,
+    xpAwarded: xpReward,
     leveledUp: finalLevel > levelBeforeAll,
     newLevel: finalLevel,
     habitTitle: habit.title as string,
