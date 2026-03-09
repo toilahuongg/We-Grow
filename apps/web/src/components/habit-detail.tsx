@@ -341,6 +341,12 @@ export function HabitDetail({ habitId, initialData }: HabitDetailProps) {
                   <span className="font-medium">{t("timesPerWeek", { count: habit.weeklyTarget ?? 1 })}</span>
                 </div>
               )}
+              {(habit.targetPerDay ?? 1) > 1 && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Số lần mỗi ngày</span>
+                  <span className="font-medium">{habit.targetPerDay}</span>
+                </div>
+              )}
               <div className="flex justify-between">
                 <span className="text-muted-foreground">{t("created")}</span>
                 <span className="font-medium">{format(new Date(habit.createdAt), "MMM d, yyyy", { locale: dateLocale })}</span>
@@ -405,7 +411,9 @@ export function HabitDetail({ habitId, initialData }: HabitDetailProps) {
                 className="w-full bg-gradient-to-r from-[#4ecdc4] to-[#a78bfa] text-white"
                 disabled={completeMutation.isPending}
               >
-                {t("markComplete")}
+                {(habit.targetPerDay ?? 1) > 1 
+                  ? `${t("markComplete")} (${habit.completedCount ?? 0}/${habit.targetPerDay})`
+                  : t("markComplete")}
               </Button>
             )}
           </div>

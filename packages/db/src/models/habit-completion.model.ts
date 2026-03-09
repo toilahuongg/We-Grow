@@ -8,6 +8,7 @@ const habitCompletionSchema = new Schema(
     habitId: { type: String, ref: "Habit", required: true },
     userId: { type: String, ref: "User", required: true },
     date: { type: String, required: true },
+    completedCount: { type: Number, default: 1 },
     note: { type: String, default: null, maxlength: 1000 },
     createdAt: { type: Date, required: true },
     updatedAt: { type: Date, required: true },

@@ -414,10 +414,28 @@
     "xpAwarded": "+{amount} XP!"
   },
   "levelUp": {
-    "title": "Level Up!",
-    "description": "Congratulations! You've reached a new level!",
+    "title": "Rank Up!",
+    "description": "Congratulations! You have been promoted!",
     "levelLabel": "Level {level}",
-    "awesome": "Awesome!"
+    "recruit": "Recruit",
+    "private2": "Private Second Class",
+    "private1": "Private First Class",
+    "corporal": "Corporal",
+    "sergeant": "Sergeant",
+    "staffSergeant": "Staff Sergeant",
+    "secondLieutenant": "Second Lieutenant",
+    "firstLieutenant": "First Lieutenant",
+    "captain": "Captain",
+    "seniorCaptain": "Senior Captain",
+    "major": "Major",
+    "lieutenantColonel": "Lieutenant Colonel",
+    "seniorColonel": "Senior Colonel",
+    "colonel": "Colonel",
+    "majorGeneral": "Major General",
+    "lieutenantGeneral": "Lieutenant General",
+    "seniorGeneral": "Senior General",
+    "general": "General",
+    "awesome": "At ease!"
   },
   "badges": {
     "title": "Badge Collection",

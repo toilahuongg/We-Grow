@@ -9,7 +9,10 @@
       "default": "./src/*.ts"
     }
   },
-  "scripts": {},
+  "scripts": {
+    "test": "vitest",
+    "test:coverage": "vitest --coverage"
+  },
   "dependencies": {
     "@we-grow/env": "workspace:*",
     "dotenv": "catalog:",
@@ -17,7 +20,11 @@
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@vitest/coverage-v8": "^2.1.9",
+    "@vitest/ui": "^2.1.9",
     "@we-grow/config": "workspace:*",
-    "typescript": "catalog:"
+    "mongodb-memory-server": "^10.4.3",
+    "typescript": "catalog:",
+    "vitest": "^4.0.18"
   }
 }

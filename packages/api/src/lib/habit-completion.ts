@@ -207,6 +207,7 @@ export async function completeHabitForUser(
   date?: string,
   note?: string,
   timezone?: string,
+  count?: number,
 ): Promise<HabitCompletionResult> {
   const completionDate = date ?? getToday(timezone);
   const now = new Date();
@@ -216,29 +217,45 @@ export async function completeHabitForUser(
     throw new Error("Habit not found");
   }
 
-  // Use try/catch on create to handle duplicate key error (race condition)
-  // instead of check-then-act pattern which is not atomic
-  try {
-    await HabitCompletion.create({
-      _id: generateId(),
-      habitId,
-      userId,
-      date: completionDate,
-      note: note ?? null,
-      createdAt: now,
-      updatedAt: now,
-    });
-  } catch (err: unknown) {
-    // Duplicate key error (code 11000) means already completed
-    if (err && typeof err === "object" && "code" in err && (err as { code: number }).code === 11000) {
-      return {
-        success: true,
-        alreadyCompleted: true,
-        streak: habit.currentStreak ?? 0,
-        habitTitle: habit.title as string,
-      };
-    }
-    throw err;
+  const countInc = count ?? 1;
+  const targetPerDay = habit.targetPerDay ?? 1;
+
+  const updateObj: any = {
+    $inc: { completedCount: countInc },
+    $set: { updatedAt: now },
+    $setOnInsert: { _id: generateId(), createdAt: now },
+  };
+  if (note !== undefined) {
+    updateObj.$set.note = note ?? null;
+  }
+
+  const completion = await HabitCompletion.findOneAndUpdate(
+    { habitId, userId, date: completionDate },
+    updateObj,
+    { upsert: true, new: true },
+  );
+
+  const newCount = completion.completedCount ?? countInc;
+  const oldCount = newCount - countInc;
+
+  if (oldCount >= targetPerDay) {
+    return {
+      success: true,
+      alreadyCompleted: true,
+      streak: habit.currentStreak ?? 0,
+      habitTitle: habit.title as string,
+    };
+  }
+
+  if (newCount < targetPerDay) {
+    return {
+      success: true,
+      alreadyCompleted: false,
+      streak: habit.currentStreak ?? 0,
+      xpAwarded: 0,
+      leveledUp: false,
+      habitTitle: habit.title as string,
+    };
   }
 
   const newStreak = await calculateStreak(habit, completionDate);
@@ -339,12 +356,15 @@ export async function recalculateStreakFromCompletions(
     userId: habit.userId,
   }).sort({ date: -1 }).lean();
 
-  if (completions.length === 0) {
+  const targetPerDay = habit.targetPerDay ?? 1;
+  const validCompletions = completions.filter((c) => (c.completedCount ?? 1) >= targetPerDay);
+
+  if (validCompletions.length === 0) {
     return { streak: 0, lastDate: null };
   }
 
-  const lastDate = completions[0]!.date as string;
-  const completionDates = new Set(completions.map((c) => c.date as string));
+  const lastDate = validCompletions[0]!.date as string;
+  const completionDates = new Set(validCompletions.map((c) => c.date as string));
 
   if (habit.frequency === "daily") {
     let streak = 1;

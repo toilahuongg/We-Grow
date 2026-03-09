@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import { getLevelInfo } from "@/lib/level-utils";
 import { useLocale } from "next-intl";
+import { RankIcon } from "./rank-icon";
 
 interface LevelProgressProps {
   current: number;
@@ -19,17 +20,17 @@ export function LevelProgress({ current, next, level, size = "md", className }: 
   const sizeStyles = {
     sm: {
       container: "h-1.5",
-      icon: "text-sm",
+      iconSize: 20,
       text: "text-xs",
     },
     md: {
       container: "h-2",
-      icon: "text-base",
+      iconSize: 28,
       text: "text-sm",
     },
     lg: {
       container: "h-3",
-      icon: "text-lg",
+      iconSize: 40,
       text: "text-base",
     },
   };
@@ -40,7 +41,7 @@ export function LevelProgress({ current, next, level, size = "md", className }: 
     <div className={cn("space-y-2", className)}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className={styles.icon}>{info.icon}</span>
+          <RankIcon level={level} size={styles.iconSize} />
           <span className={cn("font-semibold", styles.text)}>{levelName}</span>
         </div>
         <span className={cn("text-muted-foreground", styles.text)}>

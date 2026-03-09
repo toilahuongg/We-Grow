@@ -20,6 +20,7 @@ export const habitsRouter = {
         frequency: z.enum(["daily", "weekly", "specific_days"]),
         targetDays: z.array(z.number().min(0).max(6)).optional(),
         weeklyTarget: z.number().min(1).max(7).optional(),
+        targetPerDay: z.number().min(1).max(100).optional(),
         groupId: z.string().optional(),
       }),
     )
@@ -36,6 +37,7 @@ export const habitsRouter = {
         frequency: input.frequency,
         targetDays: input.targetDays ?? [],
         weeklyTarget: input.weeklyTarget ?? 1,
+        targetPerDay: input.targetPerDay ?? 1,
         groupId: input.groupId ?? null,
         createdAt: now,
         updatedAt: now,
@@ -76,7 +78,8 @@ export const habitsRouter = {
 
       return {
         ...habit.toObject(),
-        completedToday: !!completion,
+        completedToday: !!completion && (completion.completedCount ?? 1) >= (habit.targetPerDay ?? 1),
+        completedCount: completion?.completedCount ?? 0,
       };
     }),
 
@@ -89,6 +92,7 @@ export const habitsRouter = {
         frequency: z.enum(["daily", "weekly", "specific_days"]).optional(),
         targetDays: z.array(z.number().min(0).max(6)).optional(),
         weeklyTarget: z.number().min(1).max(7).optional(),
+        targetPerDay: z.number().min(1).max(100).optional(),
       }),
     )
     .handler(async ({ context, input }) => {
@@ -126,6 +130,7 @@ export const habitsRouter = {
         habitId: z.string(),
         date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
         note: z.string().max(1000).optional(),
+        count: z.number().min(1).max(100).optional(),
       }),
     )
     .handler(async ({ context, input }) => {
@@ -135,6 +140,7 @@ export const habitsRouter = {
         input.date,
         input.note,
         context.timezone,
+        input.count,
       );
       return {
         success: result.success,
@@ -151,35 +157,55 @@ export const habitsRouter = {
       z.object({
         habitId: z.string(),
         date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+        count: z.number().min(1).max(100).optional(),
       }),
     )
     .handler(async ({ context, input }) => {
       const userId = context.session.user.id;
       const date = input.date ?? getToday(context.timezone);
 
-      const deleted = await HabitCompletion.findOneAndDelete({
+      const completion = await HabitCompletion.findOne({
         habitId: input.habitId,
         userId,
         date,
       });
-      if (!deleted) {
+      if (!completion) {
         return { success: true, wasCompleted: false };
       }
 
-      // Reverse XP: remove base completion XP
-      await reverseXp(userId, "habit_completion", input.habitId, date);
-      // Reverse any streak bonus for this habit on this date
-      await reverseXp(userId, "streak_bonus", input.habitId, date);
-      // Reverse all-habits bonus for this date
-      await reverseXp(userId, "all_habits_bonus", null, date);
-
       const habit = await Habit.findOne({ _id: input.habitId, userId });
-      if (habit) {
-        const { streak, lastDate } = await recalculateStreakFromCompletions(habit);
-        habit.lastCompletedDate = lastDate;
-        habit.currentStreak = streak;
-        habit.updatedAt = new Date();
-        await habit.save();
+      const targetPerDay = habit?.targetPerDay ?? 1;
+      const currentCount = completion.completedCount ?? 1;
+      const countDec = input.count ?? 1;
+      const newCount = Math.max(0, currentCount - countDec);
+
+      const wasFullyCompleted = currentCount >= targetPerDay;
+      const isStillFullyCompleted = newCount >= targetPerDay;
+
+      if (newCount === 0) {
+        await HabitCompletion.findOneAndDelete({ _id: completion._id });
+      } else {
+        await HabitCompletion.findOneAndUpdate(
+          { _id: completion._id },
+          { $set: { completedCount: newCount, updatedAt: new Date() } }
+        );
+      }
+
+      if (wasFullyCompleted && !isStillFullyCompleted) {
+        // Reverse XP: remove base completion XP
+        await reverseXp(userId, "habit_completion", input.habitId, date);
+        // Reverse any streak bonus for this habit on this date
+        await reverseXp(userId, "streak_bonus", input.habitId, date);
+        // Reverse all-habits bonus for this date
+        await reverseXp(userId, "all_habits_bonus", null, date);
+
+        if (habit) {
+          const { streak, lastDate } = await recalculateStreakFromCompletions(habit);
+          habit.lastCompletedDate = lastDate;
+          habit.currentStreak = streak;
+          habit.updatedAt = new Date();
+          await habit.save();
+        }
       }
 
       return { success: true, wasCompleted: true };
@@ -214,7 +240,7 @@ export const habitsRouter = {
     }
     const habits = await Habit.find(filter);
     const completions = await HabitCompletion.find({ userId, date: today });
-    const completedIds = new Set(completions.map((c) => c.habitId));
+    const completionsMap = new Map(completions.map((c) => [c.habitId, c]));
 
     return habits.map((habit) => {
       let isDue = false;
@@ -226,10 +252,13 @@ export const habitsRouter = {
         isDue = (habit.targetDays ?? []).includes(todayDow);
       }
 
+      const completion = completionsMap.get(habit._id as string);
+
       return {
         ...habit.toObject(),
         isDue,
-        completedToday: completedIds.has(habit._id as string),
+        completedCount: completion?.completedCount ?? 0,
+        completedToday: !!completion && (completion.completedCount ?? 1) >= (habit.targetPerDay ?? 1),
       };
     });
   }),

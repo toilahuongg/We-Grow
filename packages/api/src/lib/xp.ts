@@ -6,16 +6,24 @@ export interface LevelInfo {
 }
 
 const LEVEL_INFO: LevelInfo[] = [
-  { level: 1, icon: "🌱", nameVi: "Hạt giống", nameEn: "Seed" },
-  { level: 2, icon: "🌿", nameVi: "Mầm non", nameEn: "Sprout" },
-  { level: 3, icon: "🪴", nameVi: "Cây con", nameEn: "Seedling" },
-  { level: 4, icon: "🌳", nameVi: "Cây xanh", nameEn: "Young Tree" },
-  { level: 5, icon: "🌲", nameVi: "Cây lớn", nameEn: "Mature Tree" },
-  { level: 6, icon: "🏔️", nameVi: "Cổ thụ", nameEn: "Ancient Tree" },
-  { level: 7, icon: "🌍", nameVi: "Rừng xanh", nameEn: "Forest" },
-  { level: 8, icon: "⭐", nameVi: "Huyền thoại", nameEn: "Legend" },
-  { level: 9, icon: "💎", nameVi: "Bất tử", nameEn: "Immortal" },
-  { level: 10, icon: "👑", nameVi: "Thần thoại", nameEn: "Mythical" },
+  { level: 1, icon: "rank-1", nameVi: "Tân binh", nameEn: "Recruit" },
+  { level: 2, icon: "rank-2", nameVi: "Binh nhì", nameEn: "Private Second Class" },
+  { level: 3, icon: "rank-3", nameVi: "Binh nhất", nameEn: "Private First Class" },
+  { level: 4, icon: "rank-4", nameVi: "Hạ sĩ", nameEn: "Corporal" },
+  { level: 5, icon: "rank-5", nameVi: "Trung sĩ", nameEn: "Sergeant" },
+  { level: 6, icon: "rank-6", nameVi: "Thượng sĩ", nameEn: "Staff Sergeant" },
+  { level: 7, icon: "rank-7", nameVi: "Thiếu úy", nameEn: "Second Lieutenant" },
+  { level: 8, icon: "rank-8", nameVi: "Trung úy", nameEn: "First Lieutenant" },
+  { level: 9, icon: "rank-9", nameVi: "Thượng úy", nameEn: "Captain" },
+  { level: 10, icon: "rank-10", nameVi: "Đại úy", nameEn: "Senior Captain" },
+  { level: 11, icon: "rank-11", nameVi: "Thiếu tá", nameEn: "Major" },
+  { level: 12, icon: "rank-12", nameVi: "Trung tá", nameEn: "Lieutenant Colonel" },
+  { level: 13, icon: "rank-13", nameVi: "Thượng tá", nameEn: "Senior Colonel" },
+  { level: 14, icon: "rank-14", nameVi: "Đại tá", nameEn: "Colonel" },
+  { level: 15, icon: "rank-15", nameVi: "Thiếu tướng", nameEn: "Major General" },
+  { level: 16, icon: "rank-16", nameVi: "Trung tướng", nameEn: "Lieutenant General" },
+  { level: 17, icon: "rank-17", nameVi: "Thượng tướng", nameEn: "Senior General" },
+  { level: 18, icon: "rank-18", nameVi: "Đại tướng", nameEn: "General" },
 ];
 
 function toRoman(num: number): string {
@@ -32,15 +40,15 @@ function toRoman(num: number): string {
 }
 
 export function getLevelInfo(level: number): LevelInfo {
-  if (level <= 10) {
+  if (level <= 18) {
     return LEVEL_INFO[level - 1] ?? LEVEL_INFO[0]!;
   }
-  const tier = level - 9;
+  const tier = level - 18;
   return {
     level,
-    icon: "👑",
-    nameVi: `Thần thoại ${toRoman(tier)}`,
-    nameEn: `Mythical ${toRoman(tier)}`,
+    icon: "rank-18",
+    nameVi: `Đại tướng ${toRoman(tier)}`,
+    nameEn: `General ${toRoman(tier)}`,
   };
 }
 

@@ -89,6 +89,14 @@ export function HabitsList() {
     },
   });
 
+  const uncompleteMutation = useMutation({
+    mutationFn: (habitId: string) => client.habits.uncomplete({ habitId }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: orpc.habits.list.queryKey() });
+      queryClient.invalidateQueries({ queryKey: orpc.gamification.getProfile.queryKey() });
+    },
+  });
+
   const filteredHabits = habits?.filter((habit: any) => {
     if (filter === "active") return !habit.archived;
     if (filter === "archived") return habit.archived;
@@ -232,11 +240,26 @@ export function HabitsList() {
                 <div className="flex items-center gap-2">
                   {!habit.archived && (
                     <button
-                      onClick={() => completeMutation.mutate(habit._id)}
-                      className="flex h-8 w-8 items-center justify-center rounded-full bg-overlay-medium text-muted-foreground transition-all hover:bg-[#4ecdc4] hover:text-white hover:shadow-lg hover:shadow-[#4ecdc4]/30"
-                      title="Complete habit"
+                      onClick={() => {
+                        if (habit.completedToday) {
+                          uncompleteMutation.mutate(habit._id);
+                        } else {
+                          completeMutation.mutate(habit._id);
+                        }
+                      }}
+                      disabled={completeMutation.isPending || uncompleteMutation.isPending}
+                      className={`flex h-8 min-w-[32px] px-2 items-center justify-center rounded-full transition-all ${
+                        habit.completedToday 
+                           ? "bg-[#4ecdc4] text-white shadow-[#4ecdc4]/30 shadow-lg"
+                           : "bg-overlay-medium text-muted-foreground hover:bg-[#4ecdc4] hover:text-white hover:shadow-lg hover:shadow-[#4ecdc4]/30"
+                      }`}
+                      title={habit.completedToday ? "Undo completion" : "Complete habit"}
                     >
-                      <CheckCircle2 className="h-4 w-4" />
+                      {(habit.targetPerDay ?? 1) > 1 && !habit.completedToday ? (
+                        <span className="text-[10px] font-bold">{habit.completedCount ?? 0}/{habit.targetPerDay}</span>
+                      ) : (
+                        <CheckCircle2 className="h-4 w-4" />
+                      )}
                     </button>
                   )}
                   {!habit.archived && (() => {

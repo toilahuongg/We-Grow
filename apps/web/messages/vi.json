@@ -414,10 +414,28 @@
     "xpAwarded": "+{amount} XP!"
   },
   "levelUp": {
-    "title": "Lên cấp!",
-    "description": "Chúc mừng! Bạn đã đạt được cấp độ mới!",
-    "levelLabel": "Cấp {level}",
-    "awesome": "Tuyệt vời!"
+    "title": "Thăng cấp!",
+    "description": "Chúc mừng! Bạn đã thăng quân hàm mới!",
+    "levelLabel": "{level}",
+    "recruit": "Tân binh",
+    "private2": "Binh nhìn",
+    "private1": "Binh nhất",
+    "corporal": "Hạ sĩ",
+    "sergeant": "Trung sĩ",
+    "staffSergeant": "Thượng sĩ",
+    "secondLieutenant": "Thiếu úy",
+    "firstLieutenant": "Trung úy",
+    "captain": "Thượng úy",
+    "seniorCaptain": "Đại úy",
+    "major": "Thiếu tá",
+    "lieutenantColonel": "Trung tá",
+    "seniorColonel": "Thượng tá",
+    "colonel": "Đại tá",
+    "majorGeneral": "Thiếu tướng",
+    "lieutenantGeneral": "Trung tướng",
+    "seniorGeneral": "Thượng tướng",
+    "general": "Đại tướng",
+    "awesome": "Rõ!"
   },
   "badges": {
     "title": "Bộ Sưu Tập Huy Hiệu",

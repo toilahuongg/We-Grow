@@ -283,13 +283,17 @@ export function Dashboard() {
                     }
                   }}
                   disabled={completeHabit.isPending || uncompleteHabit.isPending}
-                  className={`flex h-10 w-10 items-center justify-center rounded-full transition-all ${
+                  className={`flex h-10 min-w-[40px] px-2 items-center justify-center rounded-full transition-all ${
                     habit.completedToday
                       ? "bg-[#4ecdc4] text-white shadow-lg shadow-[#4ecdc4]/30"
                       : "bg-overlay-medium text-muted-foreground hover:bg-[#4ecdc4] hover:text-white hover:shadow-lg hover:shadow-[#4ecdc4]/30"
                   } ${completeHabit.isPending || uncompleteHabit.isPending ? "opacity-50 cursor-not-allowed" : ""}`}
                 >
-                  <CheckCircle2 className="h-5 w-5" />
+                  {(habit.targetPerDay ?? 1) > 1 && !habit.completedToday ? (
+                     <span className="text-xs font-bold">{habit.completedCount ?? 0}/{habit.targetPerDay}</span>
+                  ) : (
+                     <CheckCircle2 className="h-5 w-5" />
+                  )}
                 </button>
               </div>
             ))}

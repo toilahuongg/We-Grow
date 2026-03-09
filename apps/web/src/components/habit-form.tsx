@@ -26,6 +26,7 @@ interface HabitFormProps {
     frequency: "daily" | "weekly" | "specific_days";
     targetDays?: number[];
     weeklyTarget?: number;
+    targetPerDay?: number;
   };
   isEditing?: boolean;
   groupId?: string;
@@ -67,6 +68,7 @@ export function HabitForm({ habit, isEditing = false, groupId }: HabitFormProps)
     frequency: z.enum(["daily", "weekly", "specific_days"]),
     targetDays: z.array(z.number()).optional(),
     weeklyTarget: z.number().min(1).max(7).optional(),
+    targetPerDay: z.number().min(1).max(100).optional(),
   }).refine(
     (data) => {
       if (data.frequency === "specific_days") {
@@ -139,6 +141,7 @@ export function HabitForm({ habit, isEditing = false, groupId }: HabitFormProps)
       frequency: habit?.frequency ?? "daily",
       targetDays: habit?.targetDays ?? [],
       weeklyTarget: habit?.weeklyTarget ?? 1,
+      targetPerDay: habit?.targetPerDay ?? 1,
     },
     onSubmit: async ({ value }) => {
       if (isEditing && habit) {
@@ -150,6 +153,7 @@ export function HabitForm({ habit, isEditing = false, groupId }: HabitFormProps)
             frequency: value.frequency,
             targetDays: value.targetDays,
             weeklyTarget: value.weeklyTarget,
+            targetPerDay: value.targetPerDay,
           },
         });
       } else {
@@ -159,6 +163,7 @@ export function HabitForm({ habit, isEditing = false, groupId }: HabitFormProps)
           frequency: value.frequency,
           targetDays: value.targetDays,
           weeklyTarget: value.weeklyTarget,
+          targetPerDay: value.targetPerDay,
           ...(groupId ? { groupId } : {}),
         });
       }
@@ -342,6 +347,32 @@ export function HabitForm({ habit, isEditing = false, groupId }: HabitFormProps)
                 </form.Field>
               )
             }
+          </form.Field>
+
+          {/* Target Per Day (Always visible) */}
+          <form.Field name="targetPerDay">
+            {(field) => (
+              <div className="space-y-2">
+                <Label htmlFor={field.name}>Số lần mỗi ngày (Target per day)</Label>
+                <div className="flex items-center gap-4">
+                  <Input
+                    id={field.name}
+                    name={field.name}
+                    type="number"
+                    min="1"
+                    max="100"
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    onChange={(e) => field.handleChange(Number(e.target.value))}
+                    className="w-20"
+                  />
+                  <span className="text-sm text-muted-foreground">lần/ngày</span>
+                </div>
+                {field.state.meta.errors.length > 0 && (
+                  <p className="text-sm text-red-500">{field.state.meta.errors[0]}</p>
+                )}
+              </div>
+            )}
           </form.Field>
 
           {/* Reminder */}

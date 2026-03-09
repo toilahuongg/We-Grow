@@ -1,9 +1,8 @@
-"use client";
-
 import { Dialog, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { getLevelInfo } from "@/lib/level-utils";
 import { useTranslations, useLocale } from "next-intl";
+import { RankIcon } from "./rank-icon";
 
 interface LevelUpModalProps {
   level: number | null;
@@ -28,7 +27,9 @@ export function LevelUpModal({ level, onClose }: LevelUpModalProps) {
         </DialogDescription>
       </DialogHeader>
       <div className="flex flex-col items-center py-6">
-        <div className="text-7xl mb-4 animate-bounce">{info.icon}</div>
+        <div className="mb-4 animate-bounce">
+          <RankIcon level={level} size={120} />
+        </div>
         <p className="text-2xl font-bold gradient-text mb-1">
           {t("levelLabel", { level })}
         </p>
