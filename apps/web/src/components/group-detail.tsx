@@ -21,12 +21,13 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 
 import { orpc, client } from "@/utils/orpc";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { LevelUpModal } from "@/components/level-up-modal";
+import { RankIcon } from "@/components/rank-icon";
 import { Label } from "@/components/ui/label";
 import { EmptyState } from "@/components/empty-state";
 import { ActivityFeed } from "@/components/activity-feed";
@@ -56,6 +57,7 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
   const queryClient = useQueryClient();
   const t = useTranslations("groupDetail");
   const tc = useTranslations("common");
+  const locale = useLocale();
   const [session, setSession] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<"today" | "feed" | "leaderboard" | "members" | "settings">("today");
   const [showInviteCode, setShowInviteCode] = useState(false);
@@ -479,9 +481,12 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                             : leaderboard[1]?.userName}
                         </p>
                         <p className="text-lg font-bold tabular-nums">{leaderboard[1]?.totalXp} <span className="text-xs font-medium text-muted-foreground">XP</span></p>
-                        <p className="text-[11px] text-muted-foreground mt-0.5">
-                          {leaderboard[1]?.levelInfo?.icon} {t("levelLabel", { level: leaderboard[1]?.level })}
-                        </p>
+                        <div className="flex items-center justify-center gap-1.5 mt-1">
+                          <RankIcon level={leaderboard[1]?.level} size={16} />
+                          <p className="text-[11px] text-muted-foreground">
+                            {locale === "vi" ? leaderboard[1]?.levelInfo?.nameVi : leaderboard[1]?.levelInfo?.nameEn}
+                          </p>
+                        </div>
                       </div>
                     </div>
 
@@ -503,9 +508,12 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                             : leaderboard[0]?.userName}
                         </p>
                         <p className="text-xl font-bold gradient-text tabular-nums">{leaderboard[0]?.totalXp} <span className="text-xs font-medium">XP</span></p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {leaderboard[0]?.levelInfo?.icon} {t("levelLabel", { level: leaderboard[0]?.level })}
-                        </p>
+                        <div className="flex items-center justify-center gap-1.5 mt-1">
+                          <RankIcon level={leaderboard[0]?.level} size={18} />
+                          <p className="text-xs text-muted-foreground">
+                            {locale === "vi" ? leaderboard[0]?.levelInfo?.nameVi : leaderboard[0]?.levelInfo?.nameEn}
+                          </p>
+                        </div>
                       </div>
                     </div>
 
@@ -526,9 +534,12 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                             : leaderboard[2]?.userName}
                         </p>
                         <p className="text-lg font-bold tabular-nums">{leaderboard[2]?.totalXp} <span className="text-xs font-medium text-muted-foreground">XP</span></p>
-                        <p className="text-[11px] text-muted-foreground mt-0.5">
-                          {leaderboard[2]?.levelInfo?.icon} {t("levelLabel", { level: leaderboard[2]?.level })}
-                        </p>
+                        <div className="flex items-center justify-center gap-1.5 mt-1">
+                          <RankIcon level={leaderboard[2]?.level} size={16} />
+                          <p className="text-[11px] text-muted-foreground">
+                            {locale === "vi" ? leaderboard[2]?.levelInfo?.nameVi : leaderboard[2]?.levelInfo?.nameEn}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -572,9 +583,12 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                             <p className={`font-medium text-sm ${isCurrentUser ? "text-[#4ecdc4]" : ""}`}>
                               {isCurrentUser ? tc("you") : entry.userName}
                             </p>
-                            <p className="text-xs text-muted-foreground">
-                              {entry.levelInfo?.icon} {t("levelLabel", { level: entry.level })} · {t("dayStreakLabel", { count: entry.bestStreak })}
-                            </p>
+                            <div className="flex items-center gap-1.5">
+                              <RankIcon level={entry.level} size={14} />
+                              <p className="text-xs text-muted-foreground">
+                                {locale === "vi" ? entry.levelInfo?.nameVi : entry.levelInfo?.nameEn} · {t("dayStreakLabel", { count: entry.bestStreak })}
+                              </p>
+                            </div>
                           </div>
 
                           <div className="text-right shrink-0">

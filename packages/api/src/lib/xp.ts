@@ -24,6 +24,7 @@ const LEVEL_INFO: LevelInfo[] = [
   { level: 16, icon: "rank-16", nameVi: "Trung tướng", nameEn: "Lieutenant General" },
   { level: 17, icon: "rank-17", nameVi: "Thượng tướng", nameEn: "Senior General" },
   { level: 18, icon: "rank-18", nameVi: "Đại tướng", nameEn: "General" },
+  { level: 19, icon: "rank-19", nameVi: "Thống tướng", nameEn: "Grand General" },
 ];
 
 function toRoman(num: number): string {
@@ -40,15 +41,15 @@ function toRoman(num: number): string {
 }
 
 export function getLevelInfo(level: number): LevelInfo {
-  if (level <= 18) {
+  if (level <= 19) {
     return LEVEL_INFO[level - 1] ?? LEVEL_INFO[0]!;
   }
-  const tier = level - 18;
+  const tier = level - 19;
   return {
     level,
-    icon: "rank-18",
-    nameVi: `Đại tướng ${toRoman(tier)}`,
-    nameEn: `General ${toRoman(tier)}`,
+    icon: "rank-19",
+    nameVi: `Thống tướng ${toRoman(tier)}`,
+    nameEn: `Grand General ${toRoman(tier)}`,
   };
 }
 
