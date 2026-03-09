@@ -3,24 +3,32 @@ import mongoose from 'mongoose'
 import { MongoMemoryServer } from 'mongodb-memory-server'
 
 // MongoDB Memory Server instance
-let mongoServer: MongoMemoryServer
+let mongoServer: any
+let isDbConnected = false
 
 // Setup before all tests
 beforeAll(async () => {
-  mongoServer = await MongoMemoryServer.create()
-  const uri = mongoServer.getUri()
-  await mongoose.connect(uri)
+  try {
+    mongoServer = await MongoMemoryServer.create()
+    const uri = mongoServer.getUri()
+    await mongoose.connect(uri)
+    isDbConnected = true
+  } catch (error) {
+    console.error('Failed to start MongoMemoryServer:', error)
+  }
 })
 
 // Cleanup after all tests
 afterAll(async () => {
-  await mongoose.disconnect()
-  await mongoServer.stop()
+  if (isDbConnected) {
+    await mongoose.disconnect()
+    await mongoServer?.stop()
+  }
 })
 
 // Clear database and models between tests
 beforeEach(async () => {
-  if (mongoose.connection) {
+  if (isDbConnected && mongoose.connection.readyState === 1) {
     // Clear all collections
     const collections = mongoose.connection.collections
     for (const key in collections) {
@@ -38,6 +46,7 @@ beforeEach(async () => {
     }
   }
 })
+
 
 // Set test environment
 process.env.NODE_ENV = 'test'
