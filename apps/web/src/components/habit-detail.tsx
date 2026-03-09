@@ -57,6 +57,24 @@ export function HabitDetail({ habitId, initialData }: HabitDetailProps) {
 
   const completeMutation = useMutation({
     mutationFn: (date: string) => client.habits.complete({ habitId, date }),
+    onMutate: async (date) => {
+      await queryClient.cancelQueries({ queryKey: orpc.habits.getById.queryKey({ input: { habitId } }) });
+      const previous = queryClient.getQueryData(orpc.habits.getById.queryKey({ input: { habitId } }));
+      queryClient.setQueryData(
+        orpc.habits.getById.queryKey({ input: { habitId } }),
+        (old: any) => {
+          if (!old) return old;
+          const targetPerDay = old.targetPerDay ?? 1;
+          const newCount = (old.completedCount ?? 0) + 1;
+          return {
+            ...old,
+            completedCount: newCount,
+            completedToday: newCount >= targetPerDay
+          };
+        }
+      );
+      return { previous };
+    },
     onSuccess: (result: any) => {
       if (!result.alreadyCompleted) {
         toast.success(t("xpAwarded", { amount: result.xpAwarded ?? 0 }));
@@ -68,14 +86,40 @@ export function HabitDetail({ habitId, initialData }: HabitDetailProps) {
       queryClient.invalidateQueries({ queryKey: orpc.habits.getCompletions.queryKey({ input: { habitId } } as any) });
       queryClient.invalidateQueries({ queryKey: orpc.gamification.getProfile.queryKey() });
     },
+    onError: (_error, _variables, context) => {
+      queryClient.setQueryData(orpc.habits.getById.queryKey({ input: { habitId } }), context?.previous);
+      toast.error(t("failedComplete"));
+    },
   });
 
   const uncompleteMutation = useMutation({
     mutationFn: (date: string) => client.habits.uncomplete({ habitId, date }),
+    onMutate: async (date) => {
+      await queryClient.cancelQueries({ queryKey: orpc.habits.getById.queryKey({ input: { habitId } }) });
+      const previous = queryClient.getQueryData(orpc.habits.getById.queryKey({ input: { habitId } }));
+      queryClient.setQueryData(
+        orpc.habits.getById.queryKey({ input: { habitId } }),
+        (old: any) => {
+          if (!old) return old;
+          const targetPerDay = old.targetPerDay ?? 1;
+          const newCount = Math.max(0, (old.completedCount ?? 1) - 1);
+          return {
+            ...old,
+            completedCount: newCount,
+            completedToday: newCount >= targetPerDay
+          };
+        }
+      );
+      return { previous };
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: orpc.habits.getById.queryKey({ input: { habitId } }) });
       queryClient.invalidateQueries({ queryKey: orpc.habits.getCompletions.queryKey({ input: { habitId } } as any) });
       queryClient.invalidateQueries({ queryKey: orpc.gamification.getProfile.queryKey() });
+    },
+    onError: (_error, _variables, context) => {
+      queryClient.setQueryData(orpc.habits.getById.queryKey({ input: { habitId } }), context?.previous);
+      toast.error(t("failedUncomplete"));
     },
   });
 
@@ -153,7 +197,7 @@ export function HabitDetail({ habitId, initialData }: HabitDetailProps) {
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
   const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
-  const completedDates = new Set(completions?.map((c: any) => c.date) ?? []);
+  const completionsMap = new Map<string, number>(completions?.map((c: any) => [c.date, c.completedCount ?? 0]) ?? []);
   const noteDates = new Map<string, string>();
   completions?.forEach((c: any) => { if (c.note) noteDates.set(c.date, c.note); });
 
@@ -257,7 +301,10 @@ export function HabitDetail({ habitId, initialData }: HabitDetailProps) {
               ))}
               {daysInMonth.map((day) => {
                 const dateStr = format(day, "yyyy-MM-dd");
-                const isCompleted = completedDates.has(dateStr);
+                const count = completionsMap.get(dateStr) ?? 0;
+                const targetPerDay = habit.targetPerDay ?? 1;
+                const isCompleted = count >= targetPerDay;
+                const isPartial = count > 0 && count < targetPerDay;
                 const dayIsToday = isToday(day);
                 const hasNote = noteDates.has(dateStr);
 
@@ -279,11 +326,13 @@ export function HabitDetail({ habitId, initialData }: HabitDetailProps) {
                       ${dayIsToday ? "ring-2 ring-[#ff6b6b]" : ""}
                       ${isCompleted
                         ? "bg-gradient-to-br from-[#4ecdc4] to-[#a78bfa] text-white shadow-lg"
-                        : "bg-overlay-subtle text-muted-foreground hover:bg-overlay-medium"
+                        : isPartial
+                          ? "bg-gradient-to-br from-[#4ecdc4]/40 to-[#a78bfa]/40 text-foreground"
+                          : "bg-overlay-subtle text-muted-foreground hover:bg-overlay-medium"
                       }
                       disabled:opacity-50
                     `}
-                    title={format(day, "MMM d, yyyy", { locale: dateLocale })}
+                    title={`${format(day, "MMM d, yyyy", { locale: dateLocale })}${isPartial || isCompleted ? ` (${count}/${targetPerDay})` : ""}`}
                   >
                     {format(day, "d")}
                     {hasNote && (
@@ -298,6 +347,10 @@ export function HabitDetail({ habitId, initialData }: HabitDetailProps) {
               <div className="flex items-center gap-2">
                 <div className="h-3 w-3 rounded bg-gradient-to-br from-[#4ecdc4] to-[#a78bfa]" />
                 <span>{t("completed")}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="h-3 w-3 rounded bg-gradient-to-br from-[#4ecdc4]/40 to-[#a78bfa]/40" />
+                <span>{t("partial")}</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="h-3 w-3 rounded bg-overlay-subtle" />
@@ -413,7 +466,9 @@ export function HabitDetail({ habitId, initialData }: HabitDetailProps) {
               >
                 {(habit.targetPerDay ?? 1) > 1 
                   ? `${t("markComplete")} (${habit.completedCount ?? 0}/${habit.targetPerDay})`
-                  : t("markComplete")}
+                  : habit.completedCount > 0 
+                    ? `${t("markComplete")} (${habit.completedCount})`
+                    : t("markComplete")}
               </Button>
             )}
           </div>

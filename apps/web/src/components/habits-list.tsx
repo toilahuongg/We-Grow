@@ -77,6 +77,24 @@ export function HabitsList() {
 
   const completeMutation = useMutation({
     mutationFn: (habitId: string) => client.habits.complete({ habitId }),
+    onMutate: async (habitId) => {
+      await queryClient.cancelQueries({ queryKey: orpc.habits.list.queryKey() });
+      const previous = queryClient.getQueryData(orpc.habits.list.queryKey());
+      queryClient.setQueryData(
+        orpc.habits.list.queryKey(),
+        (old: any[] | undefined) => old?.map(h => {
+          if (h._id !== habitId) return h;
+          const targetPerDay = h.targetPerDay ?? 1;
+          const newCount = (h.completedCount ?? 0) + 1;
+          return {
+            ...h,
+            completedCount: newCount,
+            completedToday: newCount >= targetPerDay
+          };
+        })
+      );
+      return { previous };
+    },
     onSuccess: (result: any) => {
       if (!result.alreadyCompleted) {
         toast.success(`+${result.xpAwarded} XP! ✨`);
@@ -87,13 +105,39 @@ export function HabitsList() {
       queryClient.invalidateQueries({ queryKey: orpc.habits.list.queryKey() });
       queryClient.invalidateQueries({ queryKey: orpc.gamification.getProfile.queryKey() });
     },
+    onError: (_error, _variables, context) => {
+      queryClient.setQueryData(orpc.habits.list.queryKey(), context?.previous);
+      toast.error("Failed to complete habit");
+    },
   });
 
   const uncompleteMutation = useMutation({
     mutationFn: (habitId: string) => client.habits.uncomplete({ habitId }),
+    onMutate: async (habitId) => {
+      await queryClient.cancelQueries({ queryKey: orpc.habits.list.queryKey() });
+      const previous = queryClient.getQueryData(orpc.habits.list.queryKey());
+      queryClient.setQueryData(
+        orpc.habits.list.queryKey(),
+        (old: any[] | undefined) => old?.map(h => {
+          if (h._id !== habitId) return h;
+          const targetPerDay = h.targetPerDay ?? 1;
+          const newCount = Math.max(0, (h.completedCount ?? 1) - 1);
+          return {
+            ...h,
+            completedCount: newCount,
+            completedToday: newCount >= targetPerDay
+          };
+        })
+      );
+      return { previous };
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: orpc.habits.list.queryKey() });
       queryClient.invalidateQueries({ queryKey: orpc.gamification.getProfile.queryKey() });
+    },
+    onError: (_error, _variables, context) => {
+      queryClient.setQueryData(orpc.habits.list.queryKey(), context?.previous);
+      toast.error("Failed to uncomplete habit");
     },
   });
 
@@ -224,6 +268,15 @@ export function HabitsList() {
                     </span>
                     <span>·</span>
                     <span>Best: {habit.longestStreak ?? 0} days</span>
+                    {(habit.targetPerDay ?? 1) > 1 && (
+                      <>
+                        <span>·</span>
+                        <span className="flex items-center gap-1">
+                          <CheckCircle2 className={`h-3 w-3 ${habit.completedToday ? "text-[#4ecdc4]" : ""}`} />
+                          {habit.completedCount ?? 0}/{habit.targetPerDay}
+                        </span>
+                      </>
+                    )}
                     {reminderMap.get(habit._id)?.enabled && (
                       <>
                         <span>·</span>
@@ -257,6 +310,8 @@ export function HabitsList() {
                     >
                       {(habit.targetPerDay ?? 1) > 1 && !habit.completedToday ? (
                         <span className="text-[10px] font-bold">{habit.completedCount ?? 0}/{habit.targetPerDay}</span>
+                      ) : habit.completedToday ? (
+                        <CheckCircle2 className="h-4 w-4 fill-white text-[#4ecdc4]" />
                       ) : (
                         <CheckCircle2 className="h-4 w-4" />
                       )}

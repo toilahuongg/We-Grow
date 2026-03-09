@@ -97,7 +97,16 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
 
       queryClient.setQueryData(
         orpc.habits.todaySummary.queryOptions({ input: { groupId } }).queryKey,
-        (old: any[] | undefined) => old?.map(h => h._id === habitId ? { ...h, completedToday: true } : h)
+        (old: any[] | undefined) => old?.map(h => {
+          if (h._id !== habitId) return h;
+          const targetPerDay = h.targetPerDay ?? 1;
+          const newCount = (h.completedCount ?? 0) + 1;
+          return {
+            ...h,
+            completedCount: newCount,
+            completedToday: newCount >= targetPerDay
+          };
+        })
       );
 
       return { previousHabits };
@@ -128,12 +137,22 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
 
       queryClient.setQueryData(
         orpc.habits.todaySummary.queryOptions({ input: { groupId } }).queryKey,
-        (old: any[] | undefined) => old?.map(h => h._id === habitId ? { ...h, completedToday: false } : h)
+        (old: any[] | undefined) => old?.map(h => {
+          if (h._id !== habitId) return h;
+          const targetPerDay = h.targetPerDay ?? 1;
+          const newCount = Math.max(0, (h.completedCount ?? 0) - 1);
+          return {
+            ...h,
+            completedCount: newCount,
+            completedToday: newCount >= targetPerDay
+          };
+        })
       );
 
       return { previousHabits };
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: orpc.habits.todaySummary.queryKey() });
       queryClient.invalidateQueries({ queryKey: orpc.gamification.getProfile.queryKey() });
     },
     onError: (_error, _variables, context) => {
@@ -271,7 +290,7 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
   };
 
   const dueHabits = (todayHabits as any[])?.filter((h: any) => h.isDue) ?? [];
-  const completedCount = dueHabits.filter((h: any) => h.completedToday).length;
+  const habitsFinished = dueHabits.filter((h: any) => h.completedToday).length;
 
   const tabs = [
     { key: "today" as const, label: t("tabToday") },
@@ -318,11 +337,11 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
               <div>
                 <h2 className="font-display text-xl font-bold">{t("todaysHabits")}</h2>
                 <p className="text-sm text-muted-foreground">
-                  {completedCount === dueHabits.length && dueHabits.length > 0
+                  {habitsFinished === dueHabits.length && dueHabits.length > 0
                     ? t("allCompleted")
                     : dueHabits.length === 0
                       ? t("noHabitsToday")
-                      : t("remaining", { count: dueHabits.length - completedCount })}
+                      : t("remaining", { count: dueHabits.length - habitsFinished })}
                 </p>
               </div>
               {canManage && (
@@ -363,13 +382,19 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                         <h3 className={`font-semibold ${habit.completedToday ? "text-muted-foreground line-through" : ""}`}>
                           {habit.title}
                         </h3>
-                        {(habit.currentStreak ?? 0) >= 7 && (
-                          <span className="flex items-center gap-1 rounded-full bg-[#ff6b6b]/20 px-2 py-0.5 text-xs font-medium text-[#ff6b6b]">
-                            <Flame className="h-3 w-3" />
-                            {habit.currentStreak}
-                          </span>
-                        )}
-                      </div>
+                          {(habit.currentStreak ?? 0) >= 7 && (
+                            <span className="flex items-center gap-1 rounded-full bg-[#ff6b6b]/20 px-2 py-0.5 text-xs font-medium text-[#ff6b6b]">
+                              <Flame className="h-3 w-3" />
+                              {habit.currentStreak}
+                            </span>
+                          )}
+                          {(habit.targetPerDay ?? 1) > 1 && (
+                            <span className="flex items-center gap-1 text-xs text-muted-foreground ml-2">
+                              <CheckCircle2 className={`h-3 w-3 ${habit.completedToday ? "text-[#4ecdc4]" : ""}`} />
+                              {habit.completedCount ?? 0}/{habit.targetPerDay}
+                            </span>
+                          )}
+                        </div>
                       <p className="text-xs text-muted-foreground capitalize">
                         {habit.frequency} {habit.frequency === "specific_days" ? `· ${habit.targetDays?.length ?? 0} days/week` : ""}
                       </p>
@@ -394,7 +419,13 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                         : "bg-overlay-medium text-muted-foreground hover:bg-[#4ecdc4] hover:text-white hover:shadow-lg hover:shadow-[#4ecdc4]/30"
                         } ${completeHabit.isPending || uncompleteHabit.isPending ? "opacity-50 cursor-not-allowed" : ""}`}
                     >
-                      <CheckCircle2 className="h-5 w-5" />
+                      {(habit.targetPerDay ?? 1) > 1 && !habit.completedToday ? (
+                        <span className="text-xs font-bold">{habit.completedCount ?? 0}/{habit.targetPerDay}</span>
+                      ) : habit.completedToday ? (
+                        <CheckCircle2 className="h-5 w-5 fill-white text-[#4ecdc4]" />
+                      ) : (
+                        <CheckCircle2 className="h-5 w-5" />
+                      )}
                     </button>
                   </div>
                 ))
@@ -434,8 +465,12 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                     {/* 2nd Place */}
                     <div className="flex flex-col items-center animate-[slide-up_0.5s_ease-out_0.1s_both]">
                       <span className="text-2xl mb-1">🥈</span>
-                      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-gray-300 to-gray-500 text-white text-base font-bold shadow-lg ring-2 ring-gray-400/30 mb-3">
-                        {getInitials(leaderboard[1]?.userId === session?.user?.id ? tc("you") : (leaderboard[1]?.userName ?? ""))}
+                      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-gray-300 to-gray-500 text-white text-base font-bold shadow-lg ring-2 ring-gray-400/30 mb-3 overflow-hidden">
+                        {leaderboard[1]?.userImage ? (
+                          <img src={leaderboard[1].userImage} alt={leaderboard[1].userName} className="h-full w-full object-cover" />
+                        ) : (
+                          getInitials(leaderboard[1]?.userId === session?.user?.id ? tc("you") : (leaderboard[1]?.userName ?? ""))
+                        )}
                       </div>
                       <div className="rounded-2xl border border-gray-400/20 bg-gray-400/[0.06] p-3.5 text-center w-28 sm:w-32">
                         <p className="font-medium text-sm truncate mb-1">
@@ -454,8 +489,12 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                     <div className="flex flex-col items-center animate-[slide-up_0.5s_ease-out_both] -mt-4">
                       <Crown className="h-7 w-7 text-yellow-400 mb-1 drop-shadow-[0_0_8px_rgba(255,215,0,0.4)]" />
                       <span className="text-3xl mb-1">🥇</span>
-                      <div className="flex h-[72px] w-[72px] items-center justify-center rounded-full bg-gradient-to-br from-yellow-300 via-yellow-500 to-amber-600 text-white text-lg font-bold shadow-xl ring-3 ring-yellow-400/40 mb-3 shimmer">
-                        {getInitials(leaderboard[0]?.userId === session?.user?.id ? tc("you") : (leaderboard[0]?.userName ?? ""))}
+                      <div className="flex h-[72px] w-[72px] items-center justify-center rounded-full bg-gradient-to-br from-yellow-300 via-yellow-500 to-amber-600 text-white text-lg font-bold shadow-xl ring-3 ring-yellow-400/40 mb-3 shimmer overflow-hidden">
+                        {leaderboard[0]?.userImage ? (
+                          <img src={leaderboard[0].userImage} alt={leaderboard[0].userName} className="h-full w-full object-cover" />
+                        ) : (
+                          getInitials(leaderboard[0]?.userId === session?.user?.id ? tc("you") : (leaderboard[0]?.userName ?? ""))
+                        )}
                       </div>
                       <div className="rounded-2xl border border-yellow-500/25 bg-yellow-500/[0.08] p-4 text-center w-32 sm:w-40 shadow-[0_0_30px_rgba(255,215,0,0.06)]">
                         <p className="font-semibold truncate mb-1">
@@ -473,8 +512,12 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                     {/* 3rd Place */}
                     <div className="flex flex-col items-center animate-[slide-up_0.5s_ease-out_0.2s_both]">
                       <span className="text-2xl mb-1">🥉</span>
-                      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-amber-800 text-white text-base font-bold shadow-lg ring-2 ring-amber-600/30 mb-3">
-                        {getInitials(leaderboard[2]?.userId === session?.user?.id ? tc("you") : (leaderboard[2]?.userName ?? ""))}
+                      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-amber-800 text-white text-base font-bold shadow-lg ring-2 ring-amber-600/30 mb-3 overflow-hidden">
+                        {leaderboard[2]?.userImage ? (
+                          <img src={leaderboard[2].userImage} alt={leaderboard[2].userName} className="h-full w-full object-cover" />
+                        ) : (
+                          getInitials(leaderboard[2]?.userId === session?.user?.id ? tc("you") : (leaderboard[2]?.userName ?? ""))
+                        )}
                       </div>
                       <div className="rounded-2xl border border-amber-600/20 bg-amber-600/[0.06] p-3.5 text-center w-28 sm:w-32">
                         <p className="font-medium text-sm truncate mb-1">
@@ -517,8 +560,12 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                             </div>
                           )}
 
-                          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[#ff6b6b]/80 to-[#ffa06b]/80 text-white text-xs font-semibold shrink-0">
-                            {getInitials(isCurrentUser ? tc("you") : (entry.userName ?? ""))}
+                          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[#ff6b6b]/80 to-[#ffa06b]/80 text-white text-xs font-semibold shrink-0 overflow-hidden">
+                            {entry.userImage ? (
+                              <img src={entry.userImage} alt={entry.userName} className="h-full w-full object-cover" />
+                            ) : (
+                              getInitials(isCurrentUser ? tc("you") : (entry.userName ?? ""))
+                            )}
                           </div>
 
                           <div className="flex-1 min-w-0">
@@ -569,8 +616,12 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                       : "border-overlay-medium bg-overlay-subtle"
                       }`}
                   >
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#ffa06b] to-[#f472b6] text-white font-semibold">
-                      {isCurrentUser ? "Y" : getInitials(member.userName)}
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#ffa06b] to-[#f472b6] text-white font-semibold overflow-hidden">
+                      {member.userImage ? (
+                        <img src={member.userImage} alt={member.userName} className="h-full w-full object-cover" />
+                      ) : (
+                        isCurrentUser ? "Y" : getInitials(member.userName)
+                      )}
                     </div>
                     <div className="flex-1">
                       <p className="font-medium">
@@ -624,8 +675,12 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                     key={member._id}
                     className="flex items-center gap-3 rounded-xl border border-yellow-500/20 bg-yellow-500/5 p-3"
                   >
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#ffa06b] to-[#f472b6] text-white font-semibold">
-                      {getInitials(member.userName)}
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#ffa06b] to-[#f472b6] text-white font-semibold overflow-hidden">
+                      {member.userImage ? (
+                        <img src={member.userImage} alt={member.userName} className="h-full w-full object-cover" />
+                      ) : (
+                        getInitials(member.userName)
+                      )}
                     </div>
                     <div className="flex-1">
                       <p className="font-medium">{member.userName}</p>

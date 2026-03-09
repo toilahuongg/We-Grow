@@ -30,9 +30,10 @@ export function BadgeCollection() {
   const allLevels = getAllLevelInfos();
   const currentLevel = profile?.level ?? 1;
 
-  // Add levels beyond 10 if user has them
-  if (currentLevel > 10) {
-    for (let i = 11; i <= currentLevel; i++) {
+  // Add levels beyond the base levels if user has them
+  const baseLevelCount = allLevels.length;
+  if (currentLevel > baseLevelCount) {
+    for (let i = baseLevelCount + 1; i <= currentLevel; i++) {
       allLevels.push(getLevelInfo(i));
     }
   }
@@ -43,8 +44,8 @@ export function BadgeCollection() {
         <div className="glass-strong rounded-2xl p-8">
           <div className="h-8 w-32 animate-pulse rounded bg-overlay-medium mb-6" />
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-            {Array.from({ length: 10 }).map((_, i) => (
-              <div key={i} className="h-32 animate-pulse rounded-xl bg-overlay-subtle" />
+            {Array.from({ length: 15 }).map((_, i) => (
+              <div key={i} className="h-40 animate-pulse rounded-xl bg-overlay-subtle" />
             ))}
           </div>
         </div>
@@ -71,7 +72,7 @@ export function BadgeCollection() {
 
       {/* Badge Grid */}
       <div className="glass-strong rounded-2xl p-6">
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6">
           {allLevels.map((info) => {
             const earned = earnedLevels.has(info.level);
             const name = locale === "vi" ? info.nameVi : info.nameEn;
@@ -79,15 +80,21 @@ export function BadgeCollection() {
             return (
               <div
                 key={info.level}
-                className={`flex flex-col items-center justify-center rounded-xl border p-4 transition-all ${
+                className={`group flex flex-col items-center justify-center rounded-2xl border p-5 transition-all duration-300 ${
                   earned
-                    ? "border-[#4ecdc4]/30 bg-gradient-to-br from-[#4ecdc4]/10 to-[#a78bfa]/10"
+                    ? "border-[#4ecdc4]/30 bg-gradient-to-br from-[#4ecdc4]/10 to-[#a78bfa]/10 shadow-lg shadow-[#4ecdc4]/5"
                     : "border-overlay-subtle bg-overlay-subtle opacity-40 grayscale"
                 }`}
               >
-                <span className="text-4xl mb-2">{info.icon}</span>
-                <p className="text-xs font-semibold text-center">{name}</p>
-                <p className="text-[10px] text-muted-foreground mt-1">
+                <div className="relative mb-3 aspect-square w-16 sm:w-20 transition-transform duration-300 group-hover:scale-110">
+                  <img
+                    src={info.icon}
+                    alt={name}
+                    className="h-full w-full object-contain drop-shadow-md"
+                  />
+                </div>
+                <p className="text-xs font-bold text-center leading-tight">{name}</p>
+                <p className="text-[10px] text-muted-foreground mt-1.5 font-medium">
                   {t("levelLabel", { level: info.level })}
                 </p>
               </div>

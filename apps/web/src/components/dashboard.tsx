@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 
 import { orpc, client } from "@/utils/orpc";
+import { RankIcon } from "@/components/rank-icon";
 import { LevelProgress } from "@/components/level-progress";
 import { LevelUpModal } from "@/components/level-up-modal";
 import { PushNotificationPopup } from "@/components/push-notification-banner";
@@ -50,7 +51,16 @@ export function Dashboard() {
       const previous = queryClient.getQueryData(orpc.habits.todaySummary.queryOptions().queryKey);
       queryClient.setQueryData(
         orpc.habits.todaySummary.queryOptions().queryKey,
-        (old: any[] | undefined) => old?.map(h => h._id === habitId ? { ...h, completedToday: true } : h)
+        (old: any[] | undefined) => old?.map(h => {
+          if (h._id !== habitId) return h;
+          const targetPerDay = h.targetPerDay ?? 1;
+          const newCount = (h.completedCount ?? 0) + 1;
+          return {
+            ...h,
+            completedCount: newCount,
+            completedToday: newCount >= targetPerDay
+          };
+        })
       );
       return { previous };
     },
@@ -61,6 +71,7 @@ export function Dashboard() {
           setLevelUpLevel(result.newLevel);
         }
       }
+      queryClient.invalidateQueries({ queryKey: orpc.habits.todaySummary.queryKey() });
       queryClient.invalidateQueries({ queryKey: orpc.gamification.getProfile.queryKey() });
     },
     onError: (_error, _variables, context) => {
@@ -76,11 +87,21 @@ export function Dashboard() {
       const previous = queryClient.getQueryData(orpc.habits.todaySummary.queryOptions().queryKey);
       queryClient.setQueryData(
         orpc.habits.todaySummary.queryOptions().queryKey,
-        (old: any[] | undefined) => old?.map(h => h._id === habitId ? { ...h, completedToday: false } : h)
+        (old: any[] | undefined) => old?.map(h => {
+          if (h._id !== habitId) return h;
+          const targetPerDay = h.targetPerDay ?? 1;
+          const newCount = Math.max(0, (h.completedCount ?? 0) - 1);
+          return {
+            ...h,
+            completedCount: newCount,
+            completedToday: newCount >= targetPerDay
+          };
+        })
       );
       return { previous };
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: orpc.habits.todaySummary.queryKey() });
       queryClient.invalidateQueries({ queryKey: orpc.gamification.getProfile.queryKey() });
     },
     onError: (_error, _variables, context) => {
@@ -90,9 +111,11 @@ export function Dashboard() {
   });
 
   const dueHabits = (todayHabits as any[])?.filter((h: any) => h.isDue) ?? [];
-  const completedCount = dueHabits.filter((h: any) => h.completedToday).length;
+  const habitsFinished = dueHabits.filter((h: any) => h.completedToday).length;
   const totalDue = dueHabits.length;
-  const progressPercent = totalDue > 0 ? Math.round((completedCount / totalDue) * 100) : 0;
+  const totalTargetSteps = dueHabits.reduce((acc: number, h: any) => acc + (h.targetPerDay ?? 1), 0);
+  const currentCompletedSteps = dueHabits.reduce((acc: number, h: any) => acc + (h.completedCount ?? 0), 0);
+  const progressPercent = totalTargetSteps > 0 ? Math.round((currentCompletedSteps / totalTargetSteps) * 100) : 0;
 
   // Best current streak
   const allHabits = (todayHabits as any[]) ?? [];
@@ -149,9 +172,9 @@ export function Dashboard() {
               <p className="font-semibold">
                 {totalDue === 0
                   ? t("noHabitsDue")
-                  : completedCount === totalDue
+                  : habitsFinished === totalDue
                     ? t("allDone")
-                    : t("habitsCompleted", { completed: completedCount, total: totalDue })}
+                    : t("habitsCompleted", { completed: habitsFinished, total: totalDue })}
               </p>
             </div>
           </div>
@@ -163,7 +186,7 @@ export function Dashboard() {
           {profile && (
             <div>
               <div className="flex items-center gap-3 mb-4">
-                <span className="text-4xl">{levelInfo?.icon}</span>
+                <RankIcon level={profile.level ?? 1} size={64} />
                 <div>
                   <p className="text-2xl font-bold gradient-text">
                     Level {profile.level}
@@ -226,8 +249,8 @@ export function Dashboard() {
                     key={badge._id}
                     className="flex flex-col items-center rounded-xl border border-[#4ecdc4]/20 bg-[#4ecdc4]/5 p-3"
                   >
-                    <span className="text-2xl mb-1">{info.icon}</span>
-                    <span className="text-[10px] text-muted-foreground">Lv.{badge.level}</span>
+                    <RankIcon level={badge.level} size={40} className="mb-1" />
+                    <span className="text-[10px] text-muted-foreground font-medium">Lv.{badge.level}</span>
                   </div>
                 );
               })}
@@ -266,12 +289,20 @@ export function Dashboard() {
                   <h3 className={`font-semibold truncate ${habit.completedToday ? "text-muted-foreground line-through" : ""}`}>
                     {habit.title}
                   </h3>
-                  {(habit.currentStreak ?? 0) > 0 && (
-                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <Flame className="h-3 w-3 text-[#ff6b6b]" />
-                      {habit.currentStreak}
-                    </span>
-                  )}
+                  <div className="flex items-center gap-3">
+                    {(habit.currentStreak ?? 0) > 0 && (
+                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <Flame className="h-3 w-3 text-[#ff6b6b]" />
+                        {habit.currentStreak}
+                      </span>
+                    )}
+                    {(habit.targetPerDay ?? 1) > 1 && (
+                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <CheckCircle2 className={`h-3 w-3 ${habit.completedToday ? "text-[#4ecdc4]" : ""}`} />
+                        {habit.completedCount ?? 0}/{habit.targetPerDay}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <button
                   onClick={(e) => {
@@ -290,9 +321,11 @@ export function Dashboard() {
                   } ${completeHabit.isPending || uncompleteHabit.isPending ? "opacity-50 cursor-not-allowed" : ""}`}
                 >
                   {(habit.targetPerDay ?? 1) > 1 && !habit.completedToday ? (
-                     <span className="text-xs font-bold">{habit.completedCount ?? 0}/{habit.targetPerDay}</span>
+                    <span className="text-xs font-bold">{habit.completedCount ?? 0}/{habit.targetPerDay}</span>
+                  ) : habit.completedToday ? (
+                    <CheckCircle2 className="h-5 w-5 fill-white text-[#4ecdc4]" />
                   ) : (
-                     <CheckCircle2 className="h-5 w-5" />
+                    <CheckCircle2 className="h-5 w-5" />
                   )}
                 </button>
               </div>

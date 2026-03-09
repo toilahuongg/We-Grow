@@ -43,7 +43,16 @@ export default function HabitsPage() {
       const prev = queryClient.getQueryData(orpc.habits.todaySummary.queryOptions({ input: {} }).queryKey);
       queryClient.setQueryData(
         orpc.habits.todaySummary.queryOptions({ input: {} }).queryKey,
-        (old: any[] | undefined) => old?.map((h) => (h._id === habitId ? { ...h, completedToday: true } : h)),
+        (old: any[] | undefined) => old?.map((h) => {
+          if (h._id !== habitId) return h;
+          const targetPerDay = h.targetPerDay ?? 1;
+          const newCount = (h.completedCount ?? 0) + 1;
+          return {
+            ...h,
+            completedCount: newCount,
+            completedToday: newCount >= targetPerDay
+          };
+        }),
       );
       return { prev };
     },
@@ -54,6 +63,7 @@ export default function HabitsPage() {
           setLevelUpLevel(result.newLevel);
         }
       }
+      queryClient.invalidateQueries({ queryKey: orpc.habits.todaySummary.queryKey() });
       queryClient.invalidateQueries({ queryKey: orpc.gamification.getProfile.queryKey() });
     },
     onError: (_error, _variables, context) => {
@@ -69,11 +79,21 @@ export default function HabitsPage() {
       const prev = queryClient.getQueryData(orpc.habits.todaySummary.queryOptions({ input: {} }).queryKey);
       queryClient.setQueryData(
         orpc.habits.todaySummary.queryOptions({ input: {} }).queryKey,
-        (old: any[] | undefined) => old?.map((h) => (h._id === habitId ? { ...h, completedToday: false } : h)),
+        (old: any[] | undefined) => old?.map((h) => {
+          if (h._id !== habitId) return h;
+          const targetPerDay = h.targetPerDay ?? 1;
+          const newCount = Math.max(0, (h.completedCount ?? 1) - 1);
+          return {
+            ...h,
+            completedCount: newCount,
+            completedToday: newCount >= targetPerDay
+          };
+        }),
       );
       return { prev };
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: orpc.habits.todaySummary.queryKey() });
       queryClient.invalidateQueries({ queryKey: orpc.gamification.getProfile.queryKey() });
     },
     onError: (_error, _variables, context) => {
@@ -83,7 +103,9 @@ export default function HabitsPage() {
   });
 
   const dueHabits = (habits as any[])?.filter((h: any) => h.isDue) ?? [];
-  const completedCount = dueHabits.filter((h: any) => h.completedToday).length;
+  const totalTargetSteps = dueHabits.reduce((acc: number, h: any) => acc + (h.targetPerDay ?? 1), 0);
+  const currentCompletedSteps = dueHabits.reduce((acc: number, h: any) => acc + (h.completedCount ?? 0), 0);
+  const habitsFinished = dueHabits.filter((h: any) => h.completedToday).length;
 
   // Group habits by groupId
   const grouped = new Map<string | null, any[]>();
@@ -115,9 +137,9 @@ export default function HabitsPage() {
         <p className="text-sm text-muted-foreground">
           {dueHabits.length === 0
             ? t("noHabitsToday")
-            : completedCount === dueHabits.length
+            : habitsFinished === dueHabits.length
               ? t("allCompleted")
-              : t("remaining", { count: dueHabits.length - completedCount })}
+              : t("remaining", { count: dueHabits.length - habitsFinished })}
         </p>
       </div>
 
@@ -179,6 +201,12 @@ export default function HabitsPage() {
                         <p className="text-xs text-muted-foreground capitalize">
                           {habit.frequency}
                           {habit.frequency === "specific_days" ? ` · ${habit.targetDays?.length ?? 0} days/week` : ""}
+                          {(habit.targetPerDay ?? 1) > 1 && (
+                             <span className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
+                                <CheckCircle2 className={`h-3 w-3 ${habit.completedToday ? "text-[#4ecdc4]" : ""}`} />
+                                {habit.completedCount ?? 0}/{habit.targetPerDay}
+                             </span>
+                          )}
                         </p>
                       </div>
 
@@ -202,7 +230,13 @@ export default function HabitsPage() {
                             : "bg-overlay-medium text-muted-foreground hover:bg-[#4ecdc4] hover:text-white hover:shadow-lg hover:shadow-[#4ecdc4]/30"
                         } ${completeHabit.isPending || uncompleteHabit.isPending ? "opacity-50 cursor-not-allowed" : ""}`}
                       >
-                        <CheckCircle2 className="h-5 w-5" />
+                        {(habit.targetPerDay ?? 1) > 1 && !habit.completedToday ? (
+                          <span className="text-xs font-bold">{habit.completedCount ?? 0}/{habit.targetPerDay}</span>
+                        ) : habit.completedToday ? (
+                          <CheckCircle2 className="h-5 w-5 fill-white text-[#4ecdc4]" />
+                        ) : (
+                          <CheckCircle2 className="h-5 w-5" />
+                        )}
                       </button>
                     </div>
                   ))}

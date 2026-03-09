@@ -276,6 +276,7 @@
     "completionRate": "Tỷ Lệ Hoàn Thành",
     "completionHistory": "Lịch Sử Hoàn Thành",
     "completed": "Đã hoàn thành",
+    "partial": "Một phần",
     "notCompleted": "Chưa hoàn thành",
     "todayLabel": "Hôm nay",
     "details": "Chi Tiết",

@@ -98,10 +98,8 @@ export function GroupsList() {
       if (!groupProgress[gId]) {
         groupProgress[gId] = { completed: 0, total: 0 };
       }
-      groupProgress[gId].total++;
-      if (habit.completedToday) {
-        groupProgress[gId].completed++;
-      }
+      groupProgress[gId].total += (habit.targetPerDay ?? 1);
+      groupProgress[gId].completed += (habit.completedCount ?? 0);
     }
   }
 
@@ -121,7 +119,7 @@ export function GroupsList() {
   }
 
   const dueHabits = (todayHabits as any[])?.filter((h: any) => h.isDue) ?? [];
-  const completedToday = dueHabits.filter((h: any) => h.completedToday).length;
+  const habitsFinished = dueHabits.filter((h: any) => h.completedToday).length;
   const totalHabits = dueHabits.length;
 
   return (
@@ -150,7 +148,7 @@ export function GroupsList() {
               </div>
               <span className="text-sm font-medium text-muted-foreground">{t("today")}</span>
             </div>
-            <p className="font-display text-3xl font-bold">{completedToday}/{totalHabits}</p>
+            <p className="font-display text-3xl font-bold">{habitsFinished}/{totalHabits}</p>
             <p className="text-sm text-muted-foreground">{t("habitsCompleted")}</p>
           </div>
           <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full opacity-20 blur-2xl group-hover:opacity-30 transition-opacity" style={{ background: "#4ecdc4" }} />
