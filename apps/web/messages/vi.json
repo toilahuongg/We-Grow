@@ -419,7 +419,7 @@
   "levelUp": {
     "title": "Thăng cấp!",
     "description": "Chúc mừng! Bạn đã thăng quân hàm mới!",
-    "levelLabel": "{level}",
+    "levelLabel": "Cấp {level}",
     "recruit": "Tân binh",
     "private2": "Binh nhìn",
     "private1": "Binh nhất",
