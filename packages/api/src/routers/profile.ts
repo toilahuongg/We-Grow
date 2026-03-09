@@ -7,11 +7,12 @@ import { protectedProcedure } from "../index";
 export const profileRouter = {
   getProfile: protectedProcedure.handler(async ({ context }) => {
     const userId = context.session.user.id;
-    const profile = await UserProfile.findOne({ userId }).select("bio timezone");
+    const profile = await UserProfile.findOne({ userId }).select("bio timezone gender");
 
     return {
       bio: (profile?.bio as string) ?? "",
       timezone: (profile?.timezone as string) ?? "UTC",
+      gender: (profile?.gender as string) ?? "male",
     };
   }),
 
@@ -40,6 +41,22 @@ export const profileRouter = {
         { userId },
         {
           $set: { timezone: input.timezone, updatedAt: now },
+          $setOnInsert: { _id: generateId(), userId, totalXp: 0, level: 1, createdAt: now },
+        },
+        { upsert: true },
+      );
+      return { success: true };
+    }),
+
+  updateGender: protectedProcedure
+    .input(z.object({ gender: z.enum(["male", "female", "other", "prefer_not_to_say"]) }))
+    .handler(async ({ context, input }) => {
+      const userId = context.session.user.id;
+      const now = new Date();
+      await UserProfile.findOneAndUpdate(
+        { userId },
+        {
+          $set: { gender: input.gender, updatedAt: now },
           $setOnInsert: { _id: generateId(), userId, totalXp: 0, level: 1, createdAt: now },
         },
         { upsert: true },

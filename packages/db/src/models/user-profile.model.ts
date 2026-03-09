@@ -8,6 +8,11 @@ const userProfileSchema = new Schema(
     userId: { type: String, ref: "User", required: true, unique: true },
     bio: { type: String, default: "" },
     timezone: { type: String, default: "Asia/Ho_Chi_Minh" },
+    gender: {
+      type: String,
+      enum: ["male", "female", "other", "prefer_not_to_say"],
+      default: "male"
+    },
     totalXp: { type: Number, default: 0 },
     level: { type: Number, default: 1 },
     createdAt: { type: Date, required: true },

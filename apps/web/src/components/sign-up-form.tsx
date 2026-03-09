@@ -22,6 +22,7 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
       email: "",
       password: "",
       name: "",
+      gender: "male",
     },
     onSubmit: async ({ value }) => {
       const signUpResult = await authClient.signUp.email(
@@ -51,7 +52,10 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
               router.push("/groups");
               toast.success(t("welcomeToWeGrow"));
               const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-              if (tz) client.profile.updateTimezone({ timezone: tz }).catch(() => {});
+              if (tz) client.profile.updateTimezone({ timezone: tz }).catch(() => { });
+
+              const genderValue = value.gender as any;
+              client.profile.updateGender({ gender: genderValue }).catch(() => { });
             },
             onError: () => {
               toast.error(t("signInFailed"));
@@ -65,6 +69,7 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
         name: z.string().min(2, t("nameMinLength")),
         email: z.email(t("invalidEmail")),
         password: z.string().min(8, t("passwordMinLength")),
+        gender: z.enum(["male", "female", "other", "prefer_not_to_say"]),
       }),
     },
   });
@@ -94,7 +99,7 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
                 router.push("/groups");
                 toast.success(t("welcomeToWeGrow"));
                 const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-                if (tz) client.profile.updateTimezone({ timezone: tz }).catch(() => {});
+                if (tz) client.profile.updateTimezone({ timezone: tz }).catch(() => { });
               },
               onError: (error) => {
                 toast.error(error.error.message || t("failedGoogleSignUp"));
@@ -205,6 +210,36 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
                   onBlur={field.handleBlur}
                   onChange={(e) => field.handleChange(e.target.value)}
                 />
+                {field.state.meta.errors.map((error) => (
+                  <p key={error?.message} className="text-sm text-red-400">
+                    {error?.message}
+                  </p>
+                ))}
+              </div>
+            )}
+          </form.Field>
+        </div>
+
+        <div>
+          <form.Field name="gender">
+            {(field) => (
+              <div className="space-y-2">
+                <Label htmlFor={field.name} className="text-sm font-medium">
+                  {useTranslations("settings")("gender")}
+                </Label>
+                <select
+                  id={field.name}
+                  name={field.name}
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                  className="w-full h-12 rounded-xl border border-border bg-background px-4 py-3 text-sm focus:border-[#ff6b6b] focus:ring-[#ff6b6b]/20 focus:outline-none appearance-none"
+                >
+                  <option value="male">{useTranslations("settings")("genderMale")}</option>
+                  <option value="female">{useTranslations("settings")("genderFemale")}</option>
+                  <option value="other">{useTranslations("settings")("genderOther")}</option>
+                  <option value="prefer_not_to_say">{useTranslations("settings")("genderPreferNotToSay")}</option>
+                </select>
                 {field.state.meta.errors.map((error) => (
                   <p key={error?.message} className="text-sm text-red-400">
                     {error?.message}

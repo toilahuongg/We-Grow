@@ -84,6 +84,10 @@ export function SettingsForm({ session: _serverSession }: { session: any }) {
   const [bio, setBio] = useState<string | null>(null);
   const [bioSaved, setBioSaved] = useState<string | null>(null);
 
+  // Gender
+  const [gender, setGender] = useState<string | null>(null);
+  const [genderSaved, setGenderSaved] = useState<string | null>(null);
+
   // Password
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
@@ -93,7 +97,7 @@ export function SettingsForm({ session: _serverSession }: { session: any }) {
   // Avatar
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Initialize timezone and bio from profile
+  // Initialize timezone, bio, and gender from profile
   useEffect(() => {
     if (profile) {
       if (timezone === null) {
@@ -103,8 +107,12 @@ export function SettingsForm({ session: _serverSession }: { session: any }) {
         setBio(profile.bio);
         setBioSaved(profile.bio);
       }
+      if (gender === null) {
+        setGender(profile.gender);
+        setGenderSaved(profile.gender);
+      }
     }
-  }, [profile, timezone, bio]);
+  }, [profile, timezone, bio, gender]);
 
   // Focus name input when editing
   useEffect(() => {
@@ -189,6 +197,20 @@ export function SettingsForm({ session: _serverSession }: { session: any }) {
     },
     onError: () => {
       toast.error(t("failedUpdateBio"));
+    },
+  });
+
+  // Gender update mutation
+  const genderMutation = useMutation({
+    mutationFn: async (genderValue: string) => {
+      return client.profile.updateGender({ gender: genderValue as any });
+    },
+    onSuccess: () => {
+      toast.success(t("genderUpdated"));
+      setGenderSaved(gender);
+    },
+    onError: () => {
+      toast.error(t("failedUpdateGender"));
     },
   });
 
@@ -373,6 +395,36 @@ export function SettingsForm({ session: _serverSession }: { session: any }) {
           </div>
         </div>
 
+        {/* Gender */}
+        <div className="mt-4">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm text-muted-foreground">{t("gender")}</span>
+          </div>
+          <select
+            value={gender ?? "male"}
+            onChange={(e) => {
+              setGender(e.target.value);
+            }}
+            className="w-full rounded-xl border border-overlay-medium bg-overlay-subtle px-4 py-3 text-sm focus:border-[#4ecdc4] focus:outline-none appearance-none"
+          >
+            <option value="male">{t("genderMale")}</option>
+            <option value="female">{t("genderFemale")}</option>
+            <option value="other">{t("genderOther")}</option>
+            <option value="prefer_not_to_say">{t("genderPreferNotToSay")}</option>
+          </select>
+          {gender !== null && gender !== genderSaved && (
+            <div className="flex justify-end mt-2">
+              <Button
+                size="sm"
+                onClick={() => genderMutation.mutate(gender)}
+                disabled={genderMutation.isPending}
+              >
+                {genderMutation.isPending ? tc("saving") : tc("save")}
+              </Button>
+            </div>
+          )}
+        </div>
+
         {/* Bio */}
         <div className="mt-4">
           <div className="flex items-center justify-between mb-2">
@@ -425,11 +477,10 @@ export function SettingsForm({ session: _serverSession }: { session: any }) {
               <button
                 key={locale}
                 onClick={() => handleLanguageChange(locale)}
-                className={`w-full text-left rounded-xl border p-3 transition-all ${
-                  isSelected
+                className={`w-full text-left rounded-xl border p-3 transition-all ${isSelected
                     ? "border-[#a78bfa] bg-[#a78bfa]/10"
                     : "border-overlay-medium bg-overlay-subtle hover:border-overlay-strong"
-                }`}
+                  }`}
               >
                 <div className="flex items-center justify-between">
                   <span className="block text-sm font-medium">{localeNames[locale]}</span>
@@ -473,11 +524,10 @@ export function SettingsForm({ session: _serverSession }: { session: any }) {
                 key={tz}
                 onClick={() => timezoneMutation.mutate(tz)}
                 disabled={timezoneMutation.isPending}
-                className={`w-full text-left rounded-xl border p-3 transition-all ${
-                  isSelected
+                className={`w-full text-left rounded-xl border p-3 transition-all ${isSelected
                     ? "border-[#4ecdc4] bg-[#4ecdc4]/10"
                     : "border-overlay-medium bg-overlay-subtle hover:border-overlay-strong"
-                }`}
+                  }`}
               >
                 <div className="flex items-center justify-between">
                   <div>
