@@ -10,7 +10,7 @@ const userProfileSchema = new Schema(
     timezone: { type: String, default: "Asia/Ho_Chi_Minh" },
     gender: {
       type: String,
-      enum: ["male", "female", "other", "prefer_not_to_say"],
+      enum: ["male", "female"],
       default: "male"
     },
     totalXp: { type: Number, default: 0 },

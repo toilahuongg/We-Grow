@@ -384,19 +384,19 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                         <h3 className={`font-semibold ${habit.completedToday ? "text-muted-foreground line-through" : ""}`}>
                           {habit.title}
                         </h3>
-                          {(habit.currentStreak ?? 0) >= 7 && (
-                            <span className="flex items-center gap-1 rounded-full bg-[#ff6b6b]/20 px-2 py-0.5 text-xs font-medium text-[#ff6b6b]">
-                              <Flame className="h-3 w-3" />
-                              {habit.currentStreak}
-                            </span>
-                          )}
-                          {(habit.targetPerDay ?? 1) > 1 && (
-                            <span className="flex items-center gap-1 text-xs text-muted-foreground ml-2">
-                              <CheckCircle2 className={`h-3 w-3 ${habit.completedToday ? "text-[#4ecdc4]" : ""}`} />
-                              {habit.completedCount ?? 0}/{habit.targetPerDay}
-                            </span>
-                          )}
-                        </div>
+                        {(habit.currentStreak ?? 0) >= 7 && (
+                          <span className="flex items-center gap-1 rounded-full bg-[#ff6b6b]/20 px-2 py-0.5 text-xs font-medium text-[#ff6b6b]">
+                            <Flame className="h-3 w-3" />
+                            {habit.currentStreak}
+                          </span>
+                        )}
+                        {(habit.targetPerDay ?? 1) > 1 && (
+                          <span className="flex items-center gap-1 text-xs text-muted-foreground ml-2">
+                            <CheckCircle2 className={`h-3 w-3 ${habit.completedToday ? "text-[#4ecdc4]" : ""}`} />
+                            {habit.completedCount ?? 0}/{habit.targetPerDay}
+                          </span>
+                        )}
+                      </div>
                       <p className="text-xs text-muted-foreground capitalize">
                         {habit.frequency} {habit.frequency === "specific_days" ? `· ${habit.targetDays?.length ?? 0} days/week` : ""}
                       </p>
@@ -482,7 +482,7 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                         </p>
                         <p className="text-lg font-bold tabular-nums">{leaderboard[1]?.totalXp} <span className="text-xs font-medium text-muted-foreground">XP</span></p>
                         <div className="flex items-center justify-center gap-1.5 mt-1">
-                          <RankIcon level={leaderboard[1]?.level} size={16} />
+                          <RankIcon level={leaderboard[1]?.level} gender={leaderboard[1]?.gender} size={24} />
                           <p className="text-[11px] text-muted-foreground">
                             {locale === "vi" ? leaderboard[1]?.levelInfo?.nameVi : leaderboard[1]?.levelInfo?.nameEn}
                           </p>
@@ -509,7 +509,7 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                         </p>
                         <p className="text-xl font-bold gradient-text tabular-nums">{leaderboard[0]?.totalXp} <span className="text-xs font-medium">XP</span></p>
                         <div className="flex items-center justify-center gap-1.5 mt-1">
-                          <RankIcon level={leaderboard[0]?.level} size={18} />
+                          <RankIcon level={leaderboard[0]?.level} gender={leaderboard[0]?.gender} size={32} />
                           <p className="text-xs text-muted-foreground">
                             {locale === "vi" ? leaderboard[0]?.levelInfo?.nameVi : leaderboard[0]?.levelInfo?.nameEn}
                           </p>
@@ -535,7 +535,7 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                         </p>
                         <p className="text-lg font-bold tabular-nums">{leaderboard[2]?.totalXp} <span className="text-xs font-medium text-muted-foreground">XP</span></p>
                         <div className="flex items-center justify-center gap-1.5 mt-1">
-                          <RankIcon level={leaderboard[2]?.level} size={16} />
+                          <RankIcon level={leaderboard[2]?.level} gender={leaderboard[2]?.gender} size={24} />
                           <p className="text-[11px] text-muted-foreground">
                             {locale === "vi" ? leaderboard[2]?.levelInfo?.nameVi : leaderboard[2]?.levelInfo?.nameEn}
                           </p>
@@ -557,11 +557,10 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                       return (
                         <div
                           key={entry.userId}
-                          className={`group flex items-center gap-4 rounded-xl border p-3.5 transition-all duration-200 hover:translate-y-[-1px] ${
-                            isCurrentUser
-                              ? "border-[#4ecdc4]/30 bg-[#4ecdc4]/[0.08] shadow-[0_0_15px_rgba(78,205,196,0.08)]"
-                              : "border-overlay-subtle bg-overlay-subtle hover:bg-overlay-subtle hover:border-overlay-medium"
-                          }`}
+                          className={`group flex items-center gap-4 rounded-xl border p-3.5 transition-all duration-200 hover:translate-y-[-1px] ${isCurrentUser
+                            ? "border-[#4ecdc4]/30 bg-[#4ecdc4]/[0.08] shadow-[0_0_15px_rgba(78,205,196,0.08)]"
+                            : "border-overlay-subtle bg-overlay-subtle hover:bg-overlay-subtle hover:border-overlay-medium"
+                            }`}
                         >
                           {actualRank <= 3 ? (
                             <span className="text-xl w-8 text-center">{actualRank === 1 ? "🥇" : actualRank === 2 ? "🥈" : "🥉"}</span>
@@ -584,7 +583,7 @@ export function GroupDetail({ groupId, initialData }: { groupId: string; initial
                               {isCurrentUser ? tc("you") : entry.userName}
                             </p>
                             <div className="flex items-center gap-1.5">
-                              <RankIcon level={entry.level} size={14} />
+                              <RankIcon level={entry.level} gender={entry.gender} size={24} />
                               <p className="text-xs text-muted-foreground">
                                 {locale === "vi" ? entry.levelInfo?.nameVi : entry.levelInfo?.nameEn} · {t("dayStreakLabel", { count: entry.bestStreak })}
                               </p>

@@ -9,12 +9,13 @@ interface LevelProgressProps {
   level: number;
   size?: "sm" | "md" | "lg";
   className?: string;
+  gender?: string;
 }
 
-export function LevelProgress({ current, next, level, size = "md", className }: LevelProgressProps) {
+export function LevelProgress({ current, next, level, size = "md", className, gender = "male" }: LevelProgressProps) {
   const locale = useLocale();
   const progress = next > 0 ? (current / next) * 100 : 0;
-  const info = getLevelInfo(level);
+  const info = getLevelInfo(level, gender);
   const levelName = locale === "vi" ? info.nameVi : info.nameEn;
 
   const sizeStyles = {
@@ -41,7 +42,7 @@ export function LevelProgress({ current, next, level, size = "md", className }: 
     <div className={cn("space-y-2", className)}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <RankIcon level={level} size={styles.iconSize} />
+          <RankIcon level={level} gender={gender} size={styles.iconSize} />
           <span className={cn("font-semibold", styles.text)}>{levelName}</span>
         </div>
         <span className={cn("text-muted-foreground", styles.text)}>

@@ -129,11 +129,11 @@ export function LeaderboardTabs() {
                         <p className="font-medium text-sm truncate mb-1">
                           {getName(globalLeaderboard[1])}
                         </p>
-                         <p className="text-lg font-bold tabular-nums">{globalLeaderboard[1]?.totalXp} <span className="text-xs font-medium text-muted-foreground">XP</span></p>
+                        <p className="text-lg font-bold tabular-nums">{globalLeaderboard[1]?.totalXp} <span className="text-xs font-medium text-muted-foreground">XP</span></p>
                         <div className="flex items-center justify-center gap-1 mt-1">
-                          <RankIcon level={globalLeaderboard[1]?.level} size={14} />
+                          <RankIcon level={globalLeaderboard[1]?.level} gender={globalLeaderboard[1]?.gender} size={24} />
                           <p className="text-[11px] text-muted-foreground">
-                            {locale === "vi" ? getLevelInfo(globalLeaderboard[1]?.level).nameVi : getLevelInfo(globalLeaderboard[1]?.level).nameEn}
+                            {locale === "vi" ? getLevelInfo(globalLeaderboard[1]?.level, globalLeaderboard[1]?.gender).nameVi : getLevelInfo(globalLeaderboard[1]?.level, globalLeaderboard[1]?.gender).nameEn}
                           </p>
                         </div>
                       </div>
@@ -150,11 +150,11 @@ export function LeaderboardTabs() {
                         <p className="font-semibold truncate mb-1">
                           {getName(globalLeaderboard[0])}
                         </p>
-                         <p className="text-xl font-bold gradient-text tabular-nums">{globalLeaderboard[0]?.totalXp} <span className="text-xs font-medium">XP</span></p>
+                        <p className="text-xl font-bold gradient-text tabular-nums">{globalLeaderboard[0]?.totalXp} <span className="text-xs font-medium">XP</span></p>
                         <div className="flex items-center justify-center gap-1.5 mt-1">
-                          <RankIcon level={globalLeaderboard[0]?.level} size={16} />
+                          <RankIcon level={globalLeaderboard[0]?.level} gender={globalLeaderboard[0]?.gender} size={16} />
                           <p className="text-xs text-muted-foreground">
-                            {locale === "vi" ? getLevelInfo(globalLeaderboard[0]?.level).nameVi : getLevelInfo(globalLeaderboard[0]?.level).nameEn}
+                            {locale === "vi" ? getLevelInfo(globalLeaderboard[0]?.level, globalLeaderboard[0]?.gender).nameVi : getLevelInfo(globalLeaderboard[0]?.level, globalLeaderboard[0]?.gender).nameEn}
                           </p>
                         </div>
                       </div>
@@ -170,11 +170,11 @@ export function LeaderboardTabs() {
                         <p className="font-medium text-sm truncate mb-1">
                           {getName(globalLeaderboard[2])}
                         </p>
-                         <p className="text-lg font-bold tabular-nums">{globalLeaderboard[2]?.totalXp} <span className="text-xs font-medium text-muted-foreground">XP</span></p>
+                        <p className="text-lg font-bold tabular-nums">{globalLeaderboard[2]?.totalXp} <span className="text-xs font-medium text-muted-foreground">XP</span></p>
                         <div className="flex items-center justify-center gap-1 mt-1">
-                          <RankIcon level={globalLeaderboard[2]?.level} size={14} />
+                          <RankIcon level={globalLeaderboard[2]?.level} gender={globalLeaderboard[2]?.gender} size={24} />
                           <p className="text-[11px] text-muted-foreground">
-                            {locale === "vi" ? getLevelInfo(globalLeaderboard[2]?.level).nameVi : getLevelInfo(globalLeaderboard[2]?.level).nameEn}
+                            {locale === "vi" ? getLevelInfo(globalLeaderboard[2]?.level, globalLeaderboard[2]?.gender).nameVi : getLevelInfo(globalLeaderboard[2]?.level, globalLeaderboard[2]?.gender).nameEn}
                           </p>
                         </div>
                       </div>
@@ -194,11 +194,10 @@ export function LeaderboardTabs() {
                       return (
                         <div
                           key={entry.userId}
-                          className={`group flex items-center gap-4 rounded-xl border p-3.5 transition-all duration-200 hover:translate-y-[-1px] ${
-                            isCurrentUser
-                              ? "border-[#4ecdc4]/30 bg-[#4ecdc4]/[0.08] shadow-[0_0_15px_rgba(78,205,196,0.08)]"
-                              : "border-overlay-subtle bg-overlay-subtle hover:bg-overlay-subtle hover:border-overlay-medium"
-                          }`}
+                          className={`group flex items-center gap-4 rounded-xl border p-3.5 transition-all duration-200 hover:translate-y-[-1px] ${isCurrentUser
+                            ? "border-[#4ecdc4]/30 bg-[#4ecdc4]/[0.08] shadow-[0_0_15px_rgba(78,205,196,0.08)]"
+                            : "border-overlay-subtle bg-overlay-subtle hover:bg-overlay-subtle hover:border-overlay-medium"
+                            }`}
                         >
                           <RankBadge rank={actualRank} />
 
@@ -207,13 +206,13 @@ export function LeaderboardTabs() {
                           </div>
 
                           <div className="flex-1 min-w-0">
-                             <p className={`font-medium text-sm ${isCurrentUser ? "text-[#4ecdc4]" : ""}`}>
+                            <p className={`font-medium text-sm ${isCurrentUser ? "text-[#4ecdc4]" : ""}`}>
                               {getName(entry)}
                             </p>
                             <div className="flex items-center gap-1.5">
-                              <RankIcon level={entry.level} size={14} />
+                              <RankIcon level={entry.level} gender={entry.gender} size={24} />
                               <p className="text-xs text-muted-foreground">
-                                {locale === "vi" ? getLevelInfo(entry.level).nameVi : getLevelInfo(entry.level).nameEn}
+                                {locale === "vi" ? getLevelInfo(entry.level, entry.gender).nameVi : getLevelInfo(entry.level, entry.gender).nameEn}
                               </p>
                             </div>
                           </div>
@@ -236,14 +235,14 @@ export function LeaderboardTabs() {
                     <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-[#4ecdc4] to-[#2ab7ad] text-white font-bold text-lg shadow-lg shadow-[#4ecdc4]/20 tabular-nums">
                       {userRank + 1}
                     </div>
-                     <div className="flex-1">
+                    <div className="flex-1">
                       <p className="font-semibold">{tc("you")}</p>
                       <div className="flex items-center gap-1.5">
-                        <RankIcon level={globalLeaderboard[userRank]?.level} size={14} />
+                        <RankIcon level={globalLeaderboard[userRank]?.level} gender={globalLeaderboard[userRank]?.gender} size={24} />
                         <p className="text-xs text-muted-foreground">
-                          {locale === "vi" 
-                            ? getLevelInfo(globalLeaderboard[userRank]?.level).nameVi 
-                            : getLevelInfo(globalLeaderboard[userRank]?.level).nameEn}
+                          {locale === "vi"
+                            ? getLevelInfo(globalLeaderboard[userRank]?.level, globalLeaderboard[userRank]?.gender).nameVi
+                            : getLevelInfo(globalLeaderboard[userRank]?.level, globalLeaderboard[userRank]?.gender).nameEn}
                         </p>
                       </div>
                     </div>

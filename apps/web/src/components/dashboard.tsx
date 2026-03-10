@@ -125,7 +125,7 @@ export function Dashboard() {
   // Recent badges (last 5)
   const recentBadges = ((badges as any[]) ?? []).slice(-5).reverse();
 
-  const levelInfo = profile ? getLevelInfo(profile.level ?? 1) : null;
+  const levelInfo = profile ? getLevelInfo(profile.level ?? 1, profile.gender) : null;
 
   return (
     <div className="container mx-auto max-w-4xl px-4 py-8">
@@ -186,7 +186,7 @@ export function Dashboard() {
           {profile && (
             <div>
               <div className="flex items-center gap-3 mb-4">
-                <RankIcon level={profile.level ?? 1} size={64} />
+                <RankIcon level={profile.level ?? 1} gender={profile.gender} size={84} />
                 <div>
                   <p className="text-2xl font-bold gradient-text">
                     Level {profile.level}
@@ -200,6 +200,7 @@ export function Dashboard() {
                 current={profile.progressXp ?? 0}
                 next={(profile.nextLevelXp ?? 0) - (profile.currentLevelXp ?? 0)}
                 level={profile.level ?? 1}
+                gender={profile.gender}
                 size="md"
               />
               <p className="text-xs text-muted-foreground mt-2">
@@ -231,7 +232,7 @@ export function Dashboard() {
         </div>
 
         {/* Recent Badges */}
-        <div className="glass-strong rounded-2xl p-6">
+        <div className="glass-strong rounded-2xl p-6 overflow-hidden">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-display text-lg font-bold">{t("recentBadges")}</h2>
             <Link href="/badges" className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1">
@@ -241,16 +242,16 @@ export function Dashboard() {
           {recentBadges.length === 0 ? (
             <p className="text-sm text-muted-foreground">{t("noBadgesYet")}</p>
           ) : (
-            <div className="flex gap-3">
+            <div className="flex gap-3 overflow-x-auto pb-2">
               {recentBadges.map((badge: any) => {
-                const info = getLevelInfo(badge.level);
+                const info = getLevelInfo(badge.level, profile?.gender);
                 return (
                   <div
                     key={badge._id}
-                    className="flex flex-col items-center rounded-xl border border-[#4ecdc4]/20 bg-[#4ecdc4]/5 p-3"
+                    className="flex flex-col items-center rounded-xl border border-[#4ecdc4]/20 bg-[#4ecdc4]/5 p-3 shrink-0"
                   >
-                    <RankIcon level={badge.level} size={40} className="mb-1" />
-                    <span className="text-[10px] text-muted-foreground font-medium">Lv.{badge.level}</span>
+                    <RankIcon level={badge.level} gender={profile?.gender} size={64} className="mb-1" />
+                    <span className="text-[10px] text-muted-foreground font-medium whitespace-nowrap">Lv.{badge.level}</span>
                   </div>
                 );
               })}
@@ -278,11 +279,10 @@ export function Dashboard() {
                 onClick={() => router.push(`/habits/${habit._id}`)}
                 className="group relative flex items-center gap-4 rounded-xl border border-overlay-subtle bg-overlay-subtle p-4 transition-all hover:border-overlay-medium hover:bg-overlay-medium cursor-pointer"
               >
-                <div className={`flex h-10 w-10 items-center justify-center rounded-xl text-xl ${
-                  habit.completedToday
-                    ? "bg-gradient-to-br from-[#4ecdc4]/20 to-[#a78bfa]/20"
-                    : "bg-overlay-subtle"
-                }`}>
+                <div className={`flex h-10 w-10 items-center justify-center rounded-xl text-xl ${habit.completedToday
+                  ? "bg-gradient-to-br from-[#4ecdc4]/20 to-[#a78bfa]/20"
+                  : "bg-overlay-subtle"
+                  }`}>
                   {getHabitIcon(habit.title)}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -314,11 +314,10 @@ export function Dashboard() {
                     }
                   }}
                   disabled={completeHabit.isPending || uncompleteHabit.isPending}
-                  className={`flex h-10 min-w-[40px] px-2 items-center justify-center rounded-full transition-all ${
-                    habit.completedToday
-                      ? "bg-[#4ecdc4] text-white shadow-lg shadow-[#4ecdc4]/30"
-                      : "bg-overlay-medium text-muted-foreground hover:bg-[#4ecdc4] hover:text-white hover:shadow-lg hover:shadow-[#4ecdc4]/30"
-                  } ${completeHabit.isPending || uncompleteHabit.isPending ? "opacity-50 cursor-not-allowed" : ""}`}
+                  className={`flex h-10 min-w-[40px] px-2 items-center justify-center rounded-full transition-all ${habit.completedToday
+                    ? "bg-[#4ecdc4] text-white shadow-lg shadow-[#4ecdc4]/30"
+                    : "bg-overlay-medium text-muted-foreground hover:bg-[#4ecdc4] hover:text-white hover:shadow-lg hover:shadow-[#4ecdc4]/30"
+                    } ${completeHabit.isPending || uncompleteHabit.isPending ? "opacity-50 cursor-not-allowed" : ""}`}
                 >
                   {(habit.targetPerDay ?? 1) > 1 && !habit.completedToday ? (
                     <span className="text-xs font-bold">{habit.completedCount ?? 0}/{habit.targetPerDay}</span>

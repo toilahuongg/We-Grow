@@ -32,6 +32,7 @@ vi.mock('@/utils/orpc', () => ({
     },
     gamification: {
       getProfile: {
+        queryOptions: vi.fn().mockReturnValue({ queryKey: ['gamification', 'profile'] }),
         queryKey: vi.fn().mockReturnValue(['gamification', 'profile']),
       },
     },

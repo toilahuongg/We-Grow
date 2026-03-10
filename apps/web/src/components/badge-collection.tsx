@@ -27,14 +27,14 @@ export function BadgeCollection() {
     (badges as any[])?.map((b: any) => b.level as number) ?? [],
   );
 
-  const allLevels = getAllLevelInfos();
+  const allLevels = getAllLevelInfos(profile?.gender);
   const currentLevel = profile?.level ?? 1;
 
   // Add levels beyond the base levels if user has them
   const baseLevelCount = allLevels.length;
   if (currentLevel > baseLevelCount) {
     for (let i = baseLevelCount + 1; i <= currentLevel; i++) {
-      allLevels.push(getLevelInfo(i));
+      allLevels.push(getLevelInfo(i, profile?.gender));
     }
   }
 

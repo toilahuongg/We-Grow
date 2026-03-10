@@ -409,8 +409,6 @@ export function SettingsForm({ session: _serverSession }: { session: any }) {
           >
             <option value="male">{t("genderMale")}</option>
             <option value="female">{t("genderFemale")}</option>
-            <option value="other">{t("genderOther")}</option>
-            <option value="prefer_not_to_say">{t("genderPreferNotToSay")}</option>
           </select>
           {gender !== null && gender !== genderSaved && (
             <div className="flex justify-end mt-2">

@@ -2,6 +2,13 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
 import { LevelUpModal } from "./level-up-modal";
 import { NextIntlClientProvider } from "next-intl";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const queryClient = new QueryClient();
+
+vi.mock("@/utils/orpc", () => ({
+  orpc: { gamification: { getProfile: { queryOptions: vi.fn(() => ({ queryKey: ["profile"] })) } } }
+}));
 
 // Mock canvas-confetti
 vi.mock("canvas-confetti", () => ({
@@ -41,9 +48,11 @@ const messages = {
 describe("LevelUpModal", () => {
   it("renders correctly when level is provided", () => {
     render(
-      <NextIntlClientProvider locale="en" messages={messages}>
-        <LevelUpModal level={5} onClose={() => {}} />
-      </NextIntlClientProvider>
+      <QueryClientProvider client={queryClient}>
+        <NextIntlClientProvider locale="en" messages={messages}>
+          <LevelUpModal level={5} onClose={() => {}} />
+        </NextIntlClientProvider>
+      </QueryClientProvider>
     );
 
     expect(screen.getByText("Level 5")).toBeInTheDocument();
@@ -54,9 +63,11 @@ describe("LevelUpModal", () => {
   it("calls onClose when button is clicked", () => {
     const onClose = vi.fn();
     render(
-      <NextIntlClientProvider locale="en" messages={messages}>
-        <LevelUpModal level={5} onClose={onClose} />
-      </NextIntlClientProvider>
+      <QueryClientProvider client={queryClient}>
+        <NextIntlClientProvider locale="en" messages={messages}>
+          <LevelUpModal level={5} onClose={onClose} />
+        </NextIntlClientProvider>
+      </QueryClientProvider>
     );
 
     fireEvent.click(screen.getByText("awesome"));
@@ -65,9 +76,11 @@ describe("LevelUpModal", () => {
 
   it("returns null when level is null", () => {
     const { container } = render(
-      <NextIntlClientProvider locale="en" messages={messages}>
-        <LevelUpModal level={null} onClose={() => {}} />
-      </NextIntlClientProvider>
+      <QueryClientProvider client={queryClient}>
+        <NextIntlClientProvider locale="en" messages={messages}>
+          <LevelUpModal level={null} onClose={() => {}} />
+        </NextIntlClientProvider>
+      </QueryClientProvider>
     );
 
     expect(container.firstChild).toBeNull();

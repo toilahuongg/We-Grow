@@ -5,6 +5,8 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { getLevelInfo } from "@/lib/level-utils";
 import { useTranslations, useLocale } from "next-intl";
+import { orpc } from "@/utils/orpc";
+import { useQuery } from "@tanstack/react-query";
 import { RankIcon } from "./rank-icon";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
@@ -18,6 +20,12 @@ interface LevelUpModalProps {
 export function LevelUpModal({ level, onClose }: LevelUpModalProps) {
   const t = useTranslations("levelUp");
   const locale = useLocale();
+
+  const { data: profile } = useQuery({
+    ...orpc.gamification.getProfile.queryOptions(),
+    enabled: level !== null,
+    staleTime: 1000 * 60,
+  });
 
   const handleConfetti = useCallback(() => {
     const duration = 3 * 1000;
@@ -58,7 +66,7 @@ export function LevelUpModal({ level, onClose }: LevelUpModalProps) {
 
   if (level === null) return null;
 
-  const info = getLevelInfo(level);
+  const info = getLevelInfo(level, profile?.gender);
   const name = locale === "vi" ? info.nameVi : info.nameEn;
 
   return (
@@ -106,7 +114,7 @@ export function LevelUpModal({ level, onClose }: LevelUpModalProps) {
               <div className="absolute inset-0 bg-primary/30 blur-3xl rounded-full animate-pulse-glow" />
 
               <div className="relative animate-float">
-                <RankIcon level={level} size={160} />
+                <RankIcon level={level} gender={profile?.gender} size={184} />
               </div>
 
               {/* Sparkle effects */}

@@ -6,13 +6,14 @@ interface RankIconProps {
   level: number;
   className?: string;
   size?: number;
+  gender?: string;
 }
 
-export const RankIcon: React.FC<RankIconProps> = ({ level, className = "", size = 48 }) => {
-  const info = getLevelInfo(level);
-  
+export const RankIcon: React.FC<RankIconProps> = ({ level, className = "", size = 48, gender = "male" }) => {
+  const info = getLevelInfo(level, gender);
+
   return (
-    <div 
+    <div
       className={cn("relative flex items-center justify-center shrink-0", className)}
       style={{ width: size, height: size }}
     >

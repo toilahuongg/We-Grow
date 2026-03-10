@@ -21,6 +21,7 @@ export const gamificationRouter = {
         nextLevelXp: 100,
         progressXp: 0,
         levelInfo,
+        gender: "male", // Default
       };
     }
 
@@ -31,6 +32,7 @@ export const gamificationRouter = {
       level: profile.level,
       ...progress,
       levelInfo,
+      gender: profile.gender ?? "male",
     };
   }),
 
@@ -75,7 +77,7 @@ export const gamificationRouter = {
       return UserProfile.find()
         .sort({ totalXp: -1, level: -1 })
         .limit(limit)
-        .select("userId totalXp level");
+        .select("userId totalXp level gender");
     }),
 
   getGroupLeaderboard: protectedProcedure
@@ -117,6 +119,7 @@ export const gamificationRouter = {
           totalXp: profile?.totalXp ?? 0,
           level: memberLevel,
           levelInfo: getLevelInfo(memberLevel),
+          gender: profile?.gender ?? "male",
           bestStreak: streakMap.get(uid) ?? 0,
         };
       });

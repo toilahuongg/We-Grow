@@ -49,7 +49,7 @@ export const profileRouter = {
     }),
 
   updateGender: protectedProcedure
-    .input(z.object({ gender: z.enum(["male", "female", "other", "prefer_not_to_say"]) }))
+    .input(z.object({ gender: z.enum(["male", "female"]) }))
     .handler(async ({ context, input }) => {
       const userId = context.session.user.id;
       const now = new Date();

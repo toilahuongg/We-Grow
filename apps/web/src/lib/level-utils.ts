@@ -24,7 +24,6 @@ const LEVEL_INFO: LevelInfo[] = [
   { level: 16, icon: "/badges/badge-16.png", nameVi: "Trung tướng", nameEn: "Lieutenant General" },
   { level: 17, icon: "/badges/badge-17.png", nameVi: "Thượng tướng", nameEn: "Senior General" },
   { level: 18, icon: "/badges/badge-18.png", nameVi: "Đại tướng", nameEn: "General" },
-  { level: 19, icon: "/badges/badge-19.png", nameVi: "Thống tướng", nameEn: "Grand General" },
 ];
 
 function toRoman(num: number): string {
@@ -40,19 +39,22 @@ function toRoman(num: number): string {
   return result;
 }
 
-export function getLevelInfo(level: number): LevelInfo {
-  if (level <= 19) {
-    return LEVEL_INFO[level - 1] ?? LEVEL_INFO[0]!;
+export function getLevelInfo(level: number, gender: string = "male"): LevelInfo {
+  const g = gender === "female" ? "female" : "male";
+  if (level <= 18) {
+    const info = LEVEL_INFO[level - 1] ?? LEVEL_INFO[0]!;
+    return { ...info, icon: `/badges/badge-${info.level}-${g}.png` };
   }
-  const tier = level - 19;
+  const tier = level - 18;
   return {
     level,
-    icon: "/badges/badge-19.png",
-    nameVi: `Thống tướng ${toRoman(tier)}`,
-    nameEn: `Grand General ${toRoman(tier)}`,
+    icon: `/badges/badge-18-${g}.png`,
+    nameVi: `Đại tướng ${toRoman(tier)}`,
+    nameEn: `General ${toRoman(tier)}`,
   };
 }
 
-export function getAllLevelInfos(): LevelInfo[] {
-  return [...LEVEL_INFO];
+export function getAllLevelInfos(gender: string = "male"): LevelInfo[] {
+  const g = gender === "female" ? "female" : "male";
+  return LEVEL_INFO.map(info => ({ ...info, icon: `/badges/badge-${info.level}-${g}.png` }));
 }

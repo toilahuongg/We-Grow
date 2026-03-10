@@ -69,7 +69,7 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
         name: z.string().min(2, t("nameMinLength")),
         email: z.email(t("invalidEmail")),
         password: z.string().min(8, t("passwordMinLength")),
-        gender: z.enum(["male", "female", "other", "prefer_not_to_say"]),
+        gender: z.enum(["male", "female"]),
       }),
     },
   });
@@ -237,8 +237,6 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
                 >
                   <option value="male">{useTranslations("settings")("genderMale")}</option>
                   <option value="female">{useTranslations("settings")("genderFemale")}</option>
-                  <option value="other">{useTranslations("settings")("genderOther")}</option>
-                  <option value="prefer_not_to_say">{useTranslations("settings")("genderPreferNotToSay")}</option>
                 </select>
                 {field.state.meta.errors.map((error) => (
                   <p key={error?.message} className="text-sm text-red-400">
